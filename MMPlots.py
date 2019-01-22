@@ -19,6 +19,13 @@ rootfile = TFile(folder+".root","RECREATE")
 def createplot(file, filename):
 
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
+	if len(times) == 1:
+		print "Only one data in "+str(filename)+".dat \n"
+		return
+	if not times:
+		print "File empty: "+str(filename)+".dat \n"
+		return
+
 	times = [x.replace(':',' ') for x in times]
 	times = [x.replace('/',' ') for x in times]
 	times = [x.replace('_',' ') for x in times]
@@ -50,10 +57,7 @@ def createplot(file, filename):
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
-	#if dat_file[len(path):len(dat_file)] != "iMon_L4D.dat":
-	if dat_file[len(path):len(dat_file)] == "iMon_L1L1.dat":
-	
-		print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-		createplot(dat_file, dat_file[len(path):len(dat_file)])
+	print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
+	createplot(dat_file, dat_file[len(path):len(dat_file)-4])
 
 #createplot("Export/SM1_FROM_2018_11_16_10_00_00_TO_2018_11_16_13_51_59/"+name, name)

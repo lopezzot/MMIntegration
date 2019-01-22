@@ -16,7 +16,7 @@ def draw_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	rms = 0
 	
 	#Set ROOT histograms
-	TH1Hist = TH1F(histogramtitle,"",int(nbin),np.min(vector)-abs(np.min(vector)-np.mean(vector)), np.max(vector)+abs(np.max(vector)-np.mean(vector)))
+	TH1Hist = TH1F(histogramtitle,"",int(nbin),np.min(vector)-3*abs(np.min(vector)-np.mean(vector)), np.max(vector)+3*abs(np.max(vector)-np.mean(vector)))
 	
 	#Fill histograms in for loop
 	for entry in range(len(vector)):
@@ -55,18 +55,19 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	for y in vectory:
 		arrayy.append(y)
 
-	print len(arrayx), len(arrayy)
-	print arrayx
-
 	if ytitle == "i":
 		ytitle = ytitle+" (uA)"
 		color = 2
 		offset = 1.
+		minimum = -1
+		maximum = 5
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
 		color = 3
-		offset = 0.5
+		offset = 0.9
+		minimum = 400
+		maximum = 600
 
 	#How many graph points
 	n = len(vectorx)
@@ -80,7 +81,7 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
 	XAxis.SetTimeDisplay(1)
  	XAxis.SetTimeFormat("#splitline{%H/%M}{%d:%m}")
- 	Xaxis.SetLabelOffset(0.025)
+ 	XAxis.SetLabelOffset(0.025)
 	MyTGraph.SetMarkerColor(color)
 	MyTGraph.SetMarkerStyle(1)
 	MyTGraph.SetMarkerSize(1)
@@ -90,6 +91,9 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	YAxis.SetTitleOffset(offset)
 	YAxis.SetTitleOffset(offset)
 	YAxis.SetTitle(ytitle)
+	MyTGraph.GetHistogram().SetMinimum(minimum)
+	MyTGraph.GetHistogram().SetMaximum(maximum)
+	MyTGraph.Draw("APL")
 	MyTGraph.Write(graphname)
 	#MyTGraph.Draw("AP")
 	#gPad.SaveAs(graphname)
