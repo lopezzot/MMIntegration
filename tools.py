@@ -50,10 +50,13 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	arrayy = array('d')
 
 	for x in vectorx:
-		arrayx.append(x)
+		arrayx.append(x.Convert())
 
 	for y in vectory:
 		arrayy.append(y)
+
+	print len(arrayx), len(arrayy)
+	print arrayx
 
 	if ytitle == "i":
 		ytitle = ytitle+" (uA)"
@@ -75,12 +78,14 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	Style = gStyle
 	Style.SetPadLeftMargin(2.0)
 	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
-	MyTGraph.SetMarkerColor(color)
+	XAxis.SetTimeDisplay(1)
+ 	XAxis.SetTimeFormat("#splitline{%H/%M}{%d:%m}")
+ 	Xaxis.SetLabelOffset(0.025)
 	MyTGraph.SetMarkerColor(color)
 	MyTGraph.SetMarkerStyle(1)
 	MyTGraph.SetMarkerSize(1)
 	MyTGraph.SetTitle(graphtitle)
-	XAxis.SetTitle(xtitle)
+	#XAxis.SetTitle(xtitle)
 	YAxis = MyTGraph.GetYaxis()
 	YAxis.SetTitleOffset(offset)
 	YAxis.SetTitleOffset(offset)
