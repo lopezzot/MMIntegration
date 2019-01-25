@@ -5,13 +5,11 @@ import os
 import tools
 from ROOT import TFile, TDatime
 import glob
+import numpy as np
+import search
 
 folder = raw_input("Insert folder to study: ")
 path = "../Export/"+folder+"/" 
-#
-#path1 = "SM1_FROM_2018_11_16_10_00_00_TO_2018_11_16_13_51_59/"
-#path2 = "Export/"+path1+"/"
-#name = raw_input("Insert filename: ")
 
 rootfile = TFile(folder+".root","RECREATE")
 
@@ -52,8 +50,17 @@ def createplot(file, filename):
 
 	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
 
-	tools.draw_roothistogram(newvalues, filename, filename[0], "Entries",filename)
-	tools.draw_rootgraph(rootdates, newvalues, filename, "time (s)", filename[0], filename)
+	#Identify drops
+	valuesdeltas = np.diff(newvalues)
+	valuesdeltas = [0]+valuesdeltas
+	
+	if "i" in filename: #it's a current file
+		#search.findrisingedges(valuesdeltas, dates)
+		#search.findfallingedges(valuesdeltas, dates)
+		spikedates = search.findspikes(valuesdeltas, dates)
+
+	tools.write_roothistogram(newvalues, filename, filename[0], "Entries",filename)
+	tools.write_rootgraph(rootdates, newvalues, filename, "time (s)", filename[0], filename)
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):

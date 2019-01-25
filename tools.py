@@ -1,8 +1,8 @@
-from ROOT import TH1F, gStyle, gPad, TGraph, TCanvas, TDatime
+from ROOT import TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine
 import numpy as np
 from array import array
 
-def draw_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
+def write_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	"""Function to perform ROOT histograms"""
 
 	if xtitle == "i":
@@ -16,7 +16,7 @@ def draw_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	rms = 0
 	
 	#Set ROOT histograms
-	TH1Hist = TH1F(histogramtitle,"",int(nbin),np.min(vector)-3*abs(np.min(vector)-np.mean(vector)), np.max(vector)+3*abs(np.max(vector)-np.mean(vector)))
+	TH1Hist = TH1F(histogramtitle,"",int(nbin),np.min(vector)-1.5*abs(np.max(vector)-np.min(vector)), np.max(vector)+1.5*(np.max(vector)-np.min(vector)))
 	
 	#Fill histograms in for loop
 	for entry in range(len(vector)):
@@ -27,10 +27,6 @@ def draw_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	Style = gStyle
 	Style.SetLineWidth(1) #TH1Hist
 	Style.SetOptStat(1) #Show statistics
-	if xtitle == "i":
-		TH1Hist.SetMarkerColor(kRed)
-	elif xtitle == "v":
-		TH1Hist.SetMarkerColor(kBlue)
 	XAxis = TH1Hist.GetXaxis()
 	XAxis.SetTitle(xtitle)
 	YAxis = TH1Hist.GetYaxis()
@@ -43,7 +39,7 @@ def draw_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	#gPad.SaveAs(histogramname)
 	#gPad.Close()
 
-def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
+def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	"""Function to perform ROOT graph"""
 
 	arrayx = array('d')
@@ -60,7 +56,7 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 		color = 2
 		offset = 1.
 		minimum = -1
-		maximum = 5
+		maximum = int(np.max(vectory)+1)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
@@ -80,11 +76,12 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	Style.SetPadLeftMargin(2.0)
 	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
 	XAxis.SetTimeDisplay(1)
- 	XAxis.SetTimeFormat("#splitline{%H/%M}{%d:%m}")
+ 	XAxis.SetTimeFormat("#splitline{%d/%m}{%H:%M:%S}")
  	XAxis.SetLabelOffset(0.025)
 	MyTGraph.SetMarkerColor(color)
 	MyTGraph.SetMarkerStyle(1)
 	MyTGraph.SetMarkerSize(1)
+	MyTGraph.SetLineColor(color)
 	MyTGraph.SetTitle(graphtitle)
 	#XAxis.SetTitle(xtitle)
 	YAxis = MyTGraph.GetYaxis()
@@ -97,11 +94,4 @@ def draw_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	MyTGraph.Write(graphname)
 	#MyTGraph.Draw("AP")
 	#gPad.SaveAs(graphname)
-	#gPad.Close()
-	
-
-
-
-
-
-
+	gPad.Close()
