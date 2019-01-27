@@ -9,10 +9,11 @@ import numpy as np
 import search
 
 folder = raw_input("Insert folder to study: ")
-path = "../Export/"+folder+"/" 
+#path = "../Export/"+folder+"/" 
+path = "/Users/lorenzo/Desktop/Data_Gif/SM2_20MNMMMS200006_FROM_2019_01_25_13_25_07_TO_2019_01_25_14_20_33/HV/"
+rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 
-rootfile = TFile(folder+".root","RECREATE")
-
+spikenames = []
 #----------------------------------------------------------------------------------------
 def createplot(file, filename):
 
@@ -57,14 +58,26 @@ def createplot(file, filename):
 	if "i" in filename: #it's a current file
 		#search.findrisingedges(valuesdeltas, dates)
 		#search.findfallingedges(valuesdeltas, dates)
-		spikedates = search.findspikes(valuesdeltas, dates)
+		spikecounter, filename, spikedates, spikenames = search.findspikes(valuesdeltas, dates, filename)
 
 	tools.write_roothistogram(newvalues, filename, filename[0], "Entries",filename)
 	tools.write_rootgraph(rootdates, newvalues, filename, "time (s)", filename[0], filename)
+
+	duration = len(newtimes) #total seconds from start to stop
+
+	if "i" in filename:
+		return spikenames
+	else:
+		return None
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
 	print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-	createplot(dat_file, dat_file[len(path):len(dat_file)-4])
+	spikeslayer = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
+	if spikeslayer != None:
+		spikenames = spikenames + spikeslayer
+
+tools.write_spikeroothistogram(spikenames, "spikes", "spikes", "spikes")
+
 
 #createplot("Export/SM1_FROM_2018_11_16_10_00_00_TO_2018_11_16_13_51_59/"+name, name)

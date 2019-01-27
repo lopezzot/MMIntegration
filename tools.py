@@ -1,4 +1,4 @@
-from ROOT import TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine
+from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine
 import numpy as np
 from array import array
 
@@ -31,13 +31,40 @@ def write_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	XAxis.SetTitle(xtitle)
 	YAxis = TH1Hist.GetYaxis()
 	YAxis.SetTitle(ytitle)
-	TH1Hist.Draw()
 	mean = TH1Hist.GetMean()
 	rms = TH1Hist.GetRMS()
 	Entries = TH1Hist.GetEntries()
 	TH1Hist.Write(histogramname)
 	#gPad.SaveAs(histogramname)
 	#gPad.Close()
+
+def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, histogramname):
+	"""Function to perform ROOT histograms"""
+
+	#Set ROOT histograms
+	TH1Hist = TH1F(histogramtitle,"",3,0,3)
+	
+	vectorspikes = [x[5:len(x)] for x in vectorspikes]
+	
+	#Fill histograms in for loop
+	for entry in range(len(vectorspikes)):
+		TH1Hist.Fill(vectorspikes[entry], 1)
+
+	#Draw + DrawOptions histograms	
+	c = TCanvas()	
+	Style = gStyle
+	Style.SetLineWidth(1) #TH1Hist
+	Style.SetOptStat(0) #Show statistics
+	gROOT.ForceStyle()
+	TH1Hist.SetCanExtend(TH1.kAllAxes)
+	TH1Hist.SetFillColor(38)
+	TH1Hist.LabelsDeflate()
+	YAxis = TH1Hist.GetYaxis()
+	YAxis.SetTitle(ytitle)
+	TH1Hist.Write(histogramname)
+	#gPad.SaveAs(histogramname)
+	#gPad.Close()
+
 
 def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	"""Function to perform ROOT graph"""
