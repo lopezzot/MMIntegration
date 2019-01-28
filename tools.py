@@ -2,7 +2,7 @@ from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMult
 import numpy as np
 from array import array
 
-def write_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
+def write_roothistogram(vector, histogramtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT histograms"""
 
 	if xtitle == "i":
@@ -34,11 +34,12 @@ def write_roothistogram(vector, histogramtitle, xtitle, ytitle, histogramname):
 	mean = TH1Hist.GetMean()
 	rms = TH1Hist.GetRMS()
 	Entries = TH1Hist.GetEntries()
-	TH1Hist.Write(histogramname)
+	rootdirectory.WriteTObject(TH1Hist)
+	#TH1Hist.Write(histogramname)
 	#gPad.SaveAs(histogramname)
 	#gPad.Close()
 
-def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, histogramname):
+def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, rootdirectory, deltatime):
 	"""Function to perform ROOT histograms"""
 
 	#Set ROOT histograms
@@ -48,8 +49,8 @@ def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, histogramname
 	
 	#Fill histograms in for loop
 	for entry in range(len(vectorspikes)):
-		TH1Hist.Fill(vectorspikes[entry], 1)
-
+		TH1Hist.Fill(vectorspikes[entry],1./(deltatime/60))
+		
 	#Draw + DrawOptions histograms	
 	c = TCanvas()	
 	Style = gStyle
@@ -59,14 +60,18 @@ def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, histogramname
 	TH1Hist.SetCanExtend(TH1.kAllAxes)
 	TH1Hist.SetFillColor(38)
 	TH1Hist.LabelsDeflate()
+	TH1Hist.SetMinimum(0)
+	TH1Hist.SetMaximum(2)
 	YAxis = TH1Hist.GetYaxis()
 	YAxis.SetTitle(ytitle)
-	TH1Hist.Write(histogramname)
+	TH1Hist.Draw("histo")
+	rootdirectory.WriteTObject(TH1Hist)
+	#TH1Hist.Write(histogramname)
 	#gPad.SaveAs(histogramname)
 	#gPad.Close()
 
 
-def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
+def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT graph"""
 
 	arrayx = array('d')
@@ -83,11 +88,11 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 		color = 2
 		offset = 1.
 		minimum = -1
-		maximum = int(np.max(vectory)+1)
+		maximum = int(np.max(vectory)+1.5)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
-		color = 3
+		color = 4
 		offset = 0.9
 		minimum = 400
 		maximum = 600
@@ -96,6 +101,7 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	n = len(vectorx)
 
 	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph.SetName(graphtitle)
 	
 	#Draw + DrawOptions
 	c = TCanvas()
@@ -118,7 +124,8 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, graphname):
 	MyTGraph.GetHistogram().SetMinimum(minimum)
 	MyTGraph.GetHistogram().SetMaximum(maximum)
 	MyTGraph.Draw("APL")
-	MyTGraph.Write(graphname)
+	rootdirectory.WriteTObject(MyTGraph)
+	#MyTGraph.Write(graphname)
 	#MyTGraph.Draw("AP")
 	#gPad.SaveAs(graphname)
 	gPad.Close()

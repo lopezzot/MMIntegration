@@ -3,27 +3,36 @@ from datetime import timedelta as td
 import sys
 import os
 import tools
-from ROOT import TFile, TDatime
+from ROOT import TFile, TDatime, TDirectory, gSystem
 import glob
 import numpy as np
 import search
 
 folder = raw_input("Insert folder to study: ")
-#path = "../Export/"+folder+"/" 
-path = "/Users/lorenzo/Desktop/Data_Gif/SM2_20MNMMMS200006_FROM_2019_01_25_13_25_07_TO_2019_01_25_14_20_33/HV/"
+
+path = "/Users/lorenzo/DataGif/"+folder+"/HV/"
 rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
+dir_L1 = rootfile.mkdir("Layer1/")
+dir_L2 = rootfile.mkdir("Layer2/")
+dir_L3 = rootfile.mkdir("Layer3/")
+dir_L4 = rootfile.mkdir("Layer4/")
+dir_summary = rootfile.mkdir("Summary/")
+directories = {"L1":dir_L1,"L2":dir_L2,"L3":dir_L3,"L4":dir_L4}
 
 spikenames = []
 #----------------------------------------------------------------------------------------
 def createplot(file, filename):
 
+	layer = filename[5:7]
+	rootdirectory = directories[layer] #to check
+
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
-		print "Only one data in "+str(filename)+".dat \n"
-		return
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None, None
 	if not times:
-		print "File empty: "+str(filename)+".dat \n"
-		return
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None, None
 
 	times = [x.replace(':',' ') for x in times]
 	times = [x.replace('/',' ') for x in times]
@@ -56,28 +65,30 @@ def createplot(file, filename):
 	valuesdeltas = [0]+valuesdeltas
 	
 	if "i" in filename: #it's a current file
-		#search.findrisingedges(valuesdeltas, dates)
-		#search.findfallingedges(valuesdeltas, dates)
+		search.findrisingedges(valuesdeltas, dates)
+		search.findfallingedges(valuesdeltas, dates)
 		spikecounter, filename, spikedates, spikenames = search.findspikes(valuesdeltas, dates, filename)
 
-	tools.write_roothistogram(newvalues, filename, filename[0], "Entries",filename)
-	tools.write_rootgraph(rootdates, newvalues, filename, "time (s)", filename[0], filename)
+	tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory)
+	tools.write_rootgraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 
 	duration = len(newtimes) #total seconds from start to stop
 
-	if "i" in filename:
-		return spikenames
-	else:
-		return None
+	if "i" not in filename:
+		spikenames = None
+		duration = None
+
+	return spikenames, duration
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
 	print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-	spikeslayer = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
+	spikeslayer, duration = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
 	if spikeslayer != None:
 		spikenames = spikenames + spikeslayer
+	if duration != None:
+		deltatime = duration
 
-tools.write_spikeroothistogram(spikenames, "spikes", "spikes", "spikes")
+tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)
 
 
-#createplot("Export/SM1_FROM_2018_11_16_10_00_00_TO_2018_11_16_13_51_59/"+name, name)
