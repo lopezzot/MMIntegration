@@ -1,4 +1,4 @@
-from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine
+from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine, TLatex
 import numpy as np
 from array import array
 
@@ -53,6 +53,7 @@ def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, rootdirectory
 		
 	#Draw + DrawOptions histograms	
 	c = TCanvas()	
+	c.SetName(histogramtitle+"_canvas")
 	Style = gStyle
 	Style.SetLineWidth(1) #TH1Hist
 	Style.SetOptStat(0) #Show statistics
@@ -64,14 +65,19 @@ def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, rootdirectory
 	TH1Hist.SetMaximum(2)
 	YAxis = TH1Hist.GetYaxis()
 	YAxis.SetTitle(ytitle)
-	TH1Hist.Draw("histo")
 	rootdirectory.WriteTObject(TH1Hist)
+	line = TLine(0.,1.0,len(set(vectorspikes)),1.0)
+	line.SetLineStyle(2)
+	line.SetLineColor(2)
+	TH1Hist.Draw("histo")
+	line.Draw()
+	rootdirectory.WriteTObject(c)
 	#TH1Hist.Write(histogramname)
 	#gPad.SaveAs(histogramname)
 	#gPad.Close()
 
 
-def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
+def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT graph"""
 
 	arrayx = array('d')
@@ -96,7 +102,7 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory)
 		offset = 0.9
 		minimum = 400
 		maximum = 600
-
+		
 	#How many graph points
 	n = len(vectorx)
 
@@ -129,3 +135,82 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory)
 	#MyTGraph.Draw("AP")
 	#gPad.SaveAs(graphname)
 	gPad.Close()
+
+def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrents, rootdirectory):
+	"""Function to perform ROOT graph"""
+
+	arrayx = array('d')
+	arrayy = array('d')
+
+	for x in vectorx:
+		arrayx.append(x)
+
+	for y in vectory:
+		arrayy.append(y)
+
+	if ytitle == "i":
+		ytitle = ytitle+" (uA)"
+		color = 2
+		offset = 1.
+		minimum = -0.5
+		maximum = int(np.max(vectory)+1.5)
+		lineup = TLine(float(np.min(vectorx)), 500, float(np.max(vectorx)), 500)
+		lineup.SetLineColor(2)
+		lineup.SetLineStyle(2)
+		linedown = TLine(float(np.min(vectorx)), 500., float(np.max(vectorx)), 500.)
+		linedown.SetLineColor(8)
+		linedown.SetLineStyle(2)
+
+	if ytitle == "v":
+		ytitle = ytitle+" (V)"
+		color = 4
+		offset = 0.9
+		minimum = 400
+		maximum = 600
+		lineup = TLine(float(np.min(vectorx)), 580., float(np.max(vectorx)), 580.)
+		lineup.SetLineColor(2)
+		lineup.SetLineStyle(2)
+		linedown = TLine(float(np.min(vectorx)), 530., float(np.max(vectorx)), 530.)
+		linedown.SetLineColor(8)
+		linedown.SetLineStyle(2)
+
+	#How many graph points
+	n = len(vectorx)
+
+	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph.SetName(graphtitle)
+	
+	for entry in range(len(sectorscurrents)):
+		latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], sectorscurrents[entry])
+		latex.SetTextSize(0.02)
+		MyTGraph.GetListOfFunctions().Add(latex)
+
+	#Draw + DrawOptions
+	Style = gStyle
+	Style.SetPadLeftMargin(2.0)
+	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
+	#XAxis.SetTitleOffset(offset)
+	XAxis.SetTitle(xtitle)
+	MyTGraph.SetMarkerColor(color)
+	MyTGraph.SetMarkerStyle(1)
+	MyTGraph.SetMarkerSize(1)
+	MyTGraph.SetLineColor(color)
+	MyTGraph.SetTitle(graphtitle)
+	#XAxis.SetTitle(xtitle)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetTitleOffset(offset)
+	YAxis.SetTitle(ytitle)
+	MyTGraph.GetHistogram().SetMinimum(minimum)
+	MyTGraph.GetHistogram().SetMaximum(maximum)
+	rootdirectory.WriteTObject(MyTGraph)
+	c = TCanvas()
+	c.SetName(graphtitle+"_canvas")
+	MyTGraph.Draw("APL")
+	lineup.Draw("")
+	linedown.Draw("")
+	rootdirectory.WriteTObject(c)
+	
+	#MyTGraph.Write(graphname)
+	#MyTGraph.Draw("AP")
+	#gPad.SaveAs(graphname)
+	#gPad.Close()
