@@ -8,15 +8,24 @@ def write_roothistogram(vector, histogramtitle, xtitle, ytitle, rootdirectory):
 	if xtitle == "i":
 		xtitle = xtitle+" (uA)"
 		nbin = 100
-
+		lower =	np.min(vector)-1.5*abs(np.max(vector)-np.min(vector))
+		up = np.max(vector)+1.5*(np.max(vector)-np.min(vector))
+		
 	if xtitle == "v":
 		xtitle = xtitle+" (V)"
 		nbin = 20
+		lower =	np.min(vector)-1.5*abs(np.max(vector)-np.min(vector))
+		up = np.max(vector)+1.5*(np.max(vector)-np.min(vector))
+
+	if xtitle == "t (s)":
+		nbin = int(np.max(vector)-np.min(vector))
+		lower = 0
+		up = np.max(vector)
 
 	rms = 0
 	
 	#Set ROOT histograms
-	TH1Hist = TH1F(histogramtitle,"",int(nbin),np.min(vector)-1.5*abs(np.max(vector)-np.min(vector)), np.max(vector)+1.5*(np.max(vector)-np.min(vector)))
+	TH1Hist = TH1F(histogramtitle,"",int(nbin),lower, up)
 	
 	#Fill histograms in for loop
 	for entry in range(len(vector)):

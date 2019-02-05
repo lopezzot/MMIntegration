@@ -26,6 +26,7 @@ sectorscurrents = []
 sectorsvoltages = []
 meancurrents = []
 meanvoltages = []
+newspikeseconds = []
 #----------------------------------------------------------------------------------------
 def createplot(file, filename):
 
@@ -35,10 +36,10 @@ def createplot(file, filename):
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
 		print "Exception -----> Only one data in "+str(filename)+".dat \n"
-		return None, None, None, None, None, None
+		return None, None, None, None, None, None, None
 	if not times:
 		print "Exception -----> File empty: "+str(filename)+".dat \n"
-		return None, None, None, None, None, None
+		return None, None, None, None, None, None, None
 
 	times = [x.replace(':',' ') for x in times]
 	times = [x.replace('/',' ') for x in times]
@@ -78,7 +79,7 @@ def createplot(file, filename):
 	if "i" in filename: #it's a current file
 		search.findrisingedges(valuesdeltas, dates)
 		search.findfallingedges(valuesdeltas, dates)
-		spikecounter, filename, spikedates, spikenames = search.findspikes(valuesdeltas, dates, filename)
+		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
 
 		sectorscurrent = filename[5:9]
 		meancurrent = np.mean(newvalues)
@@ -95,14 +96,17 @@ def createplot(file, filename):
 	if "i" not in filename or "D" in filename:
 		spikenames = None
 		duration = None
+		spikeseconds = None
 
-	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent
+	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
 	print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-	spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
+	spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
 	
+	if spikeseconds != None:
+		newspikeseconds = newspikeseconds + spikeseconds
 	if spikeslayer != None:
 		spikenames = spikenames + spikeslayer
 	if duration != None:
@@ -116,6 +120,7 @@ for dat_file in glob.iglob(path+'*.dat'):
 	if meanvoltage != None:
 		meanvoltages.append(meanvoltage)
 
+tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
 tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
 tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)

@@ -18,14 +18,16 @@ def findfallingedges(valuesdeltas, dates):
 				print "---> one falling edge at "+str(dates[counter])
 				return dates[counter]
 
-def findspikes(valuesdeltas, dates, filename):
+def findspikes(valuesdeltas, dates, seconds, filename):
 	spikedates = []
 	spikecounter = 0
 	spikenames = []
+	spikeseconds = []
 	for counter, x in enumerate(valuesdeltas):
 		if x > 0.4:
 			print "---> one spike at "+str(dates[counter])
 			spikecounter = spikecounter + 1
 			spikedates.append(dates[counter])
+			spikeseconds.append(seconds[counter])
 			spikenames.append(filename)
-	return spikecounter, filename, spikedates, spikenames
+	return spikecounter, filename, spikedates, spikeseconds, spikenames
