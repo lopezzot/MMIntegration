@@ -223,3 +223,57 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 	#MyTGraph.Draw("AP")
 	#gPad.SaveAs(graphname)
 	#gPad.Close()
+
+def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
+	"""Function to perform ROOT graph"""
+
+	arrayx = array('d')
+	arrayy = array('d')
+
+	for x in vectorx:
+		arrayx.append(x)
+
+	for y in vectory:
+		arrayy.append(y)
+
+	if ytitle == "i":
+		ytitle = ytitle+" (uA)"
+		color = 2
+		offset = 1.
+		
+	if ytitle == "v":
+		ytitle = ytitle+" (V)"
+		color = 4
+		offset = 0.9
+		
+	#How many graph points
+	n = len(vectorx)
+
+	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph.SetName(graphtitle)
+	
+	#Draw + DrawOptions
+	Style = gStyle
+	Style.SetPadLeftMargin(2.0)
+	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
+	#XAxis.SetTitleOffset(offset)
+	XAxis.SetTitle(xtitle)
+	MyTGraph.SetMarkerColor(color)
+	MyTGraph.SetMarkerStyle(3)
+	MyTGraph.SetMarkerSize(3)
+	MyTGraph.SetTitle(graphtitle)
+	XAxis.SetTitle(xtitle)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetTitleOffset(offset)
+	YAxis.SetTitle(ytitle)
+	rootdirectory.WriteTObject(MyTGraph)
+	c = TCanvas()
+	#c.SetLogx()
+	c.SetName(graphtitle+"_canvas")
+	MyTGraph.Draw("AP")
+	rootdirectory.WriteTObject(c)
+	
+	#MyTGraph.Write(graphname)
+	#MyTGraph.Draw("AP")
+	#gPad.SaveAs(graphname)
+	#gPad.Close()
