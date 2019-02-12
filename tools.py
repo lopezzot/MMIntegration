@@ -157,6 +157,13 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 	for y in vectory:
 		arrayy.append(y)
 
+
+	#How many graph points
+	n = len(vectorx)
+
+	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph.SetName(graphtitle)
+
 	if ytitle == "i":
 		ytitle = ytitle+" (uA)"
 		color = 2
@@ -169,6 +176,15 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 		linedown = TLine(float(np.min(vectorx)), 500., float(np.max(vectorx)), 500.)
 		linedown.SetLineColor(8)
 		linedown.SetLineStyle(2)
+		for entry in range(len(sectorscurrents)):
+			if vectory[entry] > 0.01: 
+				latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], sectorscurrents[entry])
+				latex.SetTextSize(0.02)
+				MyTGraph.GetListOfFunctions().Add(latex)
+			else:
+				latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], "")
+				latex.SetTextSize(0.02)
+				MyTGraph.GetListOfFunctions().Add(latex)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
@@ -183,17 +199,15 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 		linedown.SetLineColor(8)
 		linedown.SetLineStyle(2)
 
-	#How many graph points
-	n = len(vectorx)
-
-	MyTGraph = TGraph(n, arrayx, arrayy)
-	MyTGraph.SetName(graphtitle)
+		for entry in range(len(sectorscurrents)):
+			if vectory[entry] > 569.0:
+				latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], "")
+			else:
+				latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], sectorscurrents[entry])
+			latex.SetTextSize(0.02)
+			MyTGraph.GetListOfFunctions().Add(latex)
 	
-	for entry in range(len(sectorscurrents)):
-		latex = TLatex(MyTGraph.GetX()[entry], MyTGraph.GetY()[entry], sectorscurrents[entry])
-		latex.SetTextSize(0.02)
-		MyTGraph.GetListOfFunctions().Add(latex)
-
+	
 	#Draw + DrawOptions
 	Style = gStyle
 	Style.SetPadLeftMargin(2.0)

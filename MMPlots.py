@@ -7,10 +7,12 @@ from ROOT import TFile, TDatime, TDirectory, gSystem
 import glob
 import numpy as np
 import search
+import copy
 
+house = raw_input("Data in BB5 or Gif? ")
 folder = raw_input("Insert folder to study: ")
 
-path = "/Users/lorenzo/DataGif/"+folder+"/HV/"
+path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
 rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 dir_L1 = rootfile.mkdir("Layer1/")
 dir_L2 = rootfile.mkdir("Layer2/")
@@ -74,21 +76,42 @@ def createplot(file, filename):
 	sectorscurrent = None
 	sectorsvoltage = None
 	meancurrent = None
+	nospike_meancurrent = None
 	meanvoltage = None
+	notrips_meanvoltage = None
 	
 	if "i" in filename: #it's a current file
-		search.findrisingedges(valuesdeltas, dates)
-		search.findfallingedges(valuesdeltas, dates)
-		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
-
+		#search.findrisingedges(valuesdeltas, dates)
+		#search.findfallingedges(valuesdeltas, dates)
+		
 		sectorscurrent = filename[5:9]
 		meancurrent = np.mean(newvalues)
+
+		#remove spikes in current files
+		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
+		nospike_newvalues = search.removespikes(valuesdeltas, copynewvalues)
+		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
+																										#or meancurrent
+		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
+		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename) #old one
+		
+		if "D" in filename:
+			sectorscurrent = None
+			nospike_meancurrent = None
 
 	if "v" in filename: #it's a voltage file
 		sectorsvoltage = filename[5:9]
 		meanvoltage = np.mean(newvalues)
 
-	tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory)
+		copynewvalues = copy.copy(newvalues)
+		notrips_newvalues = search.removetrips(valuesdeltas, copynewvalues)
+		notrips_meanvoltage = np.mean(notrips_newvalues)
+
+		if "D" in filename:
+			sectorsvoltage = None
+			notrips_meanvoltage = None
+
+	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if want additional histograms
 	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	
 	duration = len(newtimes) #total seconds from start to stop
@@ -98,7 +121,7 @@ def createplot(file, filename):
 		duration = None
 		spikeseconds = None
 
-	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds
+	return spikenames, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
@@ -120,7 +143,7 @@ for dat_file in glob.iglob(path+'*.dat'):
 	if meanvoltage != None:
 		meanvoltages.append(meanvoltage)
 
-tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
+#tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
 tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
 tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)

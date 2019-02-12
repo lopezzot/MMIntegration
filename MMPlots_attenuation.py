@@ -68,6 +68,34 @@ def createplot(giffile, file, filename):
 	for counter in range(len(newtimes)-1):
 		dates.append(dates[counter]+td(seconds=1))
 
+	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
+
+	#Identify drops
+	valuesdeltas = np.diff(newvalues)
+	valuesdeltas = [0]+valuesdeltas
+
+	sectorscurrent = None
+	sectorsvoltage = None
+	meancurrent = None
+	nospike_meancurrent = None #to have current not affected by spikes
+	meanvoltage = None
+	
+	if "i" in filename: #it's a current file
+		search.findrisingedges(valuesdeltas, dates)
+		search.findfallingedges(valuesdeltas, dates)
+		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
+
+		sectorscurrent = filename[5:9]
+		meancurrent = np.mean(newvalues)
+
+		#remove spikes
+		nospike_newvalues = search.removespikes(valuesdeltas, newvalues)
+		nospike_meancurrent = np.mean(nospike_newvalues)
+
+	if "v" in filename: #it's a voltage file
+		sectorsvoltage = filename[5:9]
+		meanvoltage = np.mean(newvalues)
+
 	#data from gif file (for attenuation)------------------------
 	atten = [x.split(' 	 ') for x in open(giffile,"r").readlines()[1:]] #read attenutation factor exept first line (header)
 	atten = [x for x in atten if len(x) == 11]
@@ -121,34 +149,10 @@ def createplot(giffile, file, filename):
 
 		setattenvalues = [float(x)**(-1) for x in setattenvalues]
 		tools.write_attenuationrootgraph(setattenvalues[2:], setmeancurrents[2:], filename+"_attenuation", "1/attenuation", "i", dir_summary)
-	
-
 	#end data from gif file--------------------------------------
 
-	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
-
-	#Identify drops
-	valuesdeltas = np.diff(newvalues)
-	valuesdeltas = [0]+valuesdeltas
-
-	sectorscurrent = None
-	sectorsvoltage = None
-	meancurrent = None
-	meanvoltage = None
-	
-	if "i" in filename: #it's a current file
-		search.findrisingedges(valuesdeltas, dates)
-		search.findfallingedges(valuesdeltas, dates)
-		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
-
-		sectorscurrent = filename[5:9]
-		meancurrent = np.mean(newvalues)
-
-	if "v" in filename: #it's a voltage file
-		sectorsvoltage = filename[5:9]
-		meanvoltage = np.mean(newvalues)
-
-	tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory)
+	#write layer graphs
+	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
 	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	
 	duration = len(newtimes) #total seconds from start to stop
@@ -158,7 +162,7 @@ def createplot(giffile, file, filename):
 		duration = None
 		spikeseconds = None
 
-	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds
+	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
