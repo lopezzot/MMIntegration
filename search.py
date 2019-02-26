@@ -61,7 +61,7 @@ def findspikes_50na(newvalues, mean_nospike, dates, seconds, filename):
 	print filename, mean_nospike
 	for counter, x in enumerate(newvalues):
 		if x > treshold+mean_nospike: #50 nA + mean without spikes
-			print "---> one spike at "+str(dates[counter])
+			#print "---> one spike at "+str(dates[counter])
 		
 			if seconds[counter] > setcounter + 3:
 				spikecounter = spikecounter + 1

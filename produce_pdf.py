@@ -1,5 +1,6 @@
 import os
 import datetime
+import MMPlots
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
     StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -9,8 +10,11 @@ from pylatex.utils import bold, NoEscape
 now = datetime.datetime.now()
 
 gas_leak = raw_input("Insert gas leake (mL/h): ")
+chambername = raw_input("Insert chamber name (e.g. SM1_M6): ")
 
+sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime = MMPlots.createsummaryplots()
 
+#--------------------------------------------------------------------------------
 def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated, sectors_irradiated, hv_irradiated, spark_irradiated):
     geometry_options = {
         "head": "40pt",
@@ -43,9 +47,10 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
             title_wrapper.append(bold(now.strftime("%d-%m-%Y")))
             title_wrapper.append(LineBreak())
             title_wrapper.append("\n")
-            title_wrapper.append(LargeText(bold("Chamber: to be filled ")))
+            title_wrapper.append(LargeText(bold("Chamber: "+str(chambername))))
             title_wrapper.append(LineBreak())
-            title_wrapper.append("ID: to be filled")
+            title_wrapper.append("ID: "+str(ID))
+            title_wrapper.append(LineBreak())
 
     # Add footer
     with first_page.create(Foot("C")) as footer:
@@ -114,30 +119,44 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
     
     with doc.create(Section('HV not irradiated', numbering=False)):
        # Add statement table
+        doc.append("\n")
+        doc.append(timeslot)
+        doc.append(LineBreak())
+        doc.append(str(deltatime/60)+str("_min"))
+        doc.append(LineBreak())
         with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
                                  row_height=1.5)) as data_table:
             data_table.add_row(["Sector",
                                 "HV",
                                 "spark/min",
-                                "Final"],
+                                "Accepted"],
                                mapper=bold,
                                color="lightgray")
             data_table.add_empty_row()
             data_table.add_hline()
             row = ["sector", "hv", "spark", "0 or 1"]
+            acceptedlist = []
             for i in range(len(hv_notirradiated)):
                 if (i % 2) == 0:
-                    if int(hv_notirradiated[i]) > 565 and spark_notirradiated[i]<1.0:
+                    if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
                         accepted = 1
+                        acceptedlist.append(accepted)
                     else:
-                        accepted = 0 
-                    data_table.add_row([str(sectors_notirradiated[i]), str(hv_notirradiated[i]), str(spark_notirradiated[i]), accepted], color="lightgray")
+                        accepted = 0
+                        acceptedlist.append(accepted) 
+                    data_table.add_row([str(sectors_notirradiated[i]), str(int(hv_notirradiated[i])), str(round(spark_notirradiated[i],2)), accepted], color="lightgray")
                 else:
-                    if int(hv_notirradiated[i]) > 565 and spark_notirradiated[i]<1.0:
+                    if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
                         accepted = 1
+                        acceptedlist.append(accepted)
                     else:
-                        accepted = 0  
-                    data_table.add_row([str(sectors_notirradiated[i]), str(hv_notirradiated[i]), str(spark_notirradiated[i]), accepted])
+                        accepted = 0
+                        acceptedlist.append(accepted)  
+                    data_table.add_row([str(sectors_notirradiated[i]), str(int(hv_notirradiated[i])), str(round(spark_notirradiated[i],2)), accepted])
+
+            data_table.add_empty_row()
+            data_table.add_hline()
+            data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 567.9])), str(len([x for x in spark_notirradiated if x > 1.0])), str(acceptedlist.count(0)))
 
     doc.append(NewPage())
 
@@ -160,13 +179,13 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
                         accepted = 1
                     else:
                         accepted = 0 
-                    data_table.add_row([str(sectors_irradiated[i]), str(hv_irradiated[i]), str(spark_irradiated[i]), accepted], color="lightgray")
+                    data_table.add_row([str(sectors_irradiated[i]), str(hv_irradiated[i]), str(round(spark_irradiated[i],2)), accepted], color="lightgray")
                 else:
                     if int(hv_irradiated[i]) > 565 and spark_irradiated[i]<1.0:
                         accepted = 1
                     else:
                         accepted = 0  
-                    data_table.add_row([str(sectors_irradiated[i]), str(hv_irradiated[i]), str(spark_irradiated[i]), accepted])
+                    data_table.add_row([str(sectors_irradiated[i]), str(hv_irradiated[i]), str(round(spark_irradiated[i],2)), accepted])
 
     with doc.create(Section('Current vs. flux (GIF)', numbering=False)):
     
@@ -179,5 +198,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
                 cheque_table.add_row([cheque, cheque, cheque, cheque])
     
     doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
+#---------------------------------------------------------------------------------------------
 
-generate_unique(["L1L1","L1L2","L1L3","L1L4","L2L3","L4L5"],[0,570,567,3,4,5],[0,1.2,0.4,0.2,1.0,0.4],["L1L1","L1L2","L1L3","L1L4","L2L3","L4L5"],[0,570,567,3,4,5],[0,1.2,0.4,0.2,1.0,0.4])
+generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated,["L1L1","L1L2","L1L3","L1L4","L2L3","L4L5"],[0,570,567,3,4,5],[0,1.2,0.4,0.2,1.0,0.4])

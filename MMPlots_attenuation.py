@@ -7,12 +7,17 @@ from ROOT import TFile, TDatime, TDirectory, gSystem
 import glob
 import numpy as np
 import search
+import copy
+from fpdf import FPDF
+from pylatex import Document, Figure
 
+house = raw_input("Data in BB5 or Gif? ")
 folder = raw_input("Insert folder to study: ")
 
-path = "/Users/lorenzo/DataGif/"+folder+"/HV/"
-gifpath = "/Users/lorenzo/DataGif/"+folder+"/GIF/"
-giffile = gifpath+"gifData.dat"
+path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
+gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
+giffile = gifpath+"EffectiveAttenuation.dat"
+sourcefile = gifpath+"Source.dat"
 
 rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 dir_L1 = rootfile.mkdir("Layer1/")
@@ -79,33 +84,60 @@ def createplot(giffile, file, filename):
 	meancurrent = None
 	nospike_meancurrent = None #to have current not affected by spikes
 	meanvoltage = None
+	notrips_meanvoltage = None
 	
 	if "i" in filename: #it's a current file
-		search.findrisingedges(valuesdeltas, dates)
-		search.findfallingedges(valuesdeltas, dates)
-		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
-
+		#search.findrisingedges(valuesdeltas, dates)
+		#search.findfallingedges(valuesdeltas, dates)
+		
 		sectorscurrent = filename[5:9]
 		meancurrent = np.mean(newvalues)
+		
+		#remove spikes in current files
+		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
+		nospike_newvalues = search.removespikes(valuesdeltas, copynewvalues)
+		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
+		
+		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
+		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
 
-		#remove spikes
-		nospike_newvalues = search.removespikes(valuesdeltas, newvalues)
-		nospike_meancurrent = np.mean(nospike_newvalues)
+		if "D" in filename:
+			sectorscurrent = None
+			nospike_meancurrent = None
 
 	if "v" in filename: #it's a voltage file
 		sectorsvoltage = filename[5:9]
 		meanvoltage = np.mean(newvalues)
 
+		copynewvalues = copy.copy(newvalues)
+		notrips_newvalues = search.removetrips(valuesdeltas, copynewvalues)
+		notrips_meanvoltage = np.mean(notrips_newvalues)
+
+		if "D" in filename:
+			sectorsvoltage = None
+			notrips_meanvoltage = None
+
+	#write layer graphs
+	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
+	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
+	
+	duration = len(newtimes) #total seconds from start to stop
+
+	if "i" not in filename or "D" in filename:
+		spikenames = None
+		duration = None
+		spikeseconds = None
+
 	#data from gif file (for attenuation)------------------------
 	atten = [x.split(' 	 ') for x in open(giffile,"r").readlines()[1:]] #read attenutation factor exept first line (header)
-	atten = [x for x in atten if len(x) == 11]
+	#atten = [x for x in atten if len(x) == 11] #used before change in daq
 	atten_times = [x[0] for x in atten]
-	atten_values = [x[5] for x in atten]
-	
+	atten_values = [float(x[1]) for x in atten]
+
 	atten_times = [x.replace(':',' ') for x in atten_times]
 	atten_times = [x.replace('/',' ') for x in atten_times]
 	atten_times = [x.replace('_',' ') for x in atten_times]
-	atten_times = [dt.strptime(x, '%d %m %Y %H %M %S') for x in atten_times]
+	atten_times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in atten_times]
 
 	atten_starttime = atten_times[0] 
 	atten_dates = [atten_starttime]
@@ -122,15 +154,71 @@ def createplot(giffile, file, filename):
 			atten_newvalues[atten_counter] = atten_newvalues[atten_counter-1]
 
 	for counter in range(len(atten_newtimes)-1):
-		atten_dates.append(atten_dates[counter]+td(seconds=1))
+		atten_dates.append(atten_dates[counter]+td(seconds=1)) #end of creating arrays atten values and times
+	
+	source = [x.split(' 	 ') for x in open(sourcefile,"r").readlines()[1:]] #read attenutation factor exept first line (header)
+	#atten = [x for x in atten if len(x) == 11] #used before change in daq
+	source_times = [x[0] for x in source]
+	source_values = [float(x[1]) for x in source] #0.0 off 1.0 on
+	
+	source_times = [x.replace(':',' ') for x in source_times]
+	source_times = [x.replace('/',' ') for x in source_times]
+	source_times = [x.replace('_',' ') for x in source_times]
+	source_times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in source_times]
+
+	source_starttime = source_times[0] 
+	source_dates = [source_starttime]
+
+	source_times = [int((x-source_starttime).total_seconds()) for x in source_times]
+	
+	source_newtimes = range(source_times[len(source_times)-1])
+	source_newvalues = [None]*len(source_newtimes)
+
+	for source_counter, source_value in enumerate(source_newvalues):
+		if source_counter in source_times:
+			source_newvalues[source_counter] = source_values[source_times.index(source_counter)]
+		else:
+			source_newvalues[source_counter] = source_newvalues[source_counter-1]
+
+	for counter in range(len(source_newtimes)-1):
+		source_dates.append(source_dates[counter]+td(seconds=1)) #end of creating arrays source values and times
+	
+	#now important to match starting time of source file and atten file
+	if "i" in filename and "D" not in filename:
+		
+		if source_dates[10] in atten_dates:
+			syncindex = atten_dates.index(source_dates[10])
+			source_dates = source_dates[10:]
+		else:
+			syncindex = atten_dates.index(source_dates[50])
+			source_dates = source_dates[50:]
+		atten_dates = atten_dates[syncindex:]
+		if len(atten_dates) > len(source_dates):
+			atten_dates = atten_dates[0:len(source_dates)]
+			atten_newvalues = atten_newvalues[0:len(source_newvalues)] #attenuation values sync to i values 
+		elif len(atten_dates) < len(source_dates):
+			source_dates = source_dates[0:len(atten_dates)]
+			source_newvalues = source_newvalues[0:len(atten_newvalues)] #syn complete
+
+		#for counter in range(0,50):
+		#	print source_dates[counter],source_newvalues[counter],atten_dates[counter],atten_newvalues[counter]
+
+	for counter, atten_newvalue in enumerate(atten_newvalues):
+		if source_newvalues[counter] == 0.0:
+			atten_newvalues[counter] = 0.0 #put attenuation to 0 il source is of, i will later remove zeros
 
 	#completed date array and attenuation array from GIF 
 	#now important to match starting time with data from chamber
 	#not done for drift
+	
 	if "i" in filename and "D" not in filename:
 		
-		syncindex = atten_dates.index(dates[10])
-		dates = dates[10:]
+		if dates[10] in atten_dates:
+			syncindex = atten_dates.index(dates[10])
+			dates = dates[10:]
+		else:
+			syncindex = atten_dates.index(dates[100]) #mettere 100 e provare!
+			dates = dates[100:]
 		atten_dates = atten_dates[syncindex:]
 		if len(atten_dates) > len(dates):
 			atten_dates = atten_dates[0:len(dates)]
@@ -139,30 +227,32 @@ def createplot(giffile, file, filename):
 			dates = dates[0:len(atten_dates)]
 			newvalues = newvalues[0:len(atten_newvalues)] #syn complete
 
+		#for counter in range(0,50):
+			#print dates[counter],newvalues[counter],atten_dates[counter],atten_newvalues[counter]
+	
 		setattenvalues = set(atten_newvalues) 
 		setattenvalues = [x for x in setattenvalues if float(x) != 0.]
+		setattenvalues.sort(reverse=True) #from min to max
 		setmeancurrents = []
+
+		currentatzero = [x for counter, x in enumerate(newvalues) if atten_newvalues[counter] == 0.] #current when source is off  
+		currentatzero = np.mean(currentatzero)
 
 		for setattenuation in setattenvalues:
 			found = [x for counter, x in enumerate(newvalues) if atten_newvalues[counter] == setattenuation]
 			setmeancurrents.append(float(np.mean(found)))
 
+		for counter in range(len(setmeancurrents)):
+			setmeancurrents[counter] = setmeancurrents[counter] - currentatzero #remove offset
+
+		for counter, setattenvalue in enumerate(setattenvalues):
+			print setattenvalue, setmeancurrents[counter]
+		
 		setattenvalues = [float(x)**(-1) for x in setattenvalues]
-		tools.write_attenuationrootgraph(setattenvalues[2:], setmeancurrents[2:], filename+"_attenuation", "1/attenuation", "i", dir_summary)
+		tools.write_attenuationrootgraph(setattenvalues, setmeancurrents, filename, "1/attenuation", "i", dir_summary)
 	#end data from gif file--------------------------------------
-
-	#write layer graphs
-	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
-	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	
-	duration = len(newtimes) #total seconds from start to stop
-
-	if "i" not in filename or "D" in filename:
-		spikenames = None
-		duration = None
-		spikeseconds = None
-
-	return spikenames, duration, sectorsvoltage, meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
+	return spikenames, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 
 for dat_file in glob.iglob(path+'*.dat'):
@@ -188,3 +278,5 @@ tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "
 tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
 tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)
+
+	

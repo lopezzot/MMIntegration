@@ -9,26 +9,79 @@ import numpy as np
 import search
 import copy
 
-house = raw_input("Data in BB5 or Gif? ")
-folder = raw_input("Insert folder to study: ")
+#---------------------------------------------------------------------------------
+def createsummaryplots():
+	house = raw_input("Data in BB5 or Gif? ")
+	folder = raw_input("Insert folder to study: ")
 
-path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
-rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
-dir_L1 = rootfile.mkdir("Layer1/")
-dir_L2 = rootfile.mkdir("Layer2/")
-dir_L3 = rootfile.mkdir("Layer3/")
-dir_L4 = rootfile.mkdir("Layer4/")
-dir_summary = rootfile.mkdir("Summary/")
+	ID = folder[0:18]
+	timeslot = folder[19:len(folder)]
 
-directories = {"L1":dir_L1,"L2":dir_L2,"L3":dir_L3,"L4":dir_L4}
+	path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
+	rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
+	dir_L1 = rootfile.mkdir("Layer1/")
+	dir_L2 = rootfile.mkdir("Layer2/")
+	dir_L3 = rootfile.mkdir("Layer3/")
+	dir_L4 = rootfile.mkdir("Layer4/")
+	dir_summary = rootfile.mkdir("Summary/")
 
-#for summary plots
-spikenames = []
-sectorscurrents = []
-sectorsvoltages = []
-meancurrents = []
-meanvoltages = []
-newspikeseconds = []
+	global directories
+	directories = {"L1":dir_L1,"L2":dir_L2,"L3":dir_L3,"L4":dir_L4}
+
+	#for summary plots
+	spikenames = []
+	sectorscurrents = []
+	sectorsvoltages = []
+	meancurrents = []
+	meanvoltages = []
+	newspikeseconds = []
+
+	for dat_file in glob.iglob(path+'*.dat'):
+		print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
+		spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
+	
+		if spikeseconds != None:
+			newspikeseconds = newspikeseconds + spikeseconds
+		if spikeslayer != None:
+			spikenames = spikenames + spikeslayer
+		if duration != None:
+			deltatime = duration
+		if sectorscurrent != None:
+			sectorscurrents.append(sectorscurrent)
+		if meancurrent != None:
+			meancurrents.append(meancurrent)
+		if sectorsvoltage != None:
+			sectorsvoltages.append(sectorsvoltage)
+		if meanvoltage != None:
+			meanvoltages.append(meanvoltage)
+
+	#tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
+	tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
+	tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
+	tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)
+
+	vectorspikes = [x[5:len(x)] for x in spikenames]
+	spikerate = []
+	spikelayers = list(set(vectorspikes))
+	for i in spikelayers:
+		spikerate.append(vectorspikes.count(i))
+
+	for sector in sectorsvoltages:
+		if sector not in spikelayers:
+			spikelayers.append(sector)
+			spikerate.append(0)
+
+	orderedspikerate = []
+	for sector in sectorsvoltages:
+		orderedspikerate.append(spikerate[spikelayers.index(sector)])
+
+	orderedspikerate = [float(x/float((deltatime/60.))) for x in orderedspikerate]
+
+	print orderedspikerate
+
+	return sectorsvoltages, meanvoltages, orderedspikerate, ID, timeslot, deltatime
+#----------------------------------------------------------------------------------------
+
 #----------------------------------------------------------------------------------------
 def createplot(file, filename):
 
@@ -124,26 +177,4 @@ def createplot(file, filename):
 	return spikenames, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 
-for dat_file in glob.iglob(path+'*.dat'):
-	print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-	spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
-	
-	if spikeseconds != None:
-		newspikeseconds = newspikeseconds + spikeseconds
-	if spikeslayer != None:
-		spikenames = spikenames + spikeslayer
-	if duration != None:
-		deltatime = duration
-	if sectorscurrent != None:
-		sectorscurrents.append(sectorscurrent)
-	if meancurrent != None:
-		meancurrents.append(meancurrent)
-	if sectorsvoltage != None:
-		sectorsvoltages.append(sectorsvoltage)
-	if meanvoltage != None:
-		meanvoltages.append(meanvoltage)
-
-#tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
-tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
-tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
-tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)
+#createsummaryplots()

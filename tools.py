@@ -104,6 +104,8 @@ def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirect
 		offset = 1.
 		minimum = -1
 		maximum = int(np.max(vectory)+1.5)
+		if maximum > 10:
+			maximum = int(10)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
@@ -140,10 +142,10 @@ def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirect
 	MyTGraph.GetHistogram().SetMaximum(maximum)
 	MyTGraph.Draw("APL")
 	rootdirectory.WriteTObject(MyTGraph)
-	#MyTGraph.Write(graphname)
-	#MyTGraph.Draw("AP")
-	#gPad.SaveAs(graphname)
-	gPad.Close()
+	#MyTGraph.Write(graphtitle)
+	MyTGraph.Draw("APL")
+	#gPad.SaveAs(graphtitle+".pdf")
+	#gPad.Close()
 
 def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrents, rootdirectory):
 	"""Function to perform ROOT graph"""
@@ -233,9 +235,9 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 	linedown.Draw("")
 	rootdirectory.WriteTObject(c)
 	
-	#MyTGraph.Write(graphname)
-	#MyTGraph.Draw("AP")
-	#gPad.SaveAs(graphname)
+	#MyTGraph.Write(graphtitle)
+	MyTGraph.Draw("APL")
+	#gPad.SaveAs(graphtitle+".pdf")
 	#gPad.Close()
 
 def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
