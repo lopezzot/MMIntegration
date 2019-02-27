@@ -291,5 +291,5 @@ def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, roo
 	
 	#MyTGraph.Write(graphname)
 	#MyTGraph.Draw("AP")
-	#gPad.SaveAs(graphname)
-	#gPad.Close()
+	gPad.SaveAs(graphtitle+".pdf")
+	gPad.Close()

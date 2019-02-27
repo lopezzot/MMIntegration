@@ -77,8 +77,6 @@ def createsummaryplots():
 
 	orderedspikerate = [float(x/float((deltatime/60.))) for x in orderedspikerate]
 
-	print orderedspikerate
-
 	return sectorsvoltages, meanvoltages, orderedspikerate, ID, timeslot, deltatime
 #----------------------------------------------------------------------------------------
 
