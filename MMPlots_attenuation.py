@@ -175,7 +175,7 @@ def createplot(giffile, file, filename):
 
 	#write layer graphs
 	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
-	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
+	tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	
 	duration = len(newtimes) #total seconds from start to stop
 

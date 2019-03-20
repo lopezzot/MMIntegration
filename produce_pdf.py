@@ -312,6 +312,26 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
     
     doc.append(NewPage())
 
+    with doc.create(Section('Current at GIF', numbering=False)):
+    
+    # Add cheque images
+        with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
+            png_list = glob.iglob('GIF-i*.pdf')
+            png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
+            print len(png_list)
+            row_image = []    
+            i = 0
+            for image in png_list:
+                row_image.append(image)
+                i = i +1
+                if i==4:
+                    cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
+                    row_image = []
+                    i=0
+
+    png_list = []
+    doc.append(NewPage())	
+
     with doc.create(Section('Current vs. flux (GIF)', numbering=False)):
     
     # Add cheque images
@@ -333,3 +353,5 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 #---------------------------------------------------------------------------------------------
 
 generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated, sectors_irradiated, hv_irradiated, spark_irradiated)
+os.system("rm GIF*.pdf")
+os.system("rm i*.pdf")
