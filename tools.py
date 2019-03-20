@@ -44,9 +44,7 @@ def write_roothistogram(vector, histogramtitle, xtitle, ytitle, rootdirectory):
 	rms = TH1Hist.GetRMS()
 	Entries = TH1Hist.GetEntries()
 	rootdirectory.WriteTObject(TH1Hist)
-	#TH1Hist.Write(histogramname)
-	#gPad.SaveAs(histogramname)
-	#gPad.Close()
+	
 
 def write_spikeroothistogram(vectorspikes, histogramtitle, ytitle, rootdirectory, deltatime):
 	"""Function to perform ROOT histograms"""
@@ -144,8 +142,8 @@ def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirect
 	rootdirectory.WriteTObject(MyTGraph)
 	#MyTGraph.Write(graphtitle)
 	MyTGraph.Draw("APL")
-	#gPad.SaveAs(graphtitle+".pdf")
-	#gPad.Close()
+	#gPad.SaveAs("current-"+graphtitle+".pdf")
+	gPad.Close()
 
 def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrents, rootdirectory):
 	"""Function to perform ROOT graph"""
@@ -237,8 +235,8 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 	
 	#MyTGraph.Write(graphtitle)
 	MyTGraph.Draw("APL")
-	#gPad.SaveAs(graphtitle+".pdf")
-	#gPad.Close()
+	#gPad.SaveAs("current-"+graphtitle+".pdf")
+	gPad.Close()
 
 def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT graph"""

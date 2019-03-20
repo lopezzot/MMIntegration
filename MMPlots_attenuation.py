@@ -291,11 +291,12 @@ def createplot(giffile, file, filename):
 		setattenvalues.sort(reverse=True) #from min to max
 		setmeancurrents = []
 
-		currentatzero = [x for counter, x in enumerate(newvalues) if atten_newvalues[counter] == 0.] #current when source is off  
+		print len(newvalues), len(atten_newvalues)
+		currentatzero = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == 0.] #current when source is off  
 		currentatzero = np.mean(currentatzero)
 
 		for setattenuation in setattenvalues:
-			found = [x for counter, x in enumerate(newvalues) if atten_newvalues[counter] == setattenuation]
+			found = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == setattenuation]
 			setmeancurrents.append(float(np.mean(found)))
 
 		for counter in range(len(setmeancurrents)):

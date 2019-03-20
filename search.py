@@ -24,7 +24,7 @@ def findspikes(valuesdeltas, dates, seconds, filename):
 	spikenames = []
 	spikeseconds = []
 	for counter, x in enumerate(valuesdeltas):
-		if x > 0.4: #nA
+		if x > 0.4: #uA was at 0.4
 			print "---> one spike at "+str(dates[counter])
 			spikecounter = spikecounter + 1
 			spikedates.append(dates[counter])
@@ -52,13 +52,13 @@ def removetrips(valuesdeltas, valueshv):
 
 def findspikes_50na(newvalues, mean_nospike, dates, seconds, filename):
 	
-	treshold = 0.050 #nA
+	treshold = 0.050 #uA
 	spikedates = []
 	spikecounter = 0
 	spikenames = []
 	spikeseconds = []
 	setcounter = 0
-	print filename, mean_nospike
+	#print filename, mean_nospike
 	for counter, x in enumerate(newvalues):
 		if x > treshold+mean_nospike: #50 nA + mean without spikes
 			#print "---> one spike at "+str(dates[counter])

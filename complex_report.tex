@@ -1,0 +1,266 @@
+\documentclass{article}%
+\usepackage[T1]{fontenc}%
+\usepackage[utf8]{inputenc}%
+\usepackage{lmodern}%
+\usepackage{textcomp}%
+\usepackage{lastpage}%
+\usepackage{parskip}%
+\usepackage[head=40pt,margin=0.5in,includeheadfoot=True,bottom=1.0in]{geometry}%
+\usepackage{color}%
+\usepackage{fancyhdr}%
+\usepackage{ragged2e}%
+\usepackage{graphicx}%
+\usepackage{tabularx}%
+\usepackage[table]{xcolor}%
+\usepackage{tabu}%
+\usepackage{longtable}%
+%
+\definecolor{lightgray}{gray}{0.80}%
+%
+\begin{document}%
+\normalsize%
+\fancypagestyle{firstpage}{ 
+\renewcommand{\headrulewidth}{0pt}%
+\renewcommand{\footrulewidth}{0pt}%
+\fancyhead{ 
+}%
+\fancyfoot{ 
+}%
+\fancyhead[L]{ 
+\begin{minipage}[c]{0.49\textwidth}%
+\includegraphics[width=80px]{../cernlogo.png}%
+\end{minipage}
+}%
+\fancyhead[R]{ 
+\begin{minipage}[c]{0.49\textwidth}%
+\flushright%
+\begin{Large}%
+\textbf{ATLAS New Small Wheel}%
+\end{Large}%
+\linebreak%
+\textbf{Integration Tests}%
+\linebreak%
+\textbf{20{-}03{-}2019}%
+\linebreak%
+\newline%
+%
+\begin{Large}%
+\textbf{Chamber: SM2\_M7}%
+\end{Large}%
+\linebreak%
+ID: SM2\_20MNMMMS200007%
+\linebreak%
+\end{minipage}
+}%
+\fancyfoot[C]{ 
+\begin{tabularx}{\textwidth}{X X X }%
+&&\\%
+\arrayrulecolor{blue}%
+\hline%
+\begin{minipage}[t]{0.25\textwidth}%
+Lorenzo Pezzotti%
+\newline%
+%
+lorenzo.pezzotti@cern.ch%
+\end{minipage}&\begin{minipage}[t]{0.25\textwidth}%
+Alan Peyaud%
+\newline%
+%
+alan.peyaud@cern.ch%
+\end{minipage}&\begin{minipage}[t]{0.25\textwidth}%
+Ivan Gnesi%
+\newline%
+%
+ivan.gnesi@cern.ch%
+\end{minipage}\\%
+\end{tabularx}
+}
+}%
+\begin{tabu}{X[r]}%
+\\%
+\end{tabu}%
+\pagestyle{firstpage}%
+\vspace{17.634mm}%
+\begin{Large}%
+\textbf{Gas leak (mL/h) }%
+3%
+x%
+A%
+T%
+L%
+A%
+S%
+\end{Large}%
+\section*{HV not irradiated}%
+\label{sec:HV not irradiated}%
+\newline%
+%
+FROM\_2019\_03\_11\_16\_03\_55\_TO\_2019\_03\_11\_17\_06\_02%
+\linebreak%
+62\_min%
+\linebreak%
+\renewcommand{\arraystretch}{1.5}%
+\begin{longtabu}{X[l] X[r] X[r] X[r]}%
+\rowcolor{lightgray}%
+\textbf{Sector}&\textbf{HV}&\textbf{spark/min}&\textbf{Accepted}\\%
+&&&\\%
+\hline%
+\rowcolor{lightgray}%
+L2L7&560&0.0&0\\%
+L2L6&570&0.56&1\\%
+\rowcolor{lightgray}%
+L3R7&559&0.29&0\\%
+L4L7&550&0.18&0\\%
+\rowcolor{lightgray}%
+L4L6&539&0.69&0\\%
+L3R6&510&3.69&0\\%
+\rowcolor{lightgray}%
+L1R6&569&1.6&0\\%
+L1R7&570&0.0&1\\%
+\rowcolor{lightgray}%
+L1L6&569&0.21&1\\%
+L1L7&569&0.0&1\\%
+\rowcolor{lightgray}%
+L4R7&556&0.39&0\\%
+L3L7&550&0.73&0\\%
+\rowcolor{lightgray}%
+L3L6&550&0.08&0\\%
+L4R6&529&0.97&0\\%
+\rowcolor{lightgray}%
+L2R7&569&0.0&1\\%
+L2R6&566&3.6&0\\%
+\rowcolor{lightgray}%
+L2R8&549&0.44&0\\%
+L1L8&569&0.05&1\\%
+\rowcolor{lightgray}%
+L4R8&560&0.03&0\\%
+L3L8&570&0.03&1\\%
+\rowcolor{lightgray}%
+L3R8&569&0.52&1\\%
+L4L8&569&0.05&1\\%
+\rowcolor{lightgray}%
+L1R8&569&0.16&1\\%
+L2L8&570&0.08&1\\%
+&&&\\%
+\hline%
+Out of spec&12&3&13\\%
+\end{longtabu}
+
+%
+\section*{Summary not irradiated}%
+\label{sec:Summary not irradiated}%
+\begin{longtabu}{X[c]}%
+\includegraphics[width=220px]{piechart.pdf}\\%
+\end{longtabu}%
+\renewcommand{\arraystretch}{1.5}%
+\begin{longtabu}{X[l] X[r] X[r] X[r]}%
+\rowcolor{lightgray}%
+\textbf{Sector overimposed (from eta side)}&\textbf{Eta}&\textbf{Stereo}&\textbf{Eta+Stereo}\\%
+&&&\\%
+\hline%
+\rowcolor{lightgray}%
+L6&0&2&2\\%
+R6&2&2&4\\%
+\rowcolor{lightgray}%
+L7&1&2&3\\%
+R7&0&2&2\\%
+\rowcolor{lightgray}%
+L8&0&0&0\\%
+R8&1&1&2\\%
+\end{longtabu}
+
+%
+\newpage%
+\section*{HV irradiated at GIF}%
+\label{sec:HV irradiated at GIF}%
+\newline%
+%
+FROM\_2019\_03\_19\_12\_42\_28\_TO\_2019\_03\_19\_14\_03\_05%
+\linebreak%
+80\_min%
+\linebreak%
+\renewcommand{\arraystretch}{1.5}%
+\begin{longtabu}{X[l] X[r] X[r] X[r]}%
+\rowcolor{lightgray}%
+\textbf{Sector}&\textbf{HV}&\textbf{spark/min}&\textbf{Accepted}\\%
+&&&\\%
+\hline%
+\rowcolor{lightgray}%
+L2L7&570&0.04&1\\%
+L2L6&569&0.12&1\\%
+\rowcolor{lightgray}%
+L3R7&569&0.04&1\\%
+L4L7&549&0.5&0\\%
+\rowcolor{lightgray}%
+L4L6&529&0.17&0\\%
+L3R6&549&0.17&0\\%
+\rowcolor{lightgray}%
+L1R6&569&1.62&0\\%
+L1R7&569&0.05&1\\%
+\rowcolor{lightgray}%
+L1L6&569&0.07&1\\%
+L1L7&569&0.09&1\\%
+\rowcolor{lightgray}%
+L4R7&529&0.15&0\\%
+L3L7&569&0.06&1\\%
+\rowcolor{lightgray}%
+L3L6&569&0.1&1\\%
+L4R6&539&0.25&0\\%
+\rowcolor{lightgray}%
+L2R7&569&0.04&1\\%
+L2R6&569&0.05&1\\%
+\rowcolor{lightgray}%
+L2R8&570&0.04&1\\%
+L1L8&569&0.04&1\\%
+\rowcolor{lightgray}%
+L4R8&569&0.06&1\\%
+L3L8&569&0.3&1\\%
+\rowcolor{lightgray}%
+L3R8&569&0.09&1\\%
+L4L8&569&0.15&1\\%
+\rowcolor{lightgray}%
+L1R8&569&0.04&1\\%
+L2L8&569&0.04&1\\%
+&&&\\%
+\hline%
+Out of spec&5&1&6\\%
+\end{longtabu}
+
+%
+\section*{Summary irradiated at GIF}%
+\label{sec:Summary irradiated at GIF}%
+\begin{longtabu}{X[c]}%
+\includegraphics[width=220px]{newpie.pdf}\\%
+\end{longtabu}%
+\renewcommand{\arraystretch}{1.5}%
+\begin{longtabu}{X[l] X[r] X[r] X[r]}%
+\rowcolor{lightgray}%
+\textbf{Sector overimposed (from eta side)}&\textbf{Eta}&\textbf{Stereo}&\textbf{Eta+Stereo}\\%
+&&&\\%
+\hline%
+\rowcolor{lightgray}%
+L6&0&1&1\\%
+R6&1&2&3\\%
+\rowcolor{lightgray}%
+L7&0&1&1\\%
+R7&0&1&1\\%
+\rowcolor{lightgray}%
+L8&0&0&0\\%
+R8&0&0&0\\%
+\end{longtabu}
+
+%
+\newpage%
+\section*{Current vs. flux (GIF)}%
+\label{sec:Current vs. flux (GIF)}%
+\begin{longtabu}{X[c] X[c] X[c] X[c]}%
+\includegraphics[width=120px]{iMon_L1R7.pdf}&\includegraphics[width=120px]{iMon_L1R6.pdf}&\includegraphics[width=120px]{iMon_L3R6.pdf}&\includegraphics[width=120px]{iMon_L4L6.pdf}\\%
+\includegraphics[width=120px]{iMon_L4L7.pdf}&\includegraphics[width=120px]{iMon_L3R7.pdf}&\includegraphics[width=120px]{iMon_L2L6.pdf}&\includegraphics[width=120px]{iMon_L2L7.pdf}\\%
+\includegraphics[width=120px]{iMon_L2R6.pdf}&\includegraphics[width=120px]{iMon_L2R7.pdf}&\includegraphics[width=120px]{iMon_L4R6.pdf}&\includegraphics[width=120px]{iMon_L3L6.pdf}\\%
+\includegraphics[width=120px]{iMon_L3L7.pdf}&\includegraphics[width=120px]{iMon_L4R7.pdf}&\includegraphics[width=120px]{iMon_L1L7.pdf}&\includegraphics[width=120px]{iMon_L1L6.pdf}\\%
+\includegraphics[width=120px]{iMon_L3L8.pdf}&\includegraphics[width=120px]{iMon_L4R8.pdf}&\includegraphics[width=120px]{iMon_L1L8.pdf}&\includegraphics[width=120px]{iMon_L2R8.pdf}\\%
+\includegraphics[width=120px]{iMon_L2L8.pdf}&\includegraphics[width=120px]{iMon_L1R8.pdf}&\includegraphics[width=120px]{iMon_L4L8.pdf}&\includegraphics[width=120px]{iMon_L3R8.pdf}\\%
+\end{longtabu}
+
+%
+\end{document}

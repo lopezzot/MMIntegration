@@ -3,6 +3,7 @@ import datetime
 import MMPlots
 import MMPlots_attenuation
 import glob
+import piecart
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
     StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -35,7 +36,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
         with header_left.create(MiniPage(width=NoEscape(r"0.49\textwidth"),
                                          pos='c')) as logo_wrapper:
             logo_file = os.path.join(os.path.dirname(__file__),
-                                     'cernlogo.png')
+                                     '../cernlogo.png')
             logo_wrapper.append(StandAloneGraphic(image_options="width=80px",
                                 filename=logo_file))
 
@@ -160,9 +161,61 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
             data_table.add_empty_row()
             data_table.add_hline()
             data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 567.9])), str(len([x for x in spark_notirradiated if x > 1.0])), str(acceptedlist.count(0)))
+    
+    with doc.create(Section('Summary not irradiated', numbering=False)):
+
+        piecart.create_pie([len(acceptedlist)-acceptedlist.count(0), acceptedlist.count(0)], "piechart.pdf")
+
+    
+         # Add cheque images
+        with doc.create(LongTabu("X[c]")) as summary1_table:
+            pie = glob.iglob("piechart.pdf")
+            #png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
+            pienew = [StandAloneGraphic(x, image_options="width=220px") for x in pie]
+            summary1_table.add_row([pienew[0]])
+        
+        #here I have sectors_notirradiated, hv_notirradiated, spark_notirradiated, acceptedlist
+        SM1channels = ["L1","R1","L2","R2","L3","R3","L4","R4","L5","R5"]
+        SM2channels = ["L6","R6","L7","R7","L8","R8"]
+        badresultsall = []
+        badresultseta = []
+        badresultsstereo = []
+
+        if chambername[0:3] == "SM1":
+    	   channels = SM1channels
+        if chambername[0:3] == "SM2":
+    	   channels = SM2channels
+
+        for channel in channels:
+    	   cntall = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and acceptedlist[x] == 1)
+    	   cnteta = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "1" or sector[1:2] == "2") and acceptedlist[x] == 1)
+    	   cntstereo = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "3" or sector[1:2] == "4") and acceptedlist[x] == 1) 
+    	   badresultsall.append(4-int(cntall))
+    	   badresultseta.append(2-int(cnteta))
+    	   badresultsstereo.append(2-int(cntstereo))
+
+        #doc.append(NewPage())
+
+        with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
+                                 row_height=1.5)) as data_table2:
+            data_table2.add_row(["Sector overimposed (from eta side)",
+                                "Eta",
+                                "Stereo",
+                                "Eta+Stereo"],
+                                mapper=bold,
+                                color="lightgray")
+            data_table2.add_empty_row()
+            data_table2.add_hline()
+            row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
+            
+            for i in range(len(channels)):
+                if (i % 2) == 0:
+                    data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]], color="lightgray")
+                else:
+                    data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]])
 
     doc.append(NewPage())
-
+    
     with doc.create(Section('HV irradiated at GIF', numbering=False)):
        # Add statement table
         doc.append("\n")
@@ -204,6 +257,59 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
             data_table_irradiated.add_hline()
             data_table_irradiated.add_row("Out of spec", str(len([x for x in hv_irradiated if x < 567.9])), str(len([x for x in spark_irradiated if x > 1.0])), str(acceptedlist.count(0)))
 
+    with doc.create(Section('Summary irradiated at GIF', numbering=False)):
+
+        piecart.create_pie([len(acceptedlist)-acceptedlist.count(0), acceptedlist.count(0)], "newpie.pdf")
+
+        # Add cheque images
+        with doc.create(LongTabu("X[c]")) as summary2_table:
+            newpie = glob.iglob("newpie.pdf")
+            #png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
+            pie2new = [StandAloneGraphic(x, image_options="width=220px") for x in newpie]
+            summary2_table.add_row([pie2new[0]])
+    
+    #doc.append(NewPage())
+
+        #here I have sectors_irradiated, hv_irradiated, spark_irradiated, acceptedlist
+        SM1channels = ["L1","R1","L2","R2","L3","R3","L4","R4","L5","R5"]
+        SM2channels = ["L6","R6","L7","R7","L8","R8"]
+        badresultsall = []
+        badresultseta = []
+        badresultsstereo = []
+
+        if chambername[0:3] == "SM1":
+    	   channels = SM1channels
+        if chambername[0:3] == "SM2":
+    	   channels = SM2channels
+
+        for channel in channels:
+    	   cntall = sum(1 for x, sector in enumerate(sectors_irradiated) if sector[2:4] == channel and acceptedlist[x] == 1)
+    	   cnteta = sum(1 for x, sector in enumerate(sectors_irradiated) if sector[2:4] == channel and (sector[1:2] == "1" or sector[1:2] == "2") and acceptedlist[x] == 1)
+    	   cntstereo = sum(1 for x, sector in enumerate(sectors_irradiated) if sector[2:4] == channel and (sector[1:2] == "3" or sector[1:2] == "4") and acceptedlist[x] == 1) 
+    	   badresultsall.append(4-int(cntall))
+    	   badresultseta.append(2-int(cnteta))
+    	   badresultsstereo.append(2-int(cntstereo))
+
+        #doc.append(NewPage())
+
+        with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
+                                     row_height=1.5)) as data_table2:
+            data_table2.add_row(["Sector overimposed (from eta side)",
+                                "Eta",
+                                "Stereo",
+                                "Eta+Stereo"],
+                                mapper=bold,
+                                color="lightgray")
+            data_table2.add_empty_row()
+            data_table2.add_hline()
+            row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
+            
+            for i in range(len(channels)):
+                if (i % 2) == 0:
+                    data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]], color="lightgray")
+                else:
+                    data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]])
+    
     doc.append(NewPage())
 
     with doc.create(Section('Current vs. flux (GIF)', numbering=False)):
@@ -214,12 +320,15 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
             png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
             print len(png_list)
             row_image = []    
-            for i, image in enumerate(png_list):
+            i = 0
+            for image in png_list:
                 row_image.append(image)
-                if i%4==0 and i!=0:
+                i = i +1
+                if i==4:
                     cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
                     row_image = []
-
+                    i=0
+	
     doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 #---------------------------------------------------------------------------------------------
 
