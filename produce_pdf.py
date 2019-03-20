@@ -311,8 +311,27 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
                     data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]])
     
     doc.append(NewPage())
+    with doc.create(Section('Current with no irradiation', numbering=False)):
+    
+    # Add cheque images
+        with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
+            png_list = glob.iglob('BB5-i*.pdf')
+            png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
+            print len(png_list)
+            row_image = []    
+            i = 0
+            for image in png_list:
+                row_image.append(image)
+                i = i +1
+                if i==4:
+                    cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
+                    row_image = []
+                    i=0
 
-    with doc.create(Section('Current at GIF', numbering=False)):
+    png_list = []
+    doc.append(NewPage())	
+
+    with doc.create(Section('Current under irradiation', numbering=False)):
     
     # Add cheque images
         with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:

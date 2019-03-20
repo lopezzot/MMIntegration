@@ -142,7 +142,8 @@ def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirect
 	rootdirectory.WriteTObject(MyTGraph)
 	#MyTGraph.Write(graphtitle)
 	MyTGraph.Draw("APL")
-	#gPad.SaveAs("current-"+graphtitle+".pdf")
+	if "D" not in graphtitle:
+		gPad.SaveAs("BB5-"+graphtitle+".pdf")
 	gPad.Close()
 
 def write_rootdategraph_fromgif(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
