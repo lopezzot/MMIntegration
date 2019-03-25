@@ -216,6 +216,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
     doc.append(NewPage())
     
+    
     with doc.create(Section('HV irradiated at GIF', numbering=False)):
        # Add statement table
         doc.append("\n")

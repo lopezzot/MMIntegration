@@ -2,6 +2,7 @@ from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMult
 import numpy as np
 from array import array
 
+
 def write_roothistogram(vector, histogramtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT histograms"""
 

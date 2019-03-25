@@ -11,6 +11,7 @@ import copy
 from fpdf import FPDF
 from pylatex import Document, Figure
 
+
 #----------------------------------------------------------------------------
 def createsummaryplot_attenuation():
 	house = raw_input("Data in Gif? ")
