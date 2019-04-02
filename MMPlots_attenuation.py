@@ -151,12 +151,14 @@ def createplot(giffile, file, filename):
 		
 		#remove spikes in current files
 		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
-		nospike_newvalues = search.removespikes(valuesdeltas, copynewvalues)
+		nospike_newvalues = search.removespikes_atgif(valuesdeltas, copynewvalues)
+		nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
+		nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
 		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
 		
 		#TO BE CHECKED WICH ONE WE WANT
 		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
-		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
+		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
 
 		if "D" in filename:
 			sectorscurrent = None
@@ -176,8 +178,8 @@ def createplot(giffile, file, filename):
 
 	#write layer graphs
 	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
-	tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
-	
+	tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)	
+
 	duration = len(newtimes) #total seconds from start to stop
 
 	if "i" not in filename or "D" in filename:
@@ -282,37 +284,53 @@ def createplot(giffile, file, filename):
 			atten_newvalues = atten_newvalues[0:len(newvalues)] #attenuation values sync to i values 
 		elif len(atten_dates) < len(dates):
 			dates = dates[0:len(atten_dates)]
-			newvalues = newvalues[0:len(atten_newvalues)] #syn complete
+			newvalues = newvalues[0:len(atten_newvalues)] #syn complete!
 
+		#if want to check sync
 		#for counter in range(0,50):
 			#print dates[counter],newvalues[counter],atten_dates[counter],atten_newvalues[counter]
 	
 		setattenvalues = set(atten_newvalues) 
-		setattenvalues = [x for x in setattenvalues if float(x) != 0.]
+		setattenvalues = [x for x in setattenvalues if float(x) != 0.] #remove 0
 		setattenvalues.sort(reverse=True) #from min to max
 		setmeancurrents = []
 
-		print len(newvalues), len(atten_newvalues)
+		#print len(newvalues), len(atten_newvalues)
 		currentatzero = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == 0.] #current when source is off  
 		currentatzero = np.mean(currentatzero)
 
-		for setattenuation in setattenvalues:
-			found = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == setattenuation]
+		for setattenuation in setattenvalues: #using nospike_newvalues here to not count spikes
+			startindex = atten_newvalues.index(setattenuation)
+			lastindex = len(atten_newvalues)-atten_newvalues[::-1].index(setattenuation)-1
+			found = [x for x in nospike_newvalues[startindex+60*3:startindex+60*3+180]] 
 			setmeancurrents.append(float(np.mean(found)))
+			#this way gave problem as underestimates the current values
+			#found = [x for counter, x in enumerate(nospike_newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == setattenuation]
+			#setmeancurrents.append(float(np.mean(found)))
 
 		for counter in range(len(setmeancurrents)):
-			setmeancurrents[counter] = setmeancurrents[counter] - currentatzero #remove offset
+			setmeancurrents[counter] = setmeancurrents[counter] #- currentatzero #remove offset
 
 		for counter, setattenvalue in enumerate(setattenvalues):
 			print setattenvalue, setmeancurrents[counter]
 		
 		setattenvalues = [float(x)**(-1) for x in setattenvalues]
 		tools.write_attenuationrootgraph(setattenvalues, setmeancurrents, filename, "1/attenuation", "i", dir_summary)
+
+		#now write graphs current and voltages + find spikes
+		if "i" in filename: #it's a current file
+		
+			#find spikes -> new part to find threshold over plateu at fiven attenuation filter without spikes
+			spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_atgif(newvalues, atten_newvalues, setmeancurrents, setattenvalues, dates, newtimes, filename)
+
+			if "D" in filename:
+				sectorscurrent = None
+				nospike_meancurrent = None
+
 	#end data from gif file--------------------------------------
 	
 	return spikenames, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
-
 #createsummaryplots_attenuation()
 
 	

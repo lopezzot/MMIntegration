@@ -553,7 +553,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 #---------------------------------------------------------------------------------------------
-
 generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated, sectors_irradiated, hv_irradiated, spark_irradiated)
-os.system("rm GIF*.pdf")
-os.system("rm i*.pdf")
+
+os.system("rm GIF*")
+os.system("rm iMon*")
+os.system("rm BB5*")
