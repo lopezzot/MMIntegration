@@ -41,15 +41,20 @@ def removespikes(valuesdeltas, valueshv):
 				valueshv[i] = valueshv[i-1]
 	return valueshv
 
-def removespikes_atgif(valuesdeltas, valueshv): #to remove spikes in current graphs from gif
-	for counter, x in enumerate(valuesdeltas):
-		if x > 0.4: #nA
-			for i in range(counter,counter+30):
+def removespikes_atgif(valuesdeltas, valueshv, attenvalues): #to remove spikes in current graphs from gif
+	
+	for counter, x in enumerate(valuesdeltas[0:len(attenvalues)]):
+		if x > 0.3 and attenvalues[counter] != 0 and valueshv[counter-1] > 0.01: #provare a mettere and valore corrente prima maggiore di tot per non prendere raising edge:       #nA
+			for i in range(counter,counter+100):
 				if i == len(valueshv) -1:
 					break
-				valueshv[i] = valueshv[i-1]
+				if attenvalues[counter] == 0.:   #if source off do not cure current
+					break           
+				#if valuesdeltas[i+1] < -0.3:
+				#	break                       #if source off do not cure current
+				valueshv[i] = np.mean(valueshv[counter-3:counter-1]) #assign mean of last 5 seconds
+				valuesdeltas[i] = 0.
 	return valueshv
-
 
 def removetrips(valuesdeltas, valueshv):
 	for counter, x in enumerate(valuesdeltas):
@@ -99,13 +104,13 @@ def findspikes_atgif(currentvalues, attenuation, meancurrent, setattenuation, da
 			currentatattenuation = meancurrent[setattenuation.index(float(attenuation[counter])**-1)]
 			if x > currentatattenuation+treshold:
 				spikecounter = spikecounter+1
-				spikedates.append(dates[counter])
+				spikedates.append(dates[counter]) 
 				spikeseconds.append(seconds[counter])
 				spikenames.append(filename)
 
-	return spikecounter, filename, spikedates, spikeseconds, spikenames
+	spikeduration = len([x for x in attenuation if x != 0.])
 
-
+	return spikecounter, filename, spikedates, spikeseconds, spikenames, spikeduration
 
 
 

@@ -8,21 +8,34 @@ import glob
 import numpy as np
 import search
 import copy
+import classes
 from fpdf import FPDF
 from pylatex import Document, Figure
 
 
 #----------------------------------------------------------------------------
 def createsummaryplot_attenuation():
-	house = raw_input("Data in Gif? ")
-	folder = raw_input("Insert folder to study: ")
+	'''function to collect info from GIF file'''
 
-	ID = folder[0:18]
-	timeslot = folder[19:len(folder)]
+	house = raw_input("Data in Gif? ") #insert BB5 of GIF file path
+	global folder
+	folder = raw_input("Insert folder to study: ") #insert folder with bartch ID
+
+	chambertype = folder[0:3]
+	defaultlayersSM1 = ["L1L1","L1R1","L1L2","L1R2","L1L3","L1R3","L1L4","L1R4","L1L5","L1R5","L2L1","L2R1","L2L2","L2R2","L2L3","L2R3","L2L4","L2R4","L2L5","L2R5","L3L1","L3R1","L3L2","L3R2","L3L3","L3R3","L3L4","L3R4","L3L5","L3R5","L4L1","L4R1","L4L2","L4R2","L4L3","L4R3","L4L4","L4R4","L4L5","L4R5"]
+	defaultlayersSM2 = ["L1L6","L1R6","L1L7","L1R7","L1L8","L1R8","L2L6","L2R6","L2L7","L2R7","L2L8","L2R8","L3L6","L3R6","L3L7","L3R7","L3L8","L3R8","L4L6","L4R6","L4L7","L4R7","L4L8","L4R8"]
+
+	if chambertype == "SM1":
+		defaultlayers = defaultlayersSM1
+	if chambertype == "SM2":
+		defaultlayers = defaultlayersSM2
+		
+	ID = folder[0:18] #batch ID
+	timeslot = folder[19:len(folder)] #time slot from folder name
 
 	path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
 	gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
-	giffile = gifpath+"EffectiveAttenuation.dat"
+	giffile = gifpath+"EffectiveAttenuation.dat" 
 	
 	global sourcefile
 	sourcefile = gifpath+"Source.dat"
@@ -46,10 +59,13 @@ def createsummaryplot_attenuation():
 	meancurrents = []
 	meanvoltages = []
 	newspikeseconds = []
+	graphs_atten = []
+	graphs_linearity = []
 
 	for dat_file in glob.iglob(path+'*.dat'):
-		print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
-		spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(giffile, dat_file, dat_file[len(path):len(dat_file)-4])
+		print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n" #print file under analysis
+		filename = dat_file[len(path):len(dat_file)-4]
+		graph_atten, graph_linearity, spikeslayer, spikeduration, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(giffile, dat_file, dat_file[len(path):len(dat_file)-4])
 		
 		if spikeseconds != None:
 			newspikeseconds = newspikeseconds + spikeseconds
@@ -57,6 +73,8 @@ def createsummaryplot_attenuation():
 			spikenames = spikenames + spikeslayer
 		if duration != None:
 			deltatime = duration
+		if spikeduration != None:
+			spikesduration = spikeduration
 		if sectorscurrent != None:
 			sectorscurrents.append(sectorscurrent)
 		if meancurrent != None:
@@ -65,7 +83,12 @@ def createsummaryplot_attenuation():
 			sectorsvoltages.append(sectorsvoltage)
 		if meanvoltage != None:
 			meanvoltages.append(meanvoltage)
+		if graph_atten != None:
+			graphs_atten.append(graph_atten)
+		if graph_linearity != None:
+			graphs_linearity.append(graph_linearity)
 
+	#create summary plots 
 	tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
 	tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 	tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
@@ -86,24 +109,73 @@ def createsummaryplot_attenuation():
 	for sector in sectorsvoltages:
 		orderedspikerate.append(spikerate[spikelayers.index(sector)])
 
-	orderedspikerate = [float(x/float((deltatime/60.))) for x in orderedspikerate]
+	orderedspikerate = [float(x/float((spikesduration/60.))) for x in orderedspikerate]
 
-	return sectorsvoltages, meanvoltages, orderedspikerate, ID, timeslot, deltatime
+	orderedsectorsvoltages = []
+	orderedsmeanvoltages = []
+	ordered_orderedspikerate = []
+	ordered_graphsatten = []
+	ordered_graphslinearity = []
+
+	for layer in defaultlayers:
+		index = sectorsvoltages.index(layer)
+		orderedsectorsvoltages.append(sectorsvoltages[index])
+		orderedsmeanvoltages.append(meanvoltages[index])
+		ordered_orderedspikerate.append(orderedspikerate[index])
+	
+	graph_atten_names = []
+	for graph in graphs_atten:
+		graph_atten_names.append(graph.name)
+	for layer in defaultlayers:
+		index = graph_atten_names.index(layer)
+		ordered_graphsatten.append(graphs_atten[index])
+
+	graph_linearity_names = []
+	for graph in graphs_linearity:
+		graph_linearity_names.append(graph.name)
+	for layer in defaultlayers:
+		index = graph_linearity_names.index(layer)
+		ordered_graphslinearity.append(graphs_linearity[index])
+
+	for counter, graph in enumerate(ordered_graphsatten):	                                                           #+" "+str(int(orderedsmeanvoltages[counter]))# 
+		tools.write_rootdategraph_plusatten(graph.new_rootdates, graph.newvalues, graph.atten_newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", filename[0], dir_summary) #plot graph current + source 
+	
+	for counter, graph in enumerate(ordered_graphslinearity):
+		print graph.name	                                              #+" "+str(int(orderedsmeanvoltages[counter]))#
+		tools.write_attenuationrootgraph(graph.setattenvalues, graph.normalizedsetmeancurrents, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "1/attenuation", "i", dir_summary)
+
+	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime
 #----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------
 def createplot(giffile, file, filename):
+	'''create graph of current of voltage, find spikes and linearity plots from GIF'''
+	if "D" in filename:
+		return None, None, None, None, None, None, None, None, None, None
+	layer = filename[5:7] #get layer       
+	rootdirectory = directories[layer] #set root file directory
 
-	layer = filename[5:7]
-	rootdirectory = directories[layer] #to check
+	sectorforarea = filename[8:9]
+	chambertype = folder[0:3] #SM1 or SM2 LM1 or LM2
+	
+	areasSM1 = {"1":(30.0+52.)*(45.2/4.), "2":(52.+70.2)*(43.5/4.), "3":(43.5+75.6)*(43.5/4.), "4":(75.6+104.)*(43.5/4.), "5":(104.+114.9)*(43.5/4.)}
+	areasSM2 = {"6":(166.4+150.5)*(135./6.), "7":(150.5+130.3)*(135./6.), "8":(130.3+117.1)*(135./6.)}
 
+	if chambertype == "SM1":
+		areas=areasSM1
+	elif chambertype == "SM2":
+		areas=areasSM2
+	else:
+		print "areas not found"
+	area = areas[sectorforarea]
+	
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
-	if len(times) == 1:
-		print "Exception -----> Only one data in "+str(filename)+".dat \n"
-		return None, None, None, None, None, None, None
+	if len(times) == 1:        
+		print "Exception -----> Only one data in "+str(filename)+".dat \n" #handle exception of empty files (should not be the case after daq fixing)
+		return None, None, None, None, None, None, None, None, None
 	if not times:
 		print "Exception -----> File empty: "+str(filename)+".dat \n"
-		return None, None, None, None, None, None, None
+		return None, None, None, None, None, None, None, None, None
 
 	times = [x.replace(':',' ') for x in times]
 	times = [x.replace('/',' ') for x in times]
@@ -130,62 +202,16 @@ def createplot(giffile, file, filename):
 		dates.append(dates[counter]+td(seconds=1))
 
 	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
+	#end of creating vectors for times, dates, values (current or voltage)
 
-	#Identify drops
-	valuesdeltas = np.diff(newvalues)
-	valuesdeltas = [0]+valuesdeltas
-
-	sectorscurrent = None
+	sectorscurrent = None #default values
 	sectorsvoltage = None
 	meancurrent = None
 	nospike_meancurrent = None #to have current not affected by spikes
 	meanvoltage = None
 	notrips_meanvoltage = None
-	
-	if "i" in filename: #it's a current file
-		#search.findrisingedges(valuesdeltas, dates)
-		#search.findfallingedges(valuesdeltas, dates)
-		
-		sectorscurrent = filename[5:9]
-		meancurrent = np.mean(newvalues)
-		
-		#remove spikes in current files
-		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
-		nospike_newvalues = search.removespikes_atgif(valuesdeltas, copynewvalues)
-		nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
-		nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
-		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
-		
-		#TO BE CHECKED WICH ONE WE WANT
-		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
-		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
-
-		if "D" in filename:
-			sectorscurrent = None
-			nospike_meancurrent = None
-
-	if "v" in filename: #it's a voltage file
-		sectorsvoltage = filename[5:9]
-		meanvoltage = np.mean(newvalues)
-
-		copynewvalues = copy.copy(newvalues)
-		notrips_newvalues = search.removetrips(valuesdeltas, copynewvalues)
-		notrips_meanvoltage = np.mean(notrips_newvalues)
-
-		if "D" in filename:
-			sectorsvoltage = None
-			notrips_meanvoltage = None
-
-	#write layer graphs
-	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
-	tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)	
 
 	duration = len(newtimes) #total seconds from start to stop
-
-	if "i" not in filename or "D" in filename:
-		spikenames = None
-		duration = None
-		spikeseconds = None
 
 	#data from gif file (for attenuation)------------------------
 	atten = [x.split(' 	 ') for x in open(giffile,"r").readlines()[1:]] #read attenutation factor exept first line (header)
@@ -264,7 +290,7 @@ def createplot(giffile, file, filename):
 
 	for counter, atten_newvalue in enumerate(atten_newvalues):
 		if source_newvalues[counter] == 0.0:
-			atten_newvalues[counter] = 0.0 #put attenuation to 0 il source is of, i will later remove zeros
+			atten_newvalues[counter] = 0.0  #put attenuation to 0 il source is off, i will later remove zeros
 
 	#completed date array and attenuation array from GIF 
 	#now important to match starting time with data from chamber
@@ -286,51 +312,145 @@ def createplot(giffile, file, filename):
 			dates = dates[0:len(atten_dates)]
 			newvalues = newvalues[0:len(atten_newvalues)] #syn complete!
 
-		#if want to check sync
+		#if want to check sync, first 50 seconds
 		#for counter in range(0,50):
-			#print dates[counter],newvalues[counter],atten_dates[counter],atten_newvalues[counter]
-	
+		#	print dates[counter],newvalues[counter],atten_dates[counter],atten_newvalues[counter]
+
+	#end data from gif file--------------------------------------
+
+		new_rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates] #rootdates with updated dates
+
+		
+	#start analysis, i'm in "i" not drift files	
+		sectorscurrent = filename[5:9] #sector name
+		meancurrent = np.mean(newvalues) #mean of current value
+		
+		#Identify drops
+		valuesdeltas = np.diff(newvalues)
+		valuesdeltas = [0]+valuesdeltas #differences in currents of voltages
+
+		#remove spikes in current files
+		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
+		nospike_newvalues = search.removespikes_atgif(valuesdeltas, copynewvalues, atten_newvalues) #remove spikes when source on at gif current files
+		#for i in range(3):
+		#	nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
+		#nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
+		#nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
+		#nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
+		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current under fixed flux
+		
 		setattenvalues = set(atten_newvalues) 
 		setattenvalues = [x for x in setattenvalues if float(x) != 0.] #remove 0
 		setattenvalues.sort(reverse=True) #from min to max
 		setmeancurrents = []
+		normalizedsetmeancurrents = []
 
 		#print len(newvalues), len(atten_newvalues)
 		currentatzero = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == 0.] #current when source is off  
-		currentatzero = np.mean(currentatzero)
+		currentatzero = np.mean(currentatzero) #current mean when source is off
 
 		for setattenuation in setattenvalues: #using nospike_newvalues here to not count spikes
-			startindex = atten_newvalues.index(setattenuation)
-			lastindex = len(atten_newvalues)-atten_newvalues[::-1].index(setattenuation)-1
-			found = [x for x in nospike_newvalues[startindex+60*3:startindex+60*3+180]] 
-			setmeancurrents.append(float(np.mean(found)))
+			startindex = atten_newvalues.index(setattenuation) #first second at a given attenuation
+			lastindex = len(atten_newvalues)-atten_newvalues[::-1].index(setattenuation)-1 #last second at a given attenuation
+			middle = (lastindex-startindex)/2
+			found = [x for x in nospike_newvalues[lastindex-60:lastindex]] 
+			setmeancurrents.append(float(np.mean(found))) 
+			normalizedsetmeancurrents.append(float(np.mean(found))/area)
 			#this way gave problem as underestimates the current values
 			#found = [x for counter, x in enumerate(nospike_newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == setattenuation]
 			#setmeancurrents.append(float(np.mean(found)))
 
+		#if want to remove offset
+		'''
 		for counter in range(len(setmeancurrents)):
-			setmeancurrents[counter] = setmeancurrents[counter] #- currentatzero #remove offset
+			setmeancurrents[counter] = setmeancurrents[counter] - currentatzero #remove offset
+		'''
 
 		for counter, setattenvalue in enumerate(setattenvalues):
-			print setattenvalue, setmeancurrents[counter]
+			print setattenvalue, setmeancurrents[counter] #to check linearity of sectors
 		
-		setattenvalues = [float(x)**(-1) for x in setattenvalues]
-		tools.write_attenuationrootgraph(setattenvalues, setmeancurrents, filename, "1/attenuation", "i", dir_summary)
+		setattenvalues = [float(x)**(-1) for x in setattenvalues] #perform 1/attenfactor
+		#tools.write_attenuationrootgraph(setattenvalues, normalizedsetmeancurrents, filename, "1/attenuation", "i", dir_summary)
+		graphlinearity = classes.attenuationrootgraph(filename[5:9], setattenvalues, normalizedsetmeancurrents, filename, "1/attenuation", "i", dir_summary)
+		#find spikes -> new part to use threshold over plateu at given attenuation filter without spikes
+		spikecounter, filename, spikedates, spikeseconds, spikenames, spikeduration = search.findspikes_atgif(newvalues, atten_newvalues, setmeancurrents, setattenvalues, dates, newtimes, filename)
 
-		#now write graphs current and voltages + find spikes
-		if "i" in filename: #it's a current file
-		
-			#find spikes -> new part to find threshold over plateu at fiven attenuation filter without spikes
-			spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_atgif(newvalues, atten_newvalues, setmeancurrents, setattenvalues, dates, newtimes, filename)
+	if "i" in filename and "D" in filename:
+		sectorscurrent = None
+		nospike_meancurrent = None
 
-			if "D" in filename:
-				sectorscurrent = None
-				nospike_meancurrent = None
+	if "v" in filename: #it's a voltage file
+		sectorsvoltage = filename[5:9]
+		meanvoltage = np.mean(newvalues)
 
-	#end data from gif file--------------------------------------
+		#Identify drops
+		valuesdeltas = np.diff(newvalues)
+		valuesdeltas = [0]+valuesdeltas #differences in currents of voltages
+
+		copynewvalues = copy.copy(newvalues)
+		notrips_newvalues = search.removetrips(valuesdeltas, copynewvalues)
+		notrips_meanvoltage = np.mean(notrips_newvalues)
+
+		if "D" in filename:
+			sectorsvoltage = None
+			notrips_meanvoltage = None
+
+	if "i" not in filename or "D" in filename:
+		spikenames = None
+		duration = None
+		spikeseconds = None
+		spikeduration = None
+
+	#write layer graphs
+	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
 	
-	return spikenames, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
+	if "i" in filename and "D" not in filename:
+		#tools.write_rootdategraph_fromgif(rootdates, nospike_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
+		#tools.write_rootdategraph_plusatten(new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graph current + source 
+ 		graph_atten = classes.rootdategraph_plusatten(filename[5:9], new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory)											     #or nospike_newvalues
+	else:		
+		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
+		graph_atten = None
+	 	graphlinearity = None
+
+	#tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
+	
+	return graph_atten, graphlinearity, spikenames, spikeduration, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 #createsummaryplots_attenuation()
+'''	
+	if "i" in filename: #it's a current file
+		#search.findrisingedges(valuesdeltas, dates)
+		#search.findfallingedges(valuesdeltas, dates)
+		
+		sectorscurrent = filename[5:9]
+		meancurrent = np.mean(newvalues)
+		
+		#remove spikes in current files
+		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
+		nospike_newvalues = search.removespikes_atgif(valuesdeltas, copynewvalues)
+		#nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
+		#nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
+		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
+		
+		#TO BE CHECKED WICH ONE WE WANT
+		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
+		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
 
+		if "D" in filename:
+			sectorscurrent = None
+			nospike_meancurrent = None
+
+	if "v" in filename: #it's a voltage file
+		sectorsvoltage = filename[5:9]
+		meanvoltage = np.mean(newvalues)
+
+		copynewvalues = copy.copy(newvalues)
+		notrips_newvalues = search.removetrips(valuesdeltas, copynewvalues)
+		notrips_meanvoltage = np.mean(notrips_newvalues)
+
+		if "D" in filename:
+			sectorsvoltage = None
+			notrips_meanvoltage = None
+'''
 	

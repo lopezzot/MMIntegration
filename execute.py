@@ -13,3 +13,6 @@ if todo == "MMPlots":
 if todo == "MMPlots_attenuation":
 	MMPlots_attenuation.createsummaryplot_attenuation()
 
+os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/GIF*")
+os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/iMon*")
+os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/BB5*")

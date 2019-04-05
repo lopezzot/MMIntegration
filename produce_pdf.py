@@ -100,7 +100,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 	doc.append(first_page)
 	# End first page style
-	redcircle = glob.iglob("redcircle.png")
+	redcircle = glob.glob("redcircle.png")
 	redcircle = StandAloneGraphic(redcircle, image_options="width=220px")
 
 	# Add customer information
@@ -130,6 +130,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		doc.append(timeslot)
 		doc.append(LineBreak())
 		doc.append(str(deltatime/60)+str("_min"))
+		doc.append(LineBreak())
+		doc.append("Spike_treshold_0.05_uA")
 		doc.append(LineBreak())
 		with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
 								 row_height=1.5)) as data_table:
@@ -317,6 +319,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		doc.append(LineBreak())
 		doc.append(str(deltatime_irradiated/60)+str("_min"))
 		doc.append(LineBreak())
+		doc.append("Spike_treshold_0.40_uA")
+		doc.append(LineBreak())
 		with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
 								 row_height=1.5)) as data_table_irradiated:
 			data_table_irradiated.add_row(["Sector",
@@ -498,7 +502,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
-			png_list = glob.iglob('BB5-i*.pdf')
+			png_list = glob.glob('BB5-i*.pdf')
+			png_list.sort(key=os.path.getmtime)
 			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
 			print len(png_list)
 			row_image = []    
@@ -518,7 +523,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
-			png_list = glob.iglob('GIF-i*.pdf')
+			png_list = glob.glob('GIF-i*.pdf')
+			png_list.sort(key=os.path.getmtime)
 			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
 			print len(png_list)
 			row_image = []    
@@ -538,7 +544,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
-			png_list = glob.iglob('i*.pdf')
+			png_list = glob.glob('i*.pdf')
+			png_list.sort(key=os.path.getmtime)
 			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
 			print len(png_list)
 			row_image = []    
@@ -554,7 +561,3 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 #---------------------------------------------------------------------------------------------
 generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated, sectors_irradiated, hv_irradiated, spark_irradiated)
-
-os.system("rm GIF*")
-os.system("rm iMon*")
-os.system("rm BB5*")
