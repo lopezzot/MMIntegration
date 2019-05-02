@@ -5,7 +5,13 @@ import MMPlots_attenuation
 todo = raw_input("MMPlots, MMPlots_attenuation or pdf? ")
 
 if todo == "pdf":
-	os.system("python produce_pdf.py")
+	ask = raw_input("BB5, GIF or both? ")
+	if ask == "both":
+		os.system("python produce_pdf.py")
+	if ask == "BB5":
+		os.system("python produce_pdf_bb5.py")
+	if ask == "GIF":
+		os.system("python produce_pdf_gif.py")
 
 if todo == "MMPlots":
 	MMPlots.createsummaryplots()

@@ -12,13 +12,13 @@ import classes
 
 #---------------------------------------------------------------------------------
 def createsummaryplots():
-	house = raw_input("Data in BB5 or Gif? ")
+	house = raw_input("Data in bb5 or Gif? ")
 	folder = raw_input("Insert folder to study: ")
 
 	ID = folder[0:18]
 	timeslot = folder[19:len(folder)]
 
-	path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
+	path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/" #Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
 	rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 	dir_L1 = rootfile.mkdir("Layer1/")
 	dir_L2 = rootfile.mkdir("Layer2/")
@@ -38,6 +38,8 @@ def createsummaryplots():
 		defaultlayers = defaultlayersSM1
 	if chambertype == "SM2":
 		defaultlayers = defaultlayersSM2
+	if chambertype == "LM1":
+		defaultlayers = defaultlayersSM1
 
 	#for summary plots
 	spikenames = []

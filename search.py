@@ -100,13 +100,14 @@ def findspikes_atgif(currentvalues, attenuation, meancurrent, setattenuation, da
 	spikenames = []
 	spikeseconds = []
 	for counter, x in enumerate(currentvalues[0:len(attenuation)]):
-		if attenuation[counter] != 0.:
-			currentatattenuation = meancurrent[setattenuation.index(float(attenuation[counter])**-1)]
-			if x > currentatattenuation+treshold:
-				spikecounter = spikecounter+1
-				spikedates.append(dates[counter]) 
-				spikeseconds.append(seconds[counter])
-				spikenames.append(filename)
+		if counter < len(dates): #added later
+			if attenuation[counter] != 0.:
+				currentatattenuation = meancurrent[setattenuation.index(float(attenuation[counter])**-1)]
+				if x > currentatattenuation+treshold:
+					spikecounter = spikecounter+1
+					spikedates.append(dates[counter]) 
+					spikeseconds.append(seconds[counter])
+					spikenames.append(filename)
 
 	spikeduration = len([x for x in attenuation if x != 0.])
 
