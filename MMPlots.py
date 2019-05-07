@@ -3,12 +3,13 @@ from datetime import timedelta as td
 import sys
 import os
 import tools
-from ROOT import TFile, TDatime, TDirectory, gSystem
+from ROOT import TFile, TDatime, TDirectory, gSystem, TTree
 import glob
 import numpy as np
 import search
 import copy
 import classes
+from array import array
 
 #---------------------------------------------------------------------------------
 def createsummaryplots():
@@ -19,7 +20,8 @@ def createsummaryplots():
 	timeslot = folder[19:len(folder)]
 
 	path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/" #Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
-	rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
+	#rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
+	rootfile = TFile(folder+".root","RECREATE") #create root file in same directory as pdf
 	dir_L1 = rootfile.mkdir("Layer1/")
 	dir_L2 = rootfile.mkdir("Layer2/")
 	dir_L3 = rootfile.mkdir("Layer3/")
@@ -115,8 +117,18 @@ def createsummaryplots():
 		ordered_graphscurrent.append(graphscurrent[index])
 
 	for counter, graph in enumerate(ordered_graphscurrent):                       #+" "+str(int(orderedsmeanvoltages[counter]))#
-		tools.write_rootdategraph(graph.rootdates, graph.newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", graph.filename[0], rootdirectory)
+		tools.write_orderedrootdategraph(graph.rootdates, graph.newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", graph.filename[0], rootdirectory)
 
+	#create trees for current values
+	for counter, graph in enumerate(ordered_graphscurrent):
+		tree = TTree(ordered_graphscurrent[counter].filename, "tree")
+		newvalue = array( 'f', [ 0 ] )
+		branch = tree.Branch(ordered_graphscurrent[counter].filename, newvalue, "newvalue/F")
+		for i in range(len(graph.newvalues)):	
+			newvalue[0] = ordered_graphscurrent[counter].newvalues[i]
+			tree.Fill()
+		tree.Write()
+		
 	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime
 #----------------------------------------------------------------------------------------
 
@@ -125,6 +137,7 @@ def createplot(file, filename):
 
 	layer = filename[5:7]
 	rootdirectory = directories[layer] #to check
+	
 
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
@@ -203,8 +216,18 @@ def createplot(file, filename):
 			notrips_meanvoltage = None
 
 	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if want additional histograms
-	#tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
+	tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	currentgraph = classes.currentgraph(filename[5:9], rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
+
+	#create trees for voltages branch
+	if "v" in filename:
+		tree = TTree(filename, "tree")
+		newvalue = array( 'f', [ 0 ] )
+		branch = tree.Branch(filename, newvalue, "newvalue/F")
+		for i in range(len(newvalues)):	
+			newvalue[0] = newvalues[i]
+			tree.Fill()
+		tree.Write()
 
 	duration = len(newtimes) #total seconds from start to stop
 

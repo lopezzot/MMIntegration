@@ -3,7 +3,7 @@ from datetime import timedelta as td
 import sys
 import os
 import tools
-from ROOT import TFile, TDatime, TDirectory, gSystem
+from ROOT import TFile, TDatime, TDirectory, gSystem, TTree
 import glob
 import numpy as np
 import search
@@ -11,7 +11,7 @@ import copy
 import classes
 from fpdf import FPDF
 from pylatex import Document, Figure
-
+from array import array
 
 #----------------------------------------------------------------------------
 def createsummaryplot_attenuation():
@@ -29,6 +29,10 @@ def createsummaryplot_attenuation():
 		defaultlayers = defaultlayersSM1
 	if chambertype == "SM2":
 		defaultlayers = defaultlayersSM2
+	if chambertype == "LM1":
+		defaultlayers = defaultlayersSM1
+	if chambertype == "LM2":
+		defaultlayers = defaultlayersSM2
 		
 	ID = folder[0:18] #batch ID
 	timeslot = folder[19:len(folder)] #time slot from folder name
@@ -40,7 +44,7 @@ def createsummaryplot_attenuation():
 	global sourcefile
 	sourcefile = gifpath+"Source.dat"
 
-	rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
+	rootfile = TFile(folder+".root","RECREATE")
 	dir_L1 = rootfile.mkdir("Layer1/")
 	dir_L2 = rootfile.mkdir("Layer2/")
 	dir_L3 = rootfile.mkdir("Layer3/")
@@ -164,6 +168,10 @@ def createplot(giffile, file, filename):
 	if chambertype == "SM1":
 		areas=areasSM1
 	elif chambertype == "SM2":
+		areas=areasSM2
+	elif chambertype == "LM1":
+		areas=areasSM1
+	elif chambertype == "LM2":
 		areas=areasSM2
 	else:
 		print "areas not found"
@@ -407,14 +415,41 @@ def createplot(giffile, file, filename):
 	if "i" in filename and "D" not in filename:
 		#tools.write_rootdategraph_fromgif(rootdates, nospike_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
 		#tools.write_rootdategraph_plusatten(new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graph current + source 
- 		graph_atten = classes.rootdategraph_plusatten(filename[5:9], new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory)											     #or nospike_newvalues
+		graph_atten = classes.rootdategraph_plusatten(filename[5:9], new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory)											     #or nospike_newvalues
+		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 	else:		
 		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
 		graph_atten = None
-	 	graphlinearity = None
+		graphlinearity = None
 
 	#tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
 	
+	if "D" not in filename:
+		#create trees
+		if "i" in filename:
+			tree = TTree(filename, "tree")
+			newvalue = array( 'f', [ 0 ] )
+			branch = tree.Branch(filename, newvalue, "newvalue/F")
+			
+			treesource = TTree(filename+"_source", "tree")
+			atten = array('f', [0])
+			branch = treesource.Branch(filename, atten, "atten/F")
+			for i in range(len(newvalues)):	
+				newvalue[0] = newvalues[i]
+				tree.Fill()
+				atten[0] = atten_newvalues[i]
+				treesource.Fill()
+			tree.Write()
+			treesource.Write()
+		if "v" in filename:
+			tree = TTree(filename, "tree")
+			newvalue = array( 'f', [ 0 ] )
+			branch = tree.Branch(filename, newvalue, "newvalue/F")
+			for i in range(len(newvalues)):	
+				newvalue[0] = newvalues[i]
+				tree.Fill()
+			tree.Write()
+			
 	return graph_atten, graphlinearity, spikenames, spikeduration, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 #createsummaryplots_attenuation()
