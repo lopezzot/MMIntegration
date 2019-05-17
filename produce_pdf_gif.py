@@ -281,6 +281,10 @@ def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
 		   channels = SM1channels
 		if chambername[0:3] == "SM2":
 		   channels = SM2channels
+		if chambername[0:3] == "LM1":
+			channels = SM1channels
+		if chambername[0:3] == "LM2":
+			channels = SM2channels
 
 		for channel in channels:
 		   cntall = sum(1 for x, sector in enumerate(sectors_irradiated) if sector[2:4] == channel and acceptedlist[x] == 1)
