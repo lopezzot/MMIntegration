@@ -437,8 +437,9 @@ def createplot(giffile, file, filename):
 			for i in range(len(newvalues)):	
 				newvalue[0] = newvalues[i]
 				tree.Fill()
-				atten[0] = atten_newvalues[i]
-				treesource.Fill()
+				if i<len(atten_newvalues):
+					atten[0] = atten_newvalues[i]
+					treesource.Fill()
 			tree.Write()
 			treesource.Write()
 		if "v" in filename:
