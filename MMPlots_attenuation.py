@@ -297,8 +297,9 @@ def createplot(giffile, file, filename):
 		#	print source_dates[counter],source_newvalues[counter],atten_dates[counter],atten_newvalues[counter]
 
 	for counter, atten_newvalue in enumerate(atten_newvalues):
-		if source_newvalues[counter] == 0.0:
-			atten_newvalues[counter] = 0.0  #put attenuation to 0 il source is off, i will later remove zeros
+		if counter < len(source_newvalues):
+			if source_newvalues[counter] == 0.0:
+				atten_newvalues[counter] = 0.0  #put attenuation to 0 il source is off, i will later remove zeros
 
 	#completed date array and attenuation array from GIF 
 	#now important to match starting time with data from chamber
