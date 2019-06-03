@@ -42,6 +42,8 @@ def createsummaryplots():
 		defaultlayers = defaultlayersSM2
 	if chambertype == "LM1":
 		defaultlayers = defaultlayersSM1
+	if chambertype == "LM2":
+		defaultlayers = defaultlayersSM2
 
 	#for summary plots
 	spikenames = []
