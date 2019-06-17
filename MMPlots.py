@@ -13,13 +13,20 @@ from array import array
 
 #---------------------------------------------------------------------------------
 def createsummaryplots():
-	house = raw_input("Data in bb5 or Gif? ")
+	where = raw_input("Where are you? (type bb5 or gif) ")
+	if where != "bb5" and where != "gif":
+		house = raw_input("Data in bb5 or Gif? ")
 	folder = raw_input("Insert folder to study: ")
 
 	ID = folder[0:18]
 	timeslot = folder[19:len(folder)]
 
-	path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/" #Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+	if where == "gif":
+		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+	elif where == "bb5":
+		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+	else:		
+		path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/" #Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
 	#rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 	rootfile = TFile(folder+".root","RECREATE") #create root file in same directory as pdf
 	dir_L1 = rootfile.mkdir("Layer1/")

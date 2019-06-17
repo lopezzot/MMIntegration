@@ -17,7 +17,8 @@ from array import array
 def createsummaryplot_attenuation():
 	'''function to collect info from GIF file'''
 
-	house = raw_input("Data in Gif? ") #insert BB5 of GIF file path
+	where = raw_input("Where are you? (GIF or bb5) ")
+	house = raw_input("Data in Gif (or bb5)? ") #insert BB5 of GIF file path
 	global folder
 	folder = raw_input("Insert folder to study: ") #insert folder with bartch ID
 
@@ -37,12 +38,25 @@ def createsummaryplot_attenuation():
 	ID = folder[0:18] #batch ID
 	timeslot = folder[19:len(folder)] #time slot from folder name
 
-	path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
-	gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
-	giffile = gifpath+"EffectiveAttenuation.dat" 
-	
 	global sourcefile
-	sourcefile = gifpath+"Source.dat"
+
+	if where == "gif":
+		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
+		giffile = gifpath+"EffectiveAttenuation.dat" 
+		sourcefile = gifpath+"Soure.dat"
+
+	elif where == "bb5":
+		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
+		giffile = gifpath+"EffectiveAttenuation.dat" 
+		sourcefile = gifpath+"Soure.dat"
+		
+	else:
+		path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
+		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
+		giffile = gifpath+"EffectiveAttenuation.dat" 
+		sourcefile = gifpath+"Source.dat"
 
 	rootfile = TFile(folder+".root","RECREATE")
 	dir_L1 = rootfile.mkdir("Layer1/")
