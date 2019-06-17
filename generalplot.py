@@ -109,7 +109,9 @@ def createplot(file, filename):
 		dates.append(dates[counter]+td(seconds=1))
 
 	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
-
+	meancurrent = np.mean(newvalues)
+	spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, meancurrent, rootdates, newtimes, filename)
+	print spikecounter
 	write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0])
 
 	return None
