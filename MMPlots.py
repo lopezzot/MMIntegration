@@ -10,14 +10,14 @@ import search
 import copy
 import classes
 from array import array
-
+import efficiency
 #---------------------------------------------------------------------------------
 def createsummaryplots():
 	where = raw_input("Where are you? (type bb5 or gif) ")
 	if where != "bb5" and where != "gif":
 		house = raw_input("Data in bb5 or Gif? ")
 	folder = raw_input("Insert folder to study: ")
-
+	user = raw_input("Who is it? (type Lorenzo or Natalia) ")
 	ID = folder[0:18]
 	timeslot = folder[19:len(folder)]
 
@@ -25,8 +25,13 @@ def createsummaryplots():
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 	elif where == "bb5":
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
-	else:		
-		path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/" #Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+	else:
+		if user == "Lorenzo":
+			path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+		elif user == "Natalia":
+			path = "/home/est/Escritorio/CERN/MMIntegration/Data_"+str(house)+"/"+folder+"/HV/"
+		else:
+			print "Name not found"
 	#rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 	rootfile = TFile(folder+".root","RECREATE") #create root file in same directory as pdf
 	dir_L1 = rootfile.mkdir("Layer1/")
@@ -67,7 +72,7 @@ def createsummaryplots():
 		layer = filename[5:7]
 		rootdirectory = directories[layer]
 		graphcurrent, spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
-	
+
 		if spikeseconds != None:
 			newspikeseconds = newspikeseconds + spikeseconds
 		if spikeslayer != None:
@@ -112,12 +117,13 @@ def createsummaryplots():
 	ordered_orderedspikerate = []
 	ordered_graphscurrent = []
 
+
 	for layer in defaultlayers: #put in order voltages
 		index = sectorsvoltages.index(layer)
 		orderedsectorsvoltages.append(sectorsvoltages[index])
 		orderedsmeanvoltages.append(meanvoltages[index])
 		ordered_orderedspikerate.append(orderedspikerate[index])
-	
+
 	graph_current_names = []
 	for graph in graphscurrent:
 		graph_current_names.append(graph.name)
@@ -133,12 +139,14 @@ def createsummaryplots():
 		tree = TTree(ordered_graphscurrent[counter].filename, "tree")
 		newvalue = array( 'f', [ 0 ] )
 		branch = tree.Branch(ordered_graphscurrent[counter].filename, newvalue, "newvalue/F")
-		for i in range(len(graph.newvalues)):	
+		for i in range(len(graph.newvalues)):
 			newvalue[0] = ordered_graphscurrent[counter].newvalues[i]
 			tree.Fill()
 		tree.Write()
-		
-	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime
+
+	eff, layers_eff, total_eff = efficiency.efficiency_values(orderedsmeanvoltages)
+
+	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime, eff, layers_eff, total_eff
 #----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------
@@ -146,7 +154,7 @@ def createplot(file, filename):
 
 	layer = filename[5:7]
 	rootdirectory = directories[layer] #to check
-	
+
 
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
@@ -192,11 +200,11 @@ def createplot(file, filename):
 	nospike_meancurrent = None
 	meanvoltage = None
 	notrips_meanvoltage = None
-	
+
 	if "i" in filename: #it's a current file
 		#search.findrisingedges(valuesdeltas, dates)
 		#search.findfallingedges(valuesdeltas, dates)
-		
+
 		sectorscurrent = filename[5:9]
 		meancurrent = np.mean(newvalues)
 
@@ -207,7 +215,7 @@ def createplot(file, filename):
 																										#or meancurrent
 		spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, meancurrent, dates, newtimes, filename)
 		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename) #old one
-		
+
 		if "D" in filename:
 			sectorscurrent = None
 			nospike_meancurrent = None
@@ -233,7 +241,7 @@ def createplot(file, filename):
 		tree = TTree(filename, "tree")
 		newvalue = array( 'f', [ 0 ] )
 		branch = tree.Branch(filename, newvalue, "newvalue/F")
-		for i in range(len(newvalues)):	
+		for i in range(len(newvalues)):
 			newvalue[0] = newvalues[i]
 			tree.Fill()
 		tree.Write()
