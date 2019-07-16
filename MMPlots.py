@@ -13,25 +13,27 @@ from array import array
 import efficiency
 #---------------------------------------------------------------------------------
 def createsummaryplots():
-	where = raw_input("Where are you? (type bb5 or gif) ")
-	if where != "bb5" and where != "gif":
-		house = raw_input("Data in bb5 or Gif? ")
+#	where = raw_input("Where are you? (type bb5 or gif) ")
+#	if where != "bb5" and where != "gif":
+	house = raw_input("Data in bb5 or Gif? ")
 	folder = raw_input("Insert folder to study: ")
-	user = raw_input("Who is it? (type Lorenzo or Natalia) ")
+	user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 	ID = folder[0:18]
 	timeslot = folder[19:len(folder)]
 
-	if where == "gif":
-		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
-	elif where == "bb5":
-		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+	# if where == "gif":
+	# 	path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+	# elif where == "bb5":
+	# 	path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
+	# else:
+	if user == "Lorenzo":
+		path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+	elif user == "Natalia":
+		path = "/home/est/Escritorio/CERN/MMIntegration/Data_"+str(house)+"/"+folder+"/HV/"
+	elif user == "bb5":
+		path = "bb5 path"
 	else:
-		if user == "Lorenzo":
-			path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
-		elif user == "Natalia":
-			path = "/home/est/Escritorio/CERN/MMIntegration/Data_"+str(house)+"/"+folder+"/HV/"
-		else:
-			print "Name not found"
+		print "Name not found"
 	#rootfile = TFile("/Users/lorenzo/Desktop/MMresults/"+folder+".root","RECREATE")
 	rootfile = TFile(folder+".root","RECREATE") #create root file in same directory as pdf
 	dir_L1 = rootfile.mkdir("Layer1/")
@@ -144,7 +146,7 @@ def createsummaryplots():
 			tree.Fill()
 		tree.Write()
 
-	eff, layers_eff, total_eff = efficiency.efficiency_values(orderedsmeanvoltages)
+	eff, layers_eff, total_eff = efficiency.efficiency_values(orderedsmeanvoltages, chambertype)
 
 	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime, eff, layers_eff, total_eff
 #----------------------------------------------------------------------------------------

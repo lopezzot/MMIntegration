@@ -1,29 +1,6 @@
 from ROOT import TMath
 import math
 def get_efficiency(x):
-#    all values
-    # p0 = -4135.1
-    # p1 = 14.5086
-    # p2 = -0.0124388
-    # efficiency = p0 + p1*x + p2*x*x
-# no 0
-#    p0 = -4147.79
-#    p1 = 14.5572
-#    p2 = -0.0124852
-
-
-# histogram
-#    p0 = -4167.17
-#    p1 = 14.6275
-#    p2 = -0.0125488
-
-    # if x == 0:
-    #     efficiency = 0
-    # elif x >= 580:
-    #     efficiency = 95
-    # else:
-    #     efficiency = p0 + p1*x + p2*x*x
-    # print efficiency
 
 # sigmoid
     p0 = 96.7336
@@ -31,21 +8,7 @@ def get_efficiency(x):
     p2 = 521.418
     efficiency = (p0/(1+ math.exp(-p1*(x-p2))))
 
-# pol2
-
-    # p0 = -0.121066
-    # p1 = -0.283292
-    # p2 = 0.000763684
-    # efficiency = p0 + p1*x + p2*x*x
-
-#    pol 5
-    # p0 = -0.00206796
-    # p1 = -2.133
-    # p2 = 0.00200703
-    # p3 = 9.83116*math.pow(10,-6)
-    # p4 = 5.88458*math.pow(10,-9)
-    # p5 = -2.04183*math.pow(10,-11)
-
+#pol9
     # p0 = 8.4947*pow(10,-8)
     # p1 = -3.33873
     # p2 = 0.00179341
@@ -56,9 +19,8 @@ def get_efficiency(x):
     # p7 = -1.51173*pow(10,-16)
     # p8 = -1.52798*pow(10,-20)
     # p9 = 2.4595*pow(10,-22)
-
-#    efficiency = p0 + p1*x + p2*x*x + p3*x*x*x +p4*x*x*x*x + p5*x*x*x*x*x +p6*x*x*x*x*x*x+ p7*x*x*x*x*x*x*x + p8*x*x*x*x*x*x*x*x +p9*x*x*x*x*x*x*x*x*x
-    print efficiency
+    #
+    # efficiency = p0 + p1*x + p2*pow(x,2) + p3*pow(x,3) +p4*pow(x,4) + p5*pow(x,5) +p6*pow(x,6)+ p7*pow(x,7) + p8*pow(x,8) +p9*pow(x,9)
     return efficiency
 
 def get_mean_efficiency(values):
@@ -68,19 +30,18 @@ def get_mean_efficiency(values):
     efficiency = total/len(values)
     return efficiency
 
-def efficiency_values(values):   # get efficiency per sector, per layer and the whole chamber
+def efficiency_values(values, type):   # get efficiency per sector, per layer and the whole chamber
     efficiency = []
     layers_efficiency = []
     for i in range(len(values)):
-        print "HV"
-        print values[i]
-        print "efficiency"
         efficiency.append(get_efficiency(values[i]))
-
     total_efficiency = get_mean_efficiency(values)
-
-    for x in range(len(values)/10):
-        layers_efficiency.append(get_mean_efficiency(values[x*10:x*10+10]))
+    if type == "SM1" or type == "SM2":
+        for x in range(len(values)/10):
+            layers_efficiency.append(get_mean_efficiency(values[x*10:x*10+10]))
+    else:
+        for x in range(len(values)/6):
+            layers_efficiency.append(get_mean_efficiency(values[x*6:x*6+6]))
 
     return efficiency, layers_efficiency, total_efficiency
 
