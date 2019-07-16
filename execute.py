@@ -2,7 +2,7 @@ import os
 import MMPlots
 import MMPlots_attenuation
 
-todo = raw_input("MMPlots, MMPlots_attenuation or pdf? ")
+todo = raw_input("MMPlots, MMPlots_attenuation, pdf or DoubleWedgepdf? ")
 
 if todo == "pdf":
 	ask = raw_input("BB5, GIF or both? ")
@@ -12,6 +12,9 @@ if todo == "pdf":
 		os.system("python produce_pdf_bb5.py")
 	if ask == "GIF":
 		os.system("python produce_pdf_gif.py")
+
+if todo == "DoubleWedgepdf":
+	os.system("python produce_pdf_dw.py")
 
 if todo == "MMPlots":
 	MMPlots.createsummaryplots()
