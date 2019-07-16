@@ -5,6 +5,7 @@ import MMPlots_attenuation
 import glob
 import piecart
 from termcolor import colored
+import production_site
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -13,11 +14,12 @@ from pylatex.utils import bold, NoEscape
 
 now = datetime.datetime.now()
 
-gas_leak = raw_input("Insert gas leake (mL/h): ")
+#gas_leak = raw_input("Insert gas leake (mL/h): ")
 chambername = raw_input("Insert chamber name (e.g. SM1_M6): ")
 
-sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime = MMPlots.createsummaryplots()
+sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots()
 
+hv_production_site, spike_production_site = production_site.read("LM1_M3_Saclay_CS.dat")
 #--------------------------------------------------------------------------------
 def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated):
 	geometry_options = {
@@ -58,7 +60,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 	# Add footer
 	with first_page.create(Foot("C")) as footer:
-		
+
 		with footer.create(Tabularx(
 				"X X X ",
 				width_argument=NoEscape(r"\textwidth"))) as footer_table:
@@ -66,7 +68,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			footer_table.add_empty_row()
 
 			footer_table.add_hline(color="blue")
-			
+
 			branch_address1 = MiniPage(
 				width=NoEscape(r"0.25\textwidth"),
 				pos='t')
@@ -112,7 +114,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		branch.append(LineBreak())
 		branch.append("ID: ")
 		branch.append(LineBreak())
-   
+
 		first_page_table.add_row([branch])
 		'''
 		first_page_table.add_empty_row()
@@ -120,9 +122,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	doc.change_document_style("firstpage")
 	doc.add_color(name="lightgray", model="gray", description="0.80")
 
-	doc.append(NoEscape(r'\vspace{17.634mm}'))
-	doc.append(LargeText(bold("Gas leak (mL/h) "))+str(gas_leak))
-	
+	#doc.append(NoEscape(r'\vspace{17.634mm}'))
+	#doc.append(LargeText(bold("Gas leak (mL/h) "))+str(gas_leak))
+
 	with doc.create(Section('HV not irradiated', numbering=False)):
 	   # Add statement table
 		doc.append("\n")
@@ -130,21 +132,24 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		doc.append(LineBreak())
 		doc.append(str(deltatime/60)+str("_min"))
 		doc.append(LineBreak())
-		doc.append("Spike_treshold_0.05_uA")
+		doc.append("Spike_treshold_0.2_uA")
 		doc.append(LineBreak())
-		with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
+		with doc.create(LongTabu("X[l] X[r] X[r] X[r] X[r]",
 								 row_height=1.5)) as data_table:
 			data_table.add_row(["Sector",
 								"HV",
 								"spark/min",
+								"Efficiency",
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
 			data_table.add_empty_row()
 			data_table.add_hline()
-			row = ["sector", "hv", "spark", "0 or 1"]
+			row = ["sector", "hv", "spark", "efficiency", "0 or 1"]
 			acceptedlist = []
+			not_acc_counter = 0
 			for i in range(len(hv_notirradiated)):
+				acc_color = "black"
 				if (i % 2) == 0:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -153,7 +158,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					else:
 						accepted = 0
-						acceptedlist.append(accepted) 
+						acceptedlist.append(accepted)
 					'''
 					if int(hv_notirradiated[i]) > 567.9:
 						hvcolor = "black"
@@ -163,12 +168,30 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
 
-					if spark_notirradiated[i] > 1.0:
+					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
 
-					if spark_notirradiated[i] < 1.0:
+					if spark_notirradiated[i] == 6.0:
+						sparkcolor = "orange"
+
+					if spark_notirradiated[i] < 6.0:
 						sparkcolor = "black"
+
+					if efficiency[i] < 80.0:
+						effcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
+
+					if efficiency[i] > 80.0:
+						effcolor = "black"
+
+					if efficiency == 80.0:
+						effcolor = "orange"
 
 					if sparkcolor == "black" and hvcolor == "black":
 						acceptedcolor = "black"
@@ -177,7 +200,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 						acceptedcolor = "red"
 
 					if sparkcolor == "orange" and hvcolor == "orange":
-						acceptedcolor = "orange" 
+						acceptedcolor = "orange"
 
 					if sparkcolor == "orange" and hvcolor == "black":
 						acceptedcolor = "orange"
@@ -197,7 +220,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 						accepted = 2
 						acceptedlist.append(accepted)
 
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(acceptedcolor, "V")], color="lightgray")
+					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color, "V")], color="lightgray")
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -205,9 +228,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 						acceptedlist.append(accepted)
 					else:
 						accepted = 0
-						acceptedlist.append(accepted)  
+						acceptedlist.append(accepted)
 					'''
-
 					if int(hv_notirradiated[i]) > 567.9:
 						hvcolor = "black"
 
@@ -216,26 +238,49 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
 
-					if spark_notirradiated[i] > 1.0:
+					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
 
-					if spark_notirradiated[i] < 1.0:
+					if spark_notirradiated[i] == 6.0:
+						sparkcolor = "orange"
+
+					if spark_notirradiated[i] < 6.0:
 						sparkcolor = "black"
 
-					if sparkcolor == "black" and hvcolor == "black":
+					if efficiency[i] < 80.0:
+						effcolor = "red"
+						acc_color = "red"
+						not_acc_counter = not_acc_counter+1
+
+					if efficiency[i] > 80.0:
+						effcolor = "black"
+
+					if efficiency == 80.0:
+						effcolor = "orange"
+					if sparkcolor == "black" and hvcolor == "black" and effcolor == "black":
 						acceptedcolor = "black"
 
-					if sparkcolor == "red" or hvcolor == "red":
+					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
 						acceptedcolor = "red"
 
-					if sparkcolor == "orange" and hvcolor == "orange":
-						acceptedcolor = "orange" 
-
-					if sparkcolor == "orange" and hvcolor == "black":
+					if sparkcolor == "orange" and hvcolor == "orange" and effcolor == "orange":
 						acceptedcolor = "orange"
 
-					if sparkcolor == "black" and hvcolor == "orange":
+					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "black":
+						acceptedcolor = "orange"
+
+					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "black":
+						acceptedcolor = "orange"
+
+					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "orange":
+						acceptedcolor = "orange"
+
+					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "orange":
 						acceptedcolor = "orange"
 
 					if acceptedcolor == "black":
@@ -250,27 +295,33 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 						accepted = 2
 						acceptedlist.append(accepted)
 
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(acceptedcolor,"V")])
+					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
 			data_table.add_empty_row()
 			data_table.add_hline()
-			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 560.0])), str(len([x for x in spark_notirradiated if x > 1.0])), str(acceptedlist.count(0)))
-	
+			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), str(len([x for x in spark_notirradiated if x > 6.0])), str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
+
+			data_table.add_empty_row()
+			data_table.add_hline()
+			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
+
+
 	with doc.create(Section('Summary not irradiated', numbering=False)):
 
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0), acceptedlist.count(2)], "piechart.pdf")
 
-	
+
 		 # Add cheque images
 		with doc.create(LongTabu("X[c]")) as summary1_table:
 			pie = glob.iglob("piechart.pdf")
 			#png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
 			pienew = [StandAloneGraphic(x, image_options="width=220px") for x in pie]
 			summary1_table.add_row([pienew[0]])
-		
+
 		#here I have sectors_notirradiated, hv_notirradiated, spark_notirradiated, acceptedlist
 		SM1channels = ["L1","R1","L2","R2","L3","R3","L4","R4","L5","R5"]
 		SM2channels = ["L6","R6","L7","R7","L8","R8"]
+
 		badresultsall = []
 		badresultseta = []
 		badresultsstereo = []
@@ -287,7 +338,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		for channel in channels:
 		   cntall = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and acceptedlist[x] == 1)
 		   cnteta = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "1" or sector[1:2] == "2") and acceptedlist[x] == 1)
-		   cntstereo = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "3" or sector[1:2] == "4") and acceptedlist[x] == 1) 
+		   cntstereo = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "3" or sector[1:2] == "4") and acceptedlist[x] == 1)
 		   badresultsall.append(4-int(cntall))
 		   badresultseta.append(2-int(cnteta))
 		   badresultsstereo.append(2-int(cntstereo))
@@ -305,24 +356,40 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			data_table2.add_empty_row()
 			data_table2.add_hline()
 			row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
-			
+
 			for i in range(len(channels)):
 				if (i % 2) == 0:
 					data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]], color="lightgray")
 				else:
 					data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]])
 
+		with doc.create(LongTabu("X[l] X[r]",
+								 row_height=1.5)) as data_table3:
+			data_table3.add_row(["Layer",
+								"Mean Efficiency"],
+								mapper=bold,
+								color="lightgray")
+			data_table3.add_empty_row()
+			data_table3.add_hline()
+			row = ["layers", "efficiency"]
+			channelsT3 = ["L1", "L2", "L3", "L4"]
+			for i in range(len(layers_efficiency)):
+				if (i % 2) == 0:
+					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))], color="lightgray")
+				else:
+					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))])
+
 	doc.append(NewPage())
-	
+
 	with doc.create(Section('Current with no irradiation', numbering=False)):
-	
+
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
 			png_list = glob.glob('BB5-i*.pdf')
 			png_list.sort(key=os.path.getmtime)
 			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
 			print len(png_list)
-			row_image = []    
+			row_image = []
 			i = 0
 			for image in png_list:
 				row_image.append(image)
@@ -333,7 +400,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					i=0
 
 	png_list = []
-		
+
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 #---------------------------------------------------------------------------------------------
 generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated)
