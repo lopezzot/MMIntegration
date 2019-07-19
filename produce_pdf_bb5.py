@@ -17,9 +17,8 @@ now = datetime.datetime.now()
 #gas_leak = raw_input("Insert gas leake (mL/h): ")
 chambername = raw_input("Insert chamber name (e.g. SM1_M6): ")
 
-sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots()
+sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency, ps_hv, ps_spike = MMPlots.createsummaryplots()
 
-hv_production_site, spike_production_site = production_site.read("LM1_M3_Saclay_CS.dat")
 #--------------------------------------------------------------------------------
 def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated):
 	geometry_options = {
@@ -134,20 +133,25 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		doc.append(LineBreak())
 		doc.append("Spike_treshold_0.2_uA")
 		doc.append(LineBreak())
-		with doc.create(LongTabu("X[l] X[r] X[r] X[r] X[r]",
+
+		with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 								 row_height=1.5)) as data_table:
+			data_table.add_hline()
 			data_table.add_row(["Sector",
 								"HV",
+								"PS HV",
 								"spark/min",
+								"PS spark/min",
 								"Efficiency",
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
 			data_table.add_empty_row()
 			data_table.add_hline()
-			row = ["sector", "hv", "spark", "efficiency", "0 or 1"]
+			row = ["sector", "hv", "pshv", "spark", "sparkhv", "efficiency", "0 or 1"]
 			acceptedlist = []
 			not_acc_counter = 0
+			pscolor = "blue"
 			for i in range(len(hv_notirradiated)):
 				acc_color = "black"
 				if (i % 2) == 0:
@@ -220,7 +224,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 						accepted = 2
 						acceptedlist.append(accepted)
 
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color, "V")], color="lightgray")
+					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
+					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
+					TextColor(acc_color, "V")], color="lightgray")
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -294,17 +300,19 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if acceptedcolor == "orange":
 						accepted = 2
 						acceptedlist.append(accepted)
-
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
-
-			data_table.add_empty_row()
-			data_table.add_hline()
-			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), str(len([x for x in spark_notirradiated if x > 6.0])), str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
+					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
+					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
+					TextColor(acc_color, "V")])
+				#	data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
 			data_table.add_empty_row()
 			data_table.add_hline()
-			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
+			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), " ", str(len([x for x in spark_notirradiated if x > 6.0]))," ", str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
 
+			data_table.add_empty_row()
+			data_table.add_hline()
+			data_table.add_row("Chamber efficiency", "","","","", "", str(round(total_efficiency)))
+			data_table.add_hline()
 
 	with doc.create(Section('Summary not irradiated', numbering=False)):
 
