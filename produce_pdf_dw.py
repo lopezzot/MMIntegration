@@ -37,7 +37,7 @@ user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 
 for folder in folders:
 	if user == "Lorenzo":
-		paths.append("/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/")#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+		paths.append("/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/")
 	elif user == "Natalia":
 		paths.append("/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/")
 	elif user == "bb5":
@@ -85,8 +85,6 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 			title_wrapper.append("\n")
 			title_wrapper.append(LargeText(bold("Double Wedge: "+str(DW_name))))
 			title_wrapper.append(LineBreak())
-			# title_wrapper.append("ID: "+str(ID))
-			# title_wrapper.append(LineBreak())
 
 	# Add footer
 	with first_page.create(Foot("C")) as footer:
@@ -136,17 +134,6 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 
 	# Add customer information
 	with doc.create(Tabu("X[r]")) as first_page_table:
-		'''
-		# Add branch information
-		branch = MiniPage(width=NoEscape(r"0.49\textwidth"), pos='t!',
-						  align='r')
-		branch.append("Chamber name: ")
-		branch.append(LineBreak())
-		branch.append("ID: ")
-		branch.append(LineBreak())
-
-		first_page_table.add_row([branch])
-		'''
 		first_page_table.add_empty_row()
 
 	doc.change_document_style("firstpage")
@@ -154,13 +141,12 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 
 	# IP
 	with doc.create(Section('IP', numbering=False)):
-		#doc.crea(LargeText(bold(chambername1IP)
 		# SM1
 		if chambername1IP[0:3] == "SM1":
 			limit = 10
 		else:
 			limit = 6
-		with doc.create(Subsection(chambername2IP, numbering=False)):
+		with doc.create(Subsection(chambername1IP, numbering=False)):
 			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 									 row_height=1.5)) as data_table:
 					data_table.add_hline()
@@ -258,6 +244,7 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 		limit = 10
 	else:
 		limit = 6
+	doc.append(NewPage())
 	with doc.create(Section('HO', numbering=False)):
 		with doc.create(Subsection(chambername1HO, numbering=False)):
 			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
@@ -350,13 +337,7 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 							data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
 						i = i+1
 					data_table4.add_hline()
-
-	png_list = []
-
 	doc.generate_pdf("complex_report_DW", clean_tex=False, compiler='pdflatex')
-
-
-
 #---------------------------------------------------------------------------------------------
 def swap(hvs):
 	for i in range(len(hvs)/2):
