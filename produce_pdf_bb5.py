@@ -806,11 +806,13 @@ if ps == "yes":
 	user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 	if user == "Lorenzo":
 	    path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+		ps_path = "Lorenzo's path"
 	elif user == "Natalia":
 		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
 		ps_path = "/home/est/Escritorio/CERN/PS_Data/"
 	elif user == "bb5":
 	    path = "bb5 path"
+		ps_path = "bb5 path"
 	else:
 	    print "Name not found"
 	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(path,folder)
