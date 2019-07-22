@@ -3,18 +3,19 @@ import datetime
 import MMPlots
 import MMPlots_attenuation
 import glob
-import piecart
+#import piecart
 from termcolor import colored
-import production_site
+#import production_site
+import bad_sectors
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
-	LineBreak, NewPage, Tabularx, TextColor, simple_page_number, Section, TextBlock
+	LineBreak, NewPage, Tabularx, TextColor, simple_page_number, Section, Subsection, TextBlock
 from pylatex.utils import bold, NoEscape
 
 now = datetime.datetime.now()
 
-#gas_leak = raw_input("Insert gas leake (mL/h): ")
+DW_name = raw_input("Insert double wedge name: ")
 chambername1IP = raw_input("Insert chamber-1 name IP side: ")
 chambername2IP = raw_input("Insert chamber-2 name IP side: ")
 chambername1HO = raw_input("Insert chamber-1 name HO side: ")
@@ -28,23 +29,29 @@ folder2HO = raw_input("Insert folder chamber-2 HO to study: ")
 
 folders = [folder1IP, folder2IP, folder1HO, folder2HO]
 hvs = []
-
+paths = []
+bad_sec = []
+final_hvs = []
+sectors = []
 user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 
-for folder in fodlers:
+for folder in folders:
 	if user == "Lorenzo":
-		path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
+		paths.append("/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/")#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
 	elif user == "Natalia":
-		path = "/home/est/Escritorio/CERN/MMIntegration/Data_"+str(house)+"/"+folder+"/HV/"
+		paths.append("/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/")
 	elif user == "bb5":
-		path = "bb5 path"
+		paths.append("bb5 path")
 	else:
 		print "Name not found"
-	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(path)
+for i in range(4):
+	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(paths[i], folders[i])
 	hvs.append(hv_notirradiated)
+	sectors.append(sectors_notirradiated)
 
+final_hvs, hl1, hl2 = bad_sectors.get_sectors_hv(hvs)
 #--------------------------------------------------------------------------------
-def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated):
+def generate_unique(final_hvs, hl1, hl2, sectors):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -76,10 +83,10 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			title_wrapper.append(bold(now.strftime("%d-%m-%Y")))
 			title_wrapper.append(LineBreak())
 			title_wrapper.append("\n")
-			title_wrapper.append(LargeText(bold("Chamber: "+str(chambername))))
+			title_wrapper.append(LargeText(bold("Double Wedge: "+str(DW_name))))
 			title_wrapper.append(LineBreak())
-			title_wrapper.append("ID: "+str(ID))
-			title_wrapper.append(LineBreak())
+			# title_wrapper.append("ID: "+str(ID))
+			# title_wrapper.append(LineBreak())
 
 	# Add footer
 	with first_page.create(Foot("C")) as footer:
@@ -145,285 +152,216 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	doc.change_document_style("firstpage")
 	doc.add_color(name="lightgray", model="gray", description="0.80")
 
-	#doc.append(NoEscape(r'\vspace{17.634mm}'))
-	#doc.append(LargeText(bold("Gas leak (mL/h) "))+str(gas_leak))
+	# IP
+	with doc.create(Section('IP', numbering=False)):
+		#doc.crea(LargeText(bold(chambername1IP)
+		# SM1
+		if chambername1IP[0:3] == "SM1":
+			limit = 10
+		else:
+			limit = 6
+		with doc.create(Subsection(chambername2IP, numbering=False)):
+			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+									 row_height=1.5)) as data_table:
+					data_table.add_hline()
+					data_table.add_row(["Sector",
+										"L1",
+										"L2",
+										"L3",
+										"L4",
+										"HL1",
+										"HL2"],
+									   mapper=bold,
+									   color="lightgray")
+					data_table.add_hline()
+					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+					i = 0
+					for hv in final_hvs[0]:
+						hl1_str = ""
+						hl2_str = ""
+						l1 = ""
+						l2 = ""
+						l3 = ""
+						l4 = ""
+						if hv == hl1:
+							hl1_str = str(hl1)
+						elif hv == hl2:
+							hl2_str = str(hl2)
+						elif i > limit-1+limit*2:
+							l4 = "570"
+						elif i > limit-1+limit:
+							l3 = "570"
+						elif i > limit-1:
+							l2 = "570"
+						else:
+							l1 = "570"
 
-	with doc.create(Section('HV not irradiated', numbering=False)):
-	   # Add statement table
-		doc.append("\n")
-		doc.append(timeslot)
-		doc.append(LineBreak())
-		doc.append(str(deltatime/60)+str("_min"))
-		doc.append(LineBreak())
-		doc.append("Spike_treshold_0.2_uA")
-		doc.append(LineBreak())
-		with doc.create(LongTabu("X[l] X[r] X[r] X[r] X[r]",
-								 row_height=1.5)) as data_table:
-			data_table.add_row(["Sector",
-								"HV",
-								"spark/min",
-								"Efficiency",
-								"Flag"],
-							   mapper=bold,
-							   color="lightgray")
-			data_table.add_empty_row()
-			data_table.add_hline()
-			row = ["sector", "hv", "spark", "efficiency", "0 or 1"]
-			acceptedlist = []
-			not_acc_counter = 0
-			for i in range(len(hv_notirradiated)):
-				acc_color = "black"
-				if (i % 2) == 0:
-					'''
-					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
-						accepted = 1
-						acceptedlist.append(accepted)
+						if (i % 2) == 0:
+							data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+						else:
+							data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						i = i+1
+					data_table.add_hline()
 
-					else:
-						accepted = 0
-						acceptedlist.append(accepted)
-					'''
-					if int(hv_notirradiated[i]) > 567.9:
-						hvcolor = "black"
+	#	SM2
 
-					if 548.0 < int(hv_notirradiated[i]) < 567.9:
-						hvcolor = "orange"
+		if chambername2IP[0:3] == "SM1":
+			limit = 10
+		else:
+			limit = 6
+		with doc.create(Subsection(chambername2IP, numbering=False)):
+			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+									 row_height=1.5)) as data_table2:
+					data_table2.add_hline()
+					data_table2.add_row(["Sector",
+										"L1",
+										"L2",
+										"L3",
+										"L4",
+										"HL1",
+										"HL2"],
+									   mapper=bold,
+									   color="lightgray")
+					data_table2.add_hline()
+					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+					i = 0
+					for hv in final_hvs[1]:
+						hl1_str = ""
+						hl2_str = ""
+						l1 = ""
+						l2 = ""
+						l3 = ""
+						l4 = ""
+						if hv == hl1:
+							hl1_str = str(hl1)
+						elif hv == hl2:
+							hl2_str = str(hl2)
+						elif i > limit-1+limit*2:
+							l4 = "570"
+						elif i > limit-1+limit:
+							l3 = "570"
+						elif i > limit-1:
+							l2 = "570"
+						else:
+							l1 = "570"
 
-					if int(hv_notirradiated[i])< 548.0:
-						hvcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if spark_notirradiated[i] > 6.0:
-						sparkcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if spark_notirradiated[i] == 6.0:
-						sparkcolor = "orange"
-
-					if spark_notirradiated[i] < 6.0:
-						sparkcolor = "black"
-
-					if efficiency[i] < 80.0:
-						effcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if efficiency[i] > 80.0:
-						effcolor = "black"
-
-					if efficiency == 80.0:
-						effcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "black":
-						acceptedcolor = "black"
-
-					if sparkcolor == "red" or hvcolor == "red":
-						acceptedcolor = "red"
-
-					if sparkcolor == "orange" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
-						accepted = 1
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "red":
-						accepted = 0
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "orange":
-						accepted = 2
-						acceptedlist.append(accepted)
-
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color, "V")], color="lightgray")
-				else:
-					'''
-					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
-						accepted = 1
-						acceptedlist.append(accepted)
-					else:
-						accepted = 0
-						acceptedlist.append(accepted)
-					'''
-					if int(hv_notirradiated[i]) > 567.9:
-						hvcolor = "black"
-
-					if 548.0 < int(hv_notirradiated[i]) < 567.9:
-						hvcolor = "orange"
-
-					if int(hv_notirradiated[i])< 548.0:
-						hvcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if spark_notirradiated[i] > 6.0:
-						sparkcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if spark_notirradiated[i] == 6.0:
-						sparkcolor = "orange"
-
-					if spark_notirradiated[i] < 6.0:
-						sparkcolor = "black"
-
-					if efficiency[i] < 80.0:
-						effcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
-
-					if efficiency[i] > 80.0:
-						effcolor = "black"
-
-					if efficiency == 80.0:
-						effcolor = "orange"
-					if sparkcolor == "black" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "black"
-
-					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
-						acceptedcolor = "red"
-
-					if sparkcolor == "orange" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
-						accepted = 1
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "red":
-						accepted = 0
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "orange":
-						accepted = 2
-						acceptedlist.append(accepted)
-
-					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
-
-			data_table.add_empty_row()
-			data_table.add_hline()
-			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), str(len([x for x in spark_notirradiated if x > 6.0])), str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
-
-			data_table.add_empty_row()
-			data_table.add_hline()
-			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
+						if (i % 2) == 0:
+							data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+						else:
+							data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						i = i+1
+					data_table2.add_hline()
+	# HO
+	final_hvs[2] = swap(final_hvs[2])
+	final_hvs[3] = swap(final_hvs[3])
+	if chambername1HO[0:3] == "SM1":
+		limit = 10
+	else:
+		limit = 6
+	with doc.create(Section('HO', numbering=False)):
+		with doc.create(Subsection(chambername1HO, numbering=False)):
+			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+									 row_height=1.5)) as data_table3:
+					data_table3.add_hline()
+					data_table3.add_row(["Sector",
+										"L1",
+										"L2",
+										"L3",
+										"L4",
+										"HL1",
+										"HL2"],
+									   mapper=bold,
+									   color="lightgray")
+					data_table3.add_hline()
+					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+					i = 0
+					for hv in final_hvs[2]:
+						hl1_str = ""
+						hl2_str = ""
+						l1 = ""
+						l2 = ""
+						l3 = ""
+						l4 = ""
+						if hv == hl1:
+							hl1_str = str(hl1)
+						elif hv == hl2:
+							hl2_str = str(hl2)
+						elif i > limit-1+limit*2:
+							l4 = "570"
+						elif i > limit-1+limit:
+							l3 = "570"
+						elif i > limit-1:
+							l2 = "570"
+						else:
+							l1 = "570"
 
 
-	with doc.create(Section('Summary not irradiated', numbering=False)):
+						if (i % 2) == 0:
+							data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+						else:
+							data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						i = i+1
+					data_table3.add_hline()
 
-		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0), acceptedlist.count(2)], "piechart.pdf")
+		if chambername2HO[0:3] == "SM1":
+			limit = 10
+		else:
+			limit = 6
+		with doc.create(Subsection(chambername2HO, numbering=False)):
+			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+									 row_height=1.5)) as data_table4:
+					data_table4.add_hline()
+					data_table4.add_row(["Sector",
+										"L1",
+										"L2",
+										"L3",
+										"L4",
+										"HL1",
+										"HL2"],
+									   mapper=bold,
+									   color="lightgray")
+					data_table4.add_hline()
+					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+					i = 0
+					for hv in final_hvs[3]:
+						hl1_str = ""
+						hl2_str = ""
+						l1 = ""
+						l2 = ""
+						l3 = ""
+						l4 = ""
+						if hv == hl1:
+							hl1_str = str(hl1)
+						elif hv == hl2:
+							hl2_str = str(hl2)
+						elif i > limit-1+limit*2:
+							l4 = "570"
+						elif i > limit-1+limit:
+							l3 = "570"
+						elif i > limit-1:
+							l2 = "570"
+						else:
+							l1 = "570"
 
 
-		 # Add cheque images
-		with doc.create(LongTabu("X[c]")) as summary1_table:
-			pie = glob.iglob("piechart.pdf")
-			#png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
-			pienew = [StandAloneGraphic(x, image_options="width=220px") for x in pie]
-			summary1_table.add_row([pienew[0]])
-
-		#here I have sectors_notirradiated, hv_notirradiated, spark_notirradiated, acceptedlist
-		SM1channels = ["L1","R1","L2","R2","L3","R3","L4","R4","L5","R5"]
-		SM2channels = ["L6","R6","L7","R7","L8","R8"]
-
-		badresultsall = []
-		badresultseta = []
-		badresultsstereo = []
-
-		if chambername[0:3] == "SM1":
-		   channels = SM1channels
-		if chambername[0:3] == "SM2":
-		   channels = SM2channels
-		if chambername[0:3] == "LM1":
-			channels = SM1channels
-		if chambername[0:3] == "LM2":
-			channels = SM2channels
-
-		for channel in channels:
-		   cntall = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and acceptedlist[x] == 1)
-		   cnteta = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "1" or sector[1:2] == "2") and acceptedlist[x] == 1)
-		   cntstereo = sum(1 for x, sector in enumerate(sectors_notirradiated) if sector[2:4] == channel and (sector[1:2] == "3" or sector[1:2] == "4") and acceptedlist[x] == 1)
-		   badresultsall.append(4-int(cntall))
-		   badresultseta.append(2-int(cnteta))
-		   badresultsstereo.append(2-int(cntstereo))
-
-		#doc.append(NewPage())
-
-		with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
-								 row_height=1.5)) as data_table2:
-			data_table2.add_row(["Sector overimposed (from eta side)",
-								"Eta",
-								"Stereo",
-								"Eta+Stereo"],
-								mapper=bold,
-								color="lightgray")
-			data_table2.add_empty_row()
-			data_table2.add_hline()
-			row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
-
-			for i in range(len(channels)):
-				if (i % 2) == 0:
-					data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]], color="lightgray")
-				else:
-					data_table2.add_row([str(channels[i]), str(int(badresultseta[i])), str(badresultsstereo[i]), badresultsall[i]])
-
-		with doc.create(LongTabu("X[l] X[r]",
-								 row_height=1.5)) as data_table3:
-			data_table3.add_row(["Layer",
-								"Mean Efficiency"],
-								mapper=bold,
-								color="lightgray")
-			data_table3.add_empty_row()
-			data_table3.add_hline()
-			row = ["layers", "efficiency"]
-			channelsT3 = ["L1", "L2", "L3", "L4"]
-			for i in range(len(layers_efficiency)):
-				if (i % 2) == 0:
-					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))], color="lightgray")
-				else:
-					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))])
-
-	doc.append(NewPage())
-
-	with doc.create(Section('Current with no irradiation', numbering=False)):
-
-	# Add cheque images
-		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
-			png_list = glob.glob('BB5-i*.pdf')
-			png_list.sort(key=os.path.getmtime)
-			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
-			print len(png_list)
-			row_image = []
-			i = 0
-			for image in png_list:
-				row_image.append(image)
-				i = i +1
-				if i==4:
-					cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
-					row_image = []
-					i=0
+						if (i % 2) == 0:
+							data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+						else:
+							data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						i = i+1
+					data_table4.add_hline()
 
 	png_list = []
 
-	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
+	doc.generate_pdf("complex_report_DW", clean_tex=False, compiler='pdflatex')
+
+
+
 #---------------------------------------------------------------------------------------------
-generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated)
+def swap(hvs):
+	for i in range(len(hvs)/2):
+		hvs[i*2], hvs[i*2+1] = hvs[i*2+1] , hvs[i*2]
+	return hvs
+#---------------------------------------------------------------------------------------------
+
+generate_unique(final_hvs,hl1, hl2, sectors)
