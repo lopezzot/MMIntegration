@@ -311,6 +311,8 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			data_table.add_row("Chamber efficiency", "","","","", "", str(round(total_efficiency)))
 			data_table.add_hline()
 
+	doc.append(NewPage())
+
 	with doc.create(Section('Summary not irradiated', numbering=False)):
 
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0), acceptedlist.count(2)], "piechart.pdf")
@@ -348,8 +350,6 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 		   badresultseta.append(2-int(cnteta))
 		   badresultsstereo.append(2-int(cntstereo))
 
-		#doc.append(NewPage())
-
 		with doc.create(LongTabu("X[l] X[r] X[r] X[r]",
 								 row_height=1.5)) as data_table2:
 			data_table2.add_row(["Sector overimposed (from eta side)",
@@ -384,7 +384,6 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 				else:
 					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))])
 
-	doc.append(NewPage())
 
 	with doc.create(Section('Current with no irradiation', numbering=False)):
 
@@ -560,12 +559,10 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -576,7 +573,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if efficiency[i] < 80.0:
 						effcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
@@ -606,6 +602,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if acceptedcolor == "red":
 						accepted = 0
 						acceptedlist.append(accepted)
+						not_acc_counter = not_acc_counter+1
 
 					if acceptedcolor == "orange":
 						accepted = 2
@@ -632,12 +629,10 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -648,7 +643,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if efficiency[i] < 80.0:
 						effcolor = "red"
 						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
@@ -683,6 +677,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if acceptedcolor == "red":
 						accepted = 0
 						acceptedlist.append(accepted)
+						not_acc_counter = not_acc_counter+1
 
 					if acceptedcolor == "orange":
 						accepted = 2
@@ -690,7 +685,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
 					TextColor(acc_color, "V")])
-				#	data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
 			data_table.add_empty_row()
 			data_table.add_hline()
@@ -700,6 +694,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			data_table.add_hline()
 			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
 			data_table.add_hline()
+
 
 	with doc.create(Section('Summary not irradiated', numbering=False)):
 

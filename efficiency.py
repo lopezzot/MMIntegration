@@ -1,15 +1,14 @@
 from ROOT import TMath
 import math
 def get_efficiency(x):
-
-# sigmoid
+    # sigmoid
     p0 = 96.7336
     p1 = 0.0626969
     p2 = 521.418
     efficiency = (p0/(1+ math.exp(-p1*(x-p2))))
     return efficiency
 
-def get_mean_efficiency(values):
+def get_mean_efficiency(values): # returns mean efficiency
     total = 0
     for i in range(len(values)):
         total = total + get_efficiency(values[i])
@@ -22,7 +21,7 @@ def efficiency_values(values, type):   # get efficiency per sector, per layer an
     for i in range(len(values)):
         efficiency.append(get_efficiency(values[i]))
     total_efficiency = get_mean_efficiency(values)
-    if type == "SM1" or type == "SM2":
+    if type == "SM1" or type == "LM1":
         for x in range(len(values)/10):
             layers_efficiency.append(get_mean_efficiency(values[x*10:x*10+10]))
     else:
