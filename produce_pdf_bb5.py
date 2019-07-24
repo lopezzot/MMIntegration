@@ -9,7 +9,7 @@ import production_site
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
-	LineBreak, NewPage, Tabularx, TextColor, simple_page_number, Section, TextBlock
+	LineBreak, NewPage, Tabularx, TextColor, simple_page_number, Section, TextBlock, NoEscape
 from pylatex.utils import bold, NoEscape
 
 now = datetime.datetime.now()
@@ -150,7 +150,6 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			not_acc_counter = 0
 			pscolor = "blue"
 			for i in range(len(hv_notirradiated)):
-				acc_color = "black"
 				if (i % 2) == 0:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -169,13 +168,9 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -185,8 +180,6 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					if efficiency[i] < 80.0:
 						effcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
@@ -194,36 +187,20 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 					if efficiency == 80.0:
 						effcolor = "orange"
 
-					if sparkcolor == "black" and hvcolor == "black":
-						acceptedcolor = "black"
-
-					if sparkcolor == "red" or hvcolor == "red":
+					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
 						acceptedcolor = "red"
-
-					if sparkcolor == "orange" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
-						accepted = 1
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "red":
 						accepted = 0
 						acceptedlist.append(accepted)
+						not_acc_counter = not_acc_counter+1
 
-					if acceptedcolor == "orange":
-						accepted = 2
+					else:
+						acceptedcolor = "black"
+						accepted = 1
 						acceptedlist.append(accepted)
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acc_color, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")], color="lightgray")
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -241,13 +218,9 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -257,49 +230,28 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					if efficiency[i] < 80.0:
 						effcolor = "red"
-						acc_color = "red"
-						not_acc_counter = not_acc_counter+1
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
 
 					if efficiency == 80.0:
 						effcolor = "orange"
-					if sparkcolor == "black" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "black"
 
 					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
 						acceptedcolor = "red"
+						accepted = 0
+						acceptedlist.append(accepted)
+						not_acc_counter = not_acc_counter+1
 
-					if sparkcolor == "orange" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
+					else:
+						acceptedcolor = "black"
 						accepted = 1
 						acceptedlist.append(accepted)
 
-					if acceptedcolor == "red":
-						accepted = 0
-						acceptedlist.append(accepted)
 
-					if acceptedcolor == "orange":
-						accepted = 2
-						acceptedlist.append(accepted)
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acc_color, "V")])
+					TextColor(acceptedcolor, "V")])
 				#	data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
 			data_table.add_empty_row()
@@ -311,13 +263,11 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			data_table.add_row("Chamber efficiency", "","","","", "", str(round(total_efficiency)))
 			data_table.add_hline()
 
-	doc.append(NewPage())
+	#doc.append(NewPage())
+	doc.append(NoEscape('\\clearpage'))
 
 	with doc.create(Section('Summary not irradiated', numbering=False)):
-
-		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0), acceptedlist.count(2)], "piechart.pdf")
-
-
+		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 		 # Add cheque images
 		with doc.create(LongTabu("X[c]")) as summary1_table:
 			pie = glob.iglob("piechart.pdf")
@@ -509,9 +459,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	doc.change_document_style("firstpage")
 	doc.add_color(name="lightgray", model="gray", description="0.80")
 
-	#doc.append(NoEscape(r'\vspace{17.634mm}'))
-	#doc.append(LargeText(bold("Gas leak (mL/h) "))+str(gas_leak))
-
 	with doc.create(Section('HV not irradiated', numbering=False)):
 	   # Add statement table
 		doc.append("\n")
@@ -539,7 +486,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			not_acc_counter = 0
 			pscolor = "blue"
 			for i in range(len(hv_notirradiated)):
-				acc_color = "black"
 				if (i % 2) == 0:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -558,11 +504,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
-						acc_color = "red"
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
-						acc_color = "red"
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -572,7 +516,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if efficiency[i] < 80.0:
 						effcolor = "red"
-						acc_color = "red"
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
@@ -580,37 +523,21 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					if efficiency == 80.0:
 						effcolor = "orange"
 
-					if sparkcolor == "black" and hvcolor == "black":
-						acceptedcolor = "black"
-
-					if sparkcolor == "red" or hvcolor == "red":
+					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
 						acceptedcolor = "red"
-
-					if sparkcolor == "orange" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
-						accepted = 1
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "red":
 						accepted = 0
 						acceptedlist.append(accepted)
 						not_acc_counter = not_acc_counter+1
 
-					if acceptedcolor == "orange":
-						accepted = 2
+					else:
+						acceptedcolor = "black"
+						accepted = 1
 						acceptedlist.append(accepted)
+
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acc_color, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")], color="lightgray")
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -628,11 +555,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if int(hv_notirradiated[i])< 548.0:
 						hvcolor = "red"
-						acc_color = "red"
 
 					if spark_notirradiated[i] > 6.0:
 						sparkcolor = "red"
-						acc_color = "red"
 
 					if spark_notirradiated[i] == 6.0:
 						sparkcolor = "orange"
@@ -642,49 +567,28 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					if efficiency[i] < 80.0:
 						effcolor = "red"
-						acc_color = "red"
 
 					if efficiency[i] > 80.0:
 						effcolor = "black"
 
 					if efficiency == 80.0:
 						effcolor = "orange"
-					if sparkcolor == "black" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "black"
 
 					if sparkcolor == "red" or hvcolor == "red" or effcolor == "red":
 						acceptedcolor = "red"
-
-					if sparkcolor == "orange" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "black":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "orange" and hvcolor == "black" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if sparkcolor == "black" and hvcolor == "orange" and effcolor == "orange":
-						acceptedcolor = "orange"
-
-					if acceptedcolor == "black":
-						accepted = 1
-						acceptedlist.append(accepted)
-
-					if acceptedcolor == "red":
 						accepted = 0
 						acceptedlist.append(accepted)
 						not_acc_counter = not_acc_counter+1
 
-					if acceptedcolor == "orange":
-						accepted = 2
+					else:
+						acceptedcolor = "black"
+						accepted = 1
 						acceptedlist.append(accepted)
+
+
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acc_color, "V")])
+					TextColor(acceptedcolor, "V")])
 
 			data_table.add_empty_row()
 			data_table.add_hline()
@@ -695,10 +599,12 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
 			data_table.add_hline()
 
-
+	doc.append(NoEscape('\\clearpage'))
 	with doc.create(Section('Summary not irradiated', numbering=False)):
-
-		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0), acceptedlist.count(2)], "piechart.pdf")
+		print "pie\n"
+		print acceptedlist.count(1)
+		print acceptedlist.count(0)
+		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 
 
 		 # Add cheque images
@@ -790,7 +696,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 					i=0
 
 	png_list = []
-
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 
 #---------------------------------------------------------------------------------------------
