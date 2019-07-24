@@ -3,9 +3,7 @@ import datetime
 import MMPlots
 import MMPlots_attenuation
 import glob
-#import piecart
 from termcolor import colored
-#import production_site
 import bad_sectors
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
@@ -51,7 +49,7 @@ for i in range(4):
 
 final_hvs, hl1, hl2 = bad_sectors.get_sectors_hv(hvs)
 #--------------------------------------------------------------------------------
-def generate_unique(final_hvs, hl1, hl2, sectors):
+def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -140,209 +138,208 @@ def generate_unique(final_hvs, hl1, hl2, sectors):
 	doc.add_color(name="lightgray", model="gray", description="0.80")
 
 	# IP
-	with doc.create(Section('IP', numbering=False)):
-		# SM1
-		if chambername1IP[0:3] == "SM1":
+	with doc.create(Section('IP SIDE', numbering=False)):
+		# first chamber
+		# Verify if its SM1, LM1, SM1 or LM2
+		if chambername1IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
 			limit = 10
 		else:
 			limit = 6
-		with doc.create(Subsection(chambername1IP, numbering=False)):
-			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
-									 row_height=1.5)) as data_table:
-					data_table.add_hline()
-					data_table.add_row(["Sector",
-										"L1",
-										"L2",
-										"L3",
-										"L4",
-										"HL1",
-										"HL2"],
-									   mapper=bold,
-									   color="lightgray")
-					data_table.add_hline()
-					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-					i = 0
-					for hv in final_hvs[0]:
-						hl1_str = ""
-						hl2_str = ""
-						l1 = ""
-						l2 = ""
-						l3 = ""
-						l4 = ""
-						if hv == hl1:
-							hl1_str = str(hl1)
-						elif hv == hl2:
-							hl2_str = str(hl2)
-						elif i > limit-1+limit*2:
-							l4 = "570"
-						elif i > limit-1+limit:
-							l3 = "570"
-						elif i > limit-1:
-							l2 = "570"
-						else:
-							l1 = "570"
 
-						if (i % 2) == 0:
-							data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str])
-						else:
-							data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
-						i = i+1
-					data_table.add_hline()
+		with doc.create(Subsection("Chambers: "+chambername1IP+" + "+chambername2IP, numbering=False)):
+			with doc.create(Subsection(chambername1IP, numbering=False)):
+				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+										 row_height=1.5)) as data_table:
+						data_table.add_hline()
+						data_table.add_row(["Sector",
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
+										   mapper=bold,
+										   color="lightgray")
+						data_table.add_hline()
+						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+						for i, hv in enumerate(final_hvs[0]):
+							hl1_str = ""
+							hl2_str = ""
+							l1 = ""
+							l2 = ""
+							l3 = ""
+							l4 = ""
+							# assign each sector to a line
+							if hv == hl1:
+								hl1_str = str(hl1)
+							elif hv == hl2:
+								hl2_str = str(hl2)
+							elif i > limit-1+limit*2:
+								l4 = "570"
+							elif i > limit-1+limit:
+								l3 = "570"
+							elif i > limit-1:
+								l2 = "570"
+							else:
+								l1 = "570"
+							if (i % 2) == 0:
+								data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+							else:
+								data_table.add_row([str(sectors[0][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						data_table.add_hline()
 
-	#	SM2
+			# second chamber
+			if chambername2IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
+				limit = 10
+			else:
+				limit = 6
+			with doc.create(Subsection(chambername2IP, numbering=False)):
+				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+										 row_height=1.5)) as data_table2:
+						data_table2.add_hline()
+						data_table2.add_row(["Sector",
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
+										   mapper=bold,
+										   color="lightgray")
+						data_table2.add_hline()
+						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+						for i, hv in enumerate(final_hvs[1]):
+							hl1_str = ""
+							hl2_str = ""
+							l1 = ""
+							l2 = ""
+							l3 = ""
+							l4 = ""
+							# assign each sector to a line
+							if hv == hl1:
+								hl1_str = str(hl1)
+							elif hv == hl2:
+								hl2_str = str(hl2)
+							elif i > limit-1+limit*2:
+								l4 = "570"
+							elif i > limit-1+limit:
+								l3 = "570"
+							elif i > limit-1:
+								l2 = "570"
+							else:
+								l1 = "570"
 
-		if chambername2IP[0:3] == "SM1":
-			limit = 10
-		else:
-			limit = 6
-		with doc.create(Subsection(chambername2IP, numbering=False)):
-			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
-									 row_height=1.5)) as data_table2:
-					data_table2.add_hline()
-					data_table2.add_row(["Sector",
-										"L1",
-										"L2",
-										"L3",
-										"L4",
-										"HL1",
-										"HL2"],
-									   mapper=bold,
-									   color="lightgray")
-					data_table2.add_hline()
-					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-					i = 0
-					for hv in final_hvs[1]:
-						hl1_str = ""
-						hl2_str = ""
-						l1 = ""
-						l2 = ""
-						l3 = ""
-						l4 = ""
-						if hv == hl1:
-							hl1_str = str(hl1)
-						elif hv == hl2:
-							hl2_str = str(hl2)
-						elif i > limit-1+limit*2:
-							l4 = "570"
-						elif i > limit-1+limit:
-							l3 = "570"
-						elif i > limit-1:
-							l2 = "570"
-						else:
-							l1 = "570"
-
-						if (i % 2) == 0:
-							data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str])
-						else:
-							data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
-						i = i+1
-					data_table2.add_hline()
+							if (i % 2) == 0:
+								data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+							else:
+								data_table2.add_row([str(sectors[1][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						data_table2.add_hline()
 	# HO
+	# Swap R an L
 	final_hvs[2] = swap(final_hvs[2])
 	final_hvs[3] = swap(final_hvs[3])
-	if chambername1HO[0:3] == "SM1":
+	if chambername1HO[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
 		limit = 10
 	else:
 		limit = 6
 	doc.append(NewPage())
-	with doc.create(Section('HO', numbering=False)):
-		with doc.create(Subsection(chambername1HO, numbering=False)):
-			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
-									 row_height=1.5)) as data_table3:
-					data_table3.add_hline()
-					data_table3.add_row(["Sector",
-										"L1",
-										"L2",
-										"L3",
-										"L4",
-										"HL1",
-										"HL2"],
-									   mapper=bold,
-									   color="lightgray")
-					data_table3.add_hline()
-					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-					i = 0
-					for hv in final_hvs[2]:
-						hl1_str = ""
-						hl2_str = ""
-						l1 = ""
-						l2 = ""
-						l3 = ""
-						l4 = ""
-						if hv == hl1:
-							hl1_str = str(hl1)
-						elif hv == hl2:
-							hl2_str = str(hl2)
-						elif i > limit-1+limit*2:
-							l4 = "570"
-						elif i > limit-1+limit:
-							l3 = "570"
-						elif i > limit-1:
-							l2 = "570"
-						else:
-							l1 = "570"
+	with doc.create(Section('HO SIDE', numbering=False)):
+		# first chamber
+		with doc.create(Subsection("Chambers: "+chambername1HO+" + "+chambername2HO, numbering=False)):
+			with doc.create(Subsection(chambername1HO, numbering=False)):
+				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+										 row_height=1.5)) as data_table3:
+						data_table3.add_hline()
+						data_table3.add_row(["Sector",
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
+										   mapper=bold,
+										   color="lightgray")
+						data_table3.add_hline()
+						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+						for i, hv in enumerate(final_hvs[2]):
+							hl1_str = ""
+							hl2_str = ""
+							l1 = ""
+							l2 = ""
+							l3 = ""
+							l4 = ""
+							# assign each sector to a line
+							if hv == hl1:
+								hl1_str = str(hl1)
+							elif hv == hl2:
+								hl2_str = str(hl2)
+							elif i > limit-1+limit*2:
+								l4 = "570"
+							elif i > limit-1+limit:
+								l3 = "570"
+							elif i > limit-1:
+								l2 = "570"
+							else:
+								l1 = "570"
+							if (i % 2) == 0:
+								data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+							else:
+								data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						data_table3.add_hline()
 
+			# second chamber
+			if chambername2HO[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
+				limit = 10
+			else:
+				limit = 6
+			with doc.create(Subsection(chambername2HO, numbering=False)):
+				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
+										 row_height=1.5)) as data_table4:
+						data_table4.add_hline()
+						data_table4.add_row(["Sector",
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
+										   mapper=bold,
+										   color="lightgray")
+						data_table4.add_hline()
+						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
+						for i, hv in enumerate(final_hvs[3]):
+							hl1_str = ""
+							hl2_str = ""
+							l1 = ""
+							l2 = ""
+							l3 = ""
+							l4 = ""
+							# assign each sector to a line
+							if hv == hl1:
+								hl1_str = str(hl1)
+							elif hv == hl2:
+								hl2_str = str(hl2)
+							elif i > limit-1+limit*2:
+								l4 = "570"
+							elif i > limit-1+limit:
+								l3 = "570"
+							elif i > limit-1:
+								l2 = "570"
+							else:
+								l1 = "570"
 
-						if (i % 2) == 0:
-							data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str])
-						else:
-							data_table3.add_row([str(sectors[2][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
-						i = i+1
-					data_table3.add_hline()
-
-		if chambername2HO[0:3] == "SM1":
-			limit = 10
-		else:
-			limit = 6
-		with doc.create(Subsection(chambername2HO, numbering=False)):
-			with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
-									 row_height=1.5)) as data_table4:
-					data_table4.add_hline()
-					data_table4.add_row(["Sector",
-										"L1",
-										"L2",
-										"L3",
-										"L4",
-										"HL1",
-										"HL2"],
-									   mapper=bold,
-									   color="lightgray")
-					data_table4.add_hline()
-					row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-					i = 0
-					for hv in final_hvs[3]:
-						hl1_str = ""
-						hl2_str = ""
-						l1 = ""
-						l2 = ""
-						l3 = ""
-						l4 = ""
-						if hv == hl1:
-							hl1_str = str(hl1)
-						elif hv == hl2:
-							hl2_str = str(hl2)
-						elif i > limit-1+limit*2:
-							l4 = "570"
-						elif i > limit-1+limit:
-							l3 = "570"
-						elif i > limit-1:
-							l2 = "570"
-						else:
-							l1 = "570"
-
-
-						if (i % 2) == 0:
-							data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str])
-						else:
-							data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
-						i = i+1
-					data_table4.add_hline()
+							if (i % 2) == 0:
+								data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str])
+							else:
+								data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
+						data_table4.add_hline()
 	doc.generate_pdf("complex_report_DW", clean_tex=False, compiler='pdflatex')
 #---------------------------------------------------------------------------------------------
+# swap R and L
 def swap(hvs):
 	for i in range(len(hvs)/2):
 		hvs[i*2], hvs[i*2+1] = hvs[i*2+1] , hvs[i*2]
 	return hvs
 #---------------------------------------------------------------------------------------------
 
-generate_unique(final_hvs,hl1, hl2, sectors)
+generate_unique_dw(final_hvs,hl1, hl2, sectors)

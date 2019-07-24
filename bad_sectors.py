@@ -6,23 +6,15 @@ def get_threshold(hvs):
             if sector < threshold:
                 values.append(sector)
     values.sort()
-    print "len values"
-    print len(values)
     div = values[int(len(values)/2)-1]
-    hl1 = round(values[0],2)
-    hl2 = round(values[int(len(values)/2)],2)
+    hl1 = int(round(values[0]))
+    hl2 = int(round(values[int(len(values)/2)]))
     return div, hl1, hl2
 
 def get_sectors_hv(hvs):
     div, hl1, hl2  = get_threshold(hvs)
     final_values = []
     final_hvs = []
-    print "div"
-    print div
-    print "hl1"
-    print hl1
-    print "hl2"
-    print hl2
     i=0
     for chamber in hvs:
         for sector in chamber:
