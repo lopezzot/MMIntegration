@@ -152,7 +152,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 	with doc.create(Section('IP SIDE', numbering=False)):
 		# first chamber
 		# Verify if its SM1, LM1, SM1 or LM2
-		if chambername1IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
+		if chambername1IP[0:3] == "SM1" or chambername1IP[0:3] == "LM1":
 			limit = 10
 		else:
 			limit = 6
@@ -203,7 +203,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 						data_table.add_hline()
 
 			# second chamber
-			if chambername2IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
+			if chambername2IP[0:3] == "SM1" or chambername2IP[0:3] == "LM1":
 				limit = 10
 			else:
 				limit = 6
@@ -215,12 +215,12 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 										 row_height=1.5)) as data_table2:
 						data_table2.add_hline()
 						data_table2.add_row(["Sector",
-											"L1",
-											"L2",
-											"L3",
-											"L4",
-											"HL1",
-											"HL2"],
+											"L5",
+											"L6",
+											"L7",
+											"L8",
+											"HL3",
+											"HL4"],
 										   mapper=bold,
 										   color="lightgray")
 						data_table2.add_hline()
@@ -255,7 +255,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 	# Swap R an L
 	final_hvs[2] = swap(final_hvs[2])
 	final_hvs[3] = swap(final_hvs[3])
-	if chambername1HO[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
+	if chambername1HO[0:3] == "SM1" or chambername1HO[0:3] == "LM1":
 		limit = 10
 	else:
 		limit = 6
@@ -320,12 +320,12 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 										 row_height=1.5)) as data_table4:
 						data_table4.add_hline()
 						data_table4.add_row(["Sector",
-											"L1",
-											"L2",
-											"L3",
-											"L4",
-											"HL1",
-											"HL2"],
+											"L5",
+											"L6",
+											"L7",
+											"L8",
+											"HL3",
+											"HL4"],
 										   mapper=bold,
 										   color="lightgray")
 						data_table4.add_hline()

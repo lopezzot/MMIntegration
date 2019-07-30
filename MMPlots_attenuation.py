@@ -12,12 +12,13 @@ import classes
 from fpdf import FPDF
 from pylatex import Document, Figure
 from array import array
+import efficiency
 
 #----------------------------------------------------------------------------
 def createsummaryplot_attenuation():
 	'''function to collect info from GIF file'''
 
-	where = raw_input("Where are you? (GIF or bb5) ")
+	where = raw_input("Who is it? (GIF, bb5, Lorenzo, Natalia) ")
 	house = raw_input("Data in Gif (or bb5)? ") #insert BB5 of GIF file path
 	global folder
 	folder = raw_input("Insert folder to study: ") #insert folder with bartch ID
@@ -34,7 +35,7 @@ def createsummaryplot_attenuation():
 		defaultlayers = defaultlayersSM1
 	if chambertype == "LM2":
 		defaultlayers = defaultlayersSM2
-		
+
 	ID = folder[0:18] #batch ID
 	timeslot = folder[19:len(folder)] #time slot from folder name
 
@@ -43,19 +44,24 @@ def createsummaryplot_attenuation():
 	if where == "gif":
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
-		giffile = gifpath+"EffectiveAttenuation.dat" 
+		giffile = gifpath+"EffectiveAttenuation.dat"
 		sourcefile = gifpath+"Soure.dat"
 
 	elif where == "bb5":
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
-		giffile = gifpath+"EffectiveAttenuation.dat" 
+		giffile = gifpath+"EffectiveAttenuation.dat"
 		sourcefile = gifpath+"Soure.dat"
-		
-	else:
+
+	elif where == "Lorenzo":
 		path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
 		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
-		giffile = gifpath+"EffectiveAttenuation.dat" 
+		giffile = gifpath+"EffectiveAttenuation.dat"
+		sourcefile = gifpath+"Source.dat"
+	else:
+		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		gifpath = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/GIF/"
+		giffile = gifpath+"EffectiveAttenuation.dat"
 		sourcefile = gifpath+"Source.dat"
 
 	rootfile = TFile(folder+".root","RECREATE")
@@ -80,11 +86,12 @@ def createsummaryplot_attenuation():
 	graphs_atten = []
 	graphs_linearity = []
 
+	print "im here"
 	for dat_file in glob.iglob(path+'*.dat'):
 		print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n" #print file under analysis
 		filename = dat_file[len(path):len(dat_file)-4]
 		graph_atten, graph_linearity, spikeslayer, spikeduration, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(giffile, dat_file, dat_file[len(path):len(dat_file)-4])
-		
+
 		if spikeseconds != None:
 			newspikeseconds = newspikeseconds + spikeseconds
 		if spikeslayer != None:
@@ -106,7 +113,7 @@ def createsummaryplot_attenuation():
 		if graph_linearity != None:
 			graphs_linearity.append(graph_linearity)
 
-	#create summary plots 
+	#create summary plots
 	tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
 	tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 	tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
@@ -140,7 +147,7 @@ def createsummaryplot_attenuation():
 		orderedsectorsvoltages.append(sectorsvoltages[index])
 		orderedsmeanvoltages.append(meanvoltages[index])
 		ordered_orderedspikerate.append(orderedspikerate[index])
-	
+
 	graph_atten_names = []
 	for graph in graphs_atten:
 		graph_atten_names.append(graph.name)
@@ -155,14 +162,15 @@ def createsummaryplot_attenuation():
 		index = graph_linearity_names.index(layer)
 		ordered_graphslinearity.append(graphs_linearity[index])
 
-	for counter, graph in enumerate(ordered_graphsatten):	                                                           #+" "+str(int(orderedsmeanvoltages[counter]))# 
-		tools.write_rootdategraph_plusatten(graph.new_rootdates, graph.newvalues, graph.atten_newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", filename[0], dir_summary) #plot graph current + source 
-	
+	for counter, graph in enumerate(ordered_graphsatten):	                                                           #+" "+str(int(orderedsmeanvoltages[counter]))#
+		tools.write_rootdategraph_plusatten(graph.new_rootdates, graph.newvalues, graph.atten_newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", filename[0], dir_summary) #plot graph current + source
+
 	for counter, graph in enumerate(ordered_graphslinearity):
 		print graph.name	                                              #+" "+str(int(orderedsmeanvoltages[counter]))#
 		tools.write_attenuationrootgraph(graph.setattenvalues, graph.normalizedsetmeancurrents, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "1/attenuation", "i", dir_summary)
 
-	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime
+	eff, layers_eff, total_eff = efficiency.efficiency_values(orderedsmeanvoltages, chambertype)
+	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime, eff, layers_eff, total_eff
 #----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------
@@ -170,12 +178,12 @@ def createplot(giffile, file, filename):
 	'''create graph of current of voltage, find spikes and linearity plots from GIF'''
 	if "D" in filename:
 		return None, None, None, None, None, None, None, None, None, None
-	layer = filename[5:7] #get layer       
+	layer = filename[5:7] #get layer
 	rootdirectory = directories[layer] #set root file directory
 
 	sectorforarea = filename[8:9]
 	chambertype = folder[0:3] #SM1 or SM2 LM1 or LM2
-	
+
 	areasSM1 = {"1":(30.0+52.)*(45.2/4.), "2":(52.+70.2)*(43.5/4.), "3":(43.5+75.6)*(43.5/4.), "4":(75.6+104.)*(43.5/4.), "5":(104.+114.9)*(43.5/4.)}
 	areasSM2 = {"6":(166.4+150.5)*(135./6.), "7":(150.5+130.3)*(135./6.), "8":(130.3+117.1)*(135./6.)}
 
@@ -190,9 +198,9 @@ def createplot(giffile, file, filename):
 	else:
 		print "areas not found"
 	area = areas[sectorforarea]
-	
+
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
-	if len(times) == 1:        
+	if len(times) == 1:
 		print "Exception -----> Only one data in "+str(filename)+".dat \n" #handle exception of empty files (should not be the case after daq fixing)
 		return None, None, None, None, None, None, None, None, None
 	if not times:
@@ -246,11 +254,11 @@ def createplot(giffile, file, filename):
 	atten_times = [x.replace('_',' ') for x in atten_times]
 	atten_times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in atten_times]
 
-	atten_starttime = atten_times[0] 
+	atten_starttime = atten_times[0]
 	atten_dates = [atten_starttime]
 
 	atten_times = [int((x-atten_starttime).total_seconds()) for x in atten_times]
-	
+
 	atten_newtimes = range(atten_times[len(atten_times)-1])
 	atten_newvalues = [None]*len(atten_newtimes)
 
@@ -262,22 +270,22 @@ def createplot(giffile, file, filename):
 
 	for counter in range(len(atten_newtimes)-1):
 		atten_dates.append(atten_dates[counter]+td(seconds=1)) #end of creating arrays atten values and times
-	
+
 	source = [x.split(' 	 ') for x in open(sourcefile,"r").readlines()[1:]] #read attenutation factor exept first line (header)
 	#atten = [x for x in atten if len(x) == 11] #used before change in daq
 	source_times = [x[0] for x in source]
 	source_values = [float(x[1]) for x in source] #0.0 off 1.0 on
-	
+
 	source_times = [x.replace(':',' ') for x in source_times]
 	source_times = [x.replace('/',' ') for x in source_times]
 	source_times = [x.replace('_',' ') for x in source_times]
 	source_times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in source_times]
 
-	source_starttime = source_times[0] 
+	source_starttime = source_times[0]
 	source_dates = [source_starttime]
 
 	source_times = [int((x-source_starttime).total_seconds()) for x in source_times]
-	
+
 	source_newtimes = range(source_times[len(source_times)-1])
 	source_newvalues = [None]*len(source_newtimes)
 
@@ -289,10 +297,10 @@ def createplot(giffile, file, filename):
 
 	for counter in range(len(source_newtimes)-1):
 		source_dates.append(source_dates[counter]+td(seconds=1)) #end of creating arrays source values and times
-	
+
 	#now important to match starting time of source file and atten file
 	if "i" in filename and "D" not in filename:
-		
+
 		if source_dates[10] in atten_dates:
 			syncindex = atten_dates.index(source_dates[10])
 			source_dates = source_dates[10:]
@@ -302,7 +310,7 @@ def createplot(giffile, file, filename):
 		atten_dates = atten_dates[syncindex:]
 		if len(atten_dates) > len(source_dates):
 			atten_dates = atten_dates[0:len(source_dates)]
-			atten_newvalues = atten_newvalues[0:len(source_newvalues)] #attenuation values sync to i values 
+			atten_newvalues = atten_newvalues[0:len(source_newvalues)] #attenuation values sync to i values
 		elif len(atten_dates) < len(source_dates):
 			source_dates = source_dates[0:len(atten_dates)]
 			source_newvalues = source_newvalues[0:len(atten_newvalues)] #syn complete
@@ -315,12 +323,12 @@ def createplot(giffile, file, filename):
 			if source_newvalues[counter] == 0.0:
 				atten_newvalues[counter] = 0.0  #put attenuation to 0 il source is off, i will later remove zeros
 
-	#completed date array and attenuation array from GIF 
+	#completed date array and attenuation array from GIF
 	#now important to match starting time with data from chamber
 	#not done for drift
-	
+
 	if "i" in filename and "D" not in filename:
-		
+
 		if dates[10] in atten_dates:
 			syncindex = atten_dates.index(dates[10])
 			dates = dates[10:]
@@ -330,7 +338,7 @@ def createplot(giffile, file, filename):
 		atten_dates = atten_dates[syncindex:]
 		if len(atten_dates) > len(dates):
 			atten_dates = atten_dates[0:len(dates)]
-			atten_newvalues = atten_newvalues[0:len(newvalues)] #attenuation values sync to i values 
+			atten_newvalues = atten_newvalues[0:len(newvalues)] #attenuation values sync to i values
 		elif len(atten_dates) < len(dates):
 			dates = dates[0:len(atten_dates)]
 			newvalues = newvalues[0:len(atten_newvalues)] #syn complete!
@@ -343,11 +351,11 @@ def createplot(giffile, file, filename):
 
 		new_rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates] #rootdates with updated dates
 
-		
-	#start analysis, i'm in "i" not drift files	
+
+	#start analysis, i'm in "i" not drift files
 		sectorscurrent = filename[5:9] #sector name
 		meancurrent = np.mean(newvalues) #mean of current value
-		
+
 		#Identify drops
 		valuesdeltas = np.diff(newvalues)
 		valuesdeltas = [0]+valuesdeltas #differences in currents of voltages
@@ -361,23 +369,23 @@ def createplot(giffile, file, filename):
 		#nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
 		#nospike_newvalues = search.removespikes_atgif([0]+np.diff(nospike_newvalues), nospike_newvalues, atten_values) #two times to actually remove spikes
 		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current under fixed flux
-		
-		setattenvalues = set(atten_newvalues) 
+
+		setattenvalues = set(atten_newvalues)
 		setattenvalues = [x for x in setattenvalues if float(x) != 0.] #remove 0
 		setattenvalues.sort(reverse=True) #from min to max
 		setmeancurrents = []
 		normalizedsetmeancurrents = []
 
 		#print len(newvalues), len(atten_newvalues)
-		currentatzero = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == 0.] #current when source is off  
+		currentatzero = [x for counter, x in enumerate(newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == 0.] #current when source is off
 		currentatzero = np.mean(currentatzero) #current mean when source is off
 
 		for setattenuation in setattenvalues: #using nospike_newvalues here to not count spikes
 			startindex = atten_newvalues.index(setattenuation) #first second at a given attenuation
 			lastindex = len(atten_newvalues)-atten_newvalues[::-1].index(setattenuation)-1 #last second at a given attenuation
 			middle = (lastindex-startindex)/2
-			found = [x for x in nospike_newvalues[lastindex-60:lastindex]] 
-			setmeancurrents.append(float(np.mean(found))) 
+			found = [x for x in nospike_newvalues[lastindex-60:lastindex]]
+			setmeancurrents.append(float(np.mean(found)))
 			normalizedsetmeancurrents.append(float(np.mean(found))/area)
 			#this way gave problem as underestimates the current values
 			#found = [x for counter, x in enumerate(nospike_newvalues[0:len(atten_newvalues)]) if atten_newvalues[counter] == setattenuation]
@@ -391,7 +399,7 @@ def createplot(giffile, file, filename):
 
 		for counter, setattenvalue in enumerate(setattenvalues):
 			print setattenvalue, setmeancurrents[counter] #to check linearity of sectors
-		
+
 		setattenvalues = [float(x)**(-1) for x in setattenvalues] #perform 1/attenfactor
 		#tools.write_attenuationrootgraph(setattenvalues, normalizedsetmeancurrents, filename, "1/attenuation", "i", dir_summary)
 		graphlinearity = classes.attenuationrootgraph(filename[5:9], setattenvalues, normalizedsetmeancurrents, filename, "1/attenuation", "i", dir_summary)
@@ -426,30 +434,30 @@ def createplot(giffile, file, filename):
 
 	#write layer graphs
 	#tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if you want additional histograms
-	
+
 	if "i" in filename and "D" not in filename:
-		#tools.write_rootdategraph_fromgif(rootdates, nospike_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
-		#tools.write_rootdategraph_plusatten(new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graph current + source 
+		#tools.write_rootdategraph_fromgif(rootdates, nospike_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs
+		#tools.write_rootdategraph_plusatten(new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graph current + source
 		graph_atten = classes.rootdategraph_plusatten(filename[5:9], new_rootdates, newvalues, atten_newvalues, filename, "time (s)", filename[0], rootdirectory)											     #or nospike_newvalues
 		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
-	else:		
-		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
+	else:
+		tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs
 		graph_atten = None
 		graphlinearity = None
 
-	#tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs	
-	
+	#tools.write_rootdategraph_fromgif(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory) #plot graphs
+
 	if "D" not in filename:
 		#create trees
 		if "i" in filename:
 			tree = TTree(filename, "tree")
 			newvalue = array( 'f', [ 0 ] )
 			branch = tree.Branch(filename, newvalue, "newvalue/F")
-			
+
 			treesource = TTree(filename+"_source", "tree")
 			atten = array('f', [0])
 			branch = treesource.Branch(filename, atten, "atten/F")
-			for i in range(len(newvalues)):	
+			for i in range(len(newvalues)):
 				newvalue[0] = newvalues[i]
 				tree.Fill()
 				if i<len(atten_newvalues):
@@ -461,29 +469,29 @@ def createplot(giffile, file, filename):
 			tree = TTree(filename, "tree")
 			newvalue = array( 'f', [ 0 ] )
 			branch = tree.Branch(filename, newvalue, "newvalue/F")
-			for i in range(len(newvalues)):	
+			for i in range(len(newvalues)):
 				newvalue[0] = newvalues[i]
 				tree.Fill()
 			tree.Write()
-			
+
 	return graph_atten, graphlinearity, spikenames, spikeduration, duration, sectorsvoltage, notrips_meanvoltage, sectorscurrent, nospike_meancurrent, spikeseconds
 #----------------------------------------------------------------------------------------
 #createsummaryplots_attenuation()
-'''	
+'''
 	if "i" in filename: #it's a current file
 		#search.findrisingedges(valuesdeltas, dates)
 		#search.findfallingedges(valuesdeltas, dates)
-		
+
 		sectorscurrent = filename[5:9]
 		meancurrent = np.mean(newvalues)
-		
+
 		#remove spikes in current files
 		copynewvalues = copy.copy(newvalues) #need to copy it to pass to function below
 		nospike_newvalues = search.removespikes_atgif(valuesdeltas, copynewvalues)
 		#nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
 		#nospike_newvalues = search.removespikes_atgif(np.diff(nospike_newvalues), nospike_newvalues) #two times to actually remove spikes
 		nospike_meancurrent = np.mean(nospike_newvalues) #used to have real baseline of the current
-		
+
 		#TO BE CHECKED WICH ONE WE WANT
 		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes_50na(newvalues, nospike_meancurrent, dates, newtimes, filename)
 		#spikecounter, filename, spikedates, spikeseconds, spikenames = search.findspikes(valuesdeltas, dates, newtimes, filename)
@@ -504,4 +512,3 @@ def createplot(giffile, file, filename):
 			sectorsvoltage = None
 			notrips_meanvoltage = None
 '''
-	
