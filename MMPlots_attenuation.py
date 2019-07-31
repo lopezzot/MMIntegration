@@ -153,8 +153,6 @@ def createplot(giffile, file, filename, folder):
 	if "D" in filename:
 		return None, None, None, None, None, None, None, None, None, None
 	layer = filename[5:7] #get layer
-	print "filename"
-	print filename
 	rootdirectory = directories[layer] #set root file directory
 
 	sectorforarea = filename[8:9]

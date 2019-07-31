@@ -19,7 +19,7 @@ user = raw_input("Who is it? (GIF, bb5, Lorenzo, Natalia) ")
 folder = raw_input("Insert folder to study: ") #insert folder with bartch ID
 ps = raw_input("Do you have production site data? (yes or no) " )
 #--------------------------------------------------------------------------------
-def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
+def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -139,7 +139,6 @@ def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
-			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_hline()
 			row = ["sector", "hv", "spark", "eff", "0 or 1"]
 			acceptedlist = []
@@ -185,8 +184,7 @@ def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
-					data_table_irradiated.add_hline()
+					TextColor(acceptedcolor, "V")])
 				else:
 
 					if int(hv_irradiated[i]) > 567.9:
@@ -228,12 +226,13 @@ def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")])
-					data_table_irradiated.add_hline()
+					TextColor(acceptedcolor, "V")], color="lightgray")
 
 			data_table_irradiated.add_hline()
+			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_row("Out of spec", str(len([x for x in hv_irradiated if x < 548.0])), str(len([x for x in spark_irradiated if x > 6.0])), str(len([x for x in efficiency_irradiated if x < 80.0])), str(acceptedlist.count(0)))
 			data_table_irradiated.add_hline()
+			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_row("Chamber efficiency", "","", "", str(round(total_efficiency_irradiated)))
 			data_table_irradiated.add_hline()
 
@@ -354,7 +353,7 @@ def generate_unique(sectors_irradiated, hv_irradiated, spark_irradiated):
 
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 
-def generate_unique_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_hv, ps_spike):
+def generate_unique_gif_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_hv, ps_spike):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -462,7 +461,7 @@ def generate_unique_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_h
 		doc.append(LineBreak())
 		doc.append(str(deltatime_irradiated/60)+str("_min"))
 		doc.append(LineBreak())
-		doc.append("Spike_treshold_0.40_uA")
+		doc.append("Spike_treshold_0.20_uA")
 		doc.append(LineBreak())
 		with doc.create(LongTabu("|X[l]| X[r]| X[r] |X[r] |X[r]| X[r]| X[r]|",
 								 row_height=1.5)) as data_table_irradiated:
@@ -476,7 +475,6 @@ def generate_unique_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_h
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
-			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_hline()
 			row = ["sector", "hv", "hv ps", "spark", "spark ps","eff", "0 or 1"]
 			acceptedlist = []
@@ -530,8 +528,7 @@ def generate_unique_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_h
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))), TextColor("blue",str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))),  TextColor("blue",str(ps_spike[i])), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
-					data_table_irradiated.add_hline()
+					TextColor(acceptedcolor, "V")])
 				else:
 
 					if int(hv_irradiated[i]) > 567.9:
@@ -572,12 +569,11 @@ def generate_unique_ps(sectors_irradiated, hv_irradiated, spark_irradiated, ps_h
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))), TextColor("blue",str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))),  TextColor("blue",str(ps_spike[i])), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")])
-					data_table_irradiated.add_hline()
-
+					TextColor(acceptedcolor, "V")], color="lightgray")
 
 			data_table_irradiated.add_hline()
 			data_table_irradiated.add_row("Out of spec", str(len([x for x in hv_irradiated if x < 548.0])),"", str(len([x for x in spark_irradiated if x > 6.0])),"", str(len([x for x in efficiency_irradiated if x < 80.0])), str(acceptedlist.count(0)))
+			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_hline()
 			data_table_irradiated.add_row("Chamber efficiency", "","","","", "", str(round(total_efficiency_irradiated)))
 			data_table_irradiated.add_hline()
@@ -724,7 +720,7 @@ if ps == "yes":
 	sectors_irradiated, hv_irradiated, spark_irradiated, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
 	ps_hv, ps_spike = production_site.read(ps_path+ps_filename+'.dat')
 	ID = ID_irradiated
-	generate_unique_ps(sectors_irradiated,hv_irradiated,spark_irradiated, ps_hv, ps_spike)
+	generate_unique_gif_ps(sectors_irradiated,hv_irradiated,spark_irradiated, ps_hv, ps_spike)
 else:
 	if user == "Lorenzo":
 		path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
@@ -743,4 +739,4 @@ else:
 
 	sectors_irradiated, hv_irradiated, spark_irradiated, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
 	ID = ID_irradiated
-	generate_unique(sectors_irradiated,hv_irradiated,spark_irradiated)
+	generate_unique_gif(sectors_irradiated,hv_irradiated,spark_irradiated)

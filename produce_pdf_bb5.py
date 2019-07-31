@@ -136,14 +136,13 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			data_table.add_hline()
 			data_table.add_row(["Sector",
 								"HV",
-								"PS HV",
+								"HV PS",
 								"spark/min",
-								"PS spark/min",
+								"spark/min PS",
 								"Efficiency",
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
-			data_table.add_empty_row()
 			data_table.add_hline()
 			row = ["sector", "hv", "pshv", "spark", "sparkhv", "efficiency", "0 or 1"]
 			acceptedlist = []
@@ -200,7 +199,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")])
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -251,7 +250,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")])
+					TextColor(acceptedcolor, "V")], color="lightgray")
 				#	data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
 			data_table.add_empty_row()
@@ -479,7 +478,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray")
-			data_table.add_empty_row()
 			data_table.add_hline()
 			row = ["sector", "hv","spark", "efficiency", "0 or 1"]
 			acceptedlist = []
@@ -537,7 +535,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")])
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -588,7 +586,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")])
+					TextColor(acceptedcolor, "V")], color="lightgray")
 
 			data_table.add_empty_row()
 			data_table.add_hline()
@@ -601,9 +599,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 	doc.append(NoEscape('\\clearpage'))
 	with doc.create(Section('Summary not irradiated', numbering=False)):
-		print "pie\n"
-		print acceptedlist.count(1)
-		print acceptedlist.count(0)
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 
 
