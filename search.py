@@ -94,7 +94,7 @@ def findspikes_50na(newvalues, mean_nospike, dates, seconds, filename):
 def findspikes_atgif(currentvalues, attenuation, meancurrent, setattenuation, dates, seconds, filename):
 	''' to count spikes with current graphs from GIF'''
 
-	treshold = 0.4 #uA
+	treshold = 0.2 #uA
 	spikedates = []
 	spikecounter = 0
 	spikenames = []
