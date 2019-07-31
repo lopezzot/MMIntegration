@@ -4,7 +4,7 @@ import MMPlots
 import MMPlots_attenuation
 import glob
 from termcolor import colored
-import bad_sectors
+import bad_sectors2
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -31,7 +31,6 @@ paths = []
 bad_sec = []
 final_hvs = []
 sectors = []
-timeslots = []
 user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 
 for folder in folders:
@@ -47,10 +46,10 @@ for i in range(4):
 	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(paths[i], folders[i])
 	hvs.append(hv_notirradiated)
 	sectors.append(sectors_notirradiated)
-	timeslots.append(timeslot)
-final_hvs, hl1, hl2 = bad_sectors.get_sectors_hv(hvs)
+
+final_hvs1, final_hvs2, hl1_ch1, hl2_ch1, hl1_ch2, hl2_ch2 = bad_sectors2.get_sectors_hv(hvs)
 #--------------------------------------------------------------------------------
-def generate_unique_dw(final_hvs, hl1, hl2, sectors):
+def generate_unique_dw(final_hvs1, final_hvs2, hl1_ch1, hl2_ch1, hl1_ch2, hl2_ch2, sectors):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -84,16 +83,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 			title_wrapper.append("\n")
 			title_wrapper.append(LargeText(bold("Double Wedge: "+str(DW_name))))
 			title_wrapper.append(LineBreak())
-			title_wrapper.append("\n")
-			title_wrapper.append(LargeText(bold("Chambers: "+str(chambername1IP))))
-			title_wrapper.append(LineBreak())
-			title_wrapper.append(LargeText(bold("          "+str(chambername2IP))))
-			title_wrapper.append(LineBreak())
-			title_wrapper.append(LargeText(bold("          "+str(chambername1HO))))
-			title_wrapper.append(LineBreak())
-			title_wrapper.append(LargeText(bold("          "+str(chambername2HO))))
-			title_wrapper.append(LineBreak())
-
 
 	# Add footer
 	with first_page.create(Foot("C")) as footer:
@@ -148,20 +137,21 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 	doc.change_document_style("firstpage")
 	doc.add_color(name="lightgray", model="gray", description="0.80")
 
+	doc.append("\n")
+	doc.append(timeslot)
+	doc.append(LineBreak())
+
 	# IP
 	with doc.create(Section('IP SIDE', numbering=False)):
 		# first chamber
 		# Verify if its SM1, LM1, SM1 or LM2
-		if chambername1IP[0:3] == "SM1" or chambername1IP[0:3] == "LM1":
+		if chambername1IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
 			limit = 10
 		else:
 			limit = 6
 
 		with doc.create(Subsection("Chambers: "+chambername1IP+" + "+chambername2IP, numbering=False)):
 			with doc.create(Subsection(chambername1IP, numbering=False)):
-				doc.append("\n")
-				doc.append(timeslots[0])
-				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table:
 						data_table.add_hline()
@@ -176,7 +166,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 										   color="lightgray")
 						data_table.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-						for i, hv in enumerate(final_hvs[0]):
+						for i, hv in enumerate(final_hvs1[0]):
 							hl1_str = ""
 							hl2_str = ""
 							l1 = ""
@@ -184,10 +174,10 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 							l3 = ""
 							l4 = ""
 							# assign each sector to a line
-							if hv == hl1[0]:
-								hl1_str = str(hl1[0])
-							elif hv == hl2[0]:
-								hl2_str = str(hl2[0])
+							if hv == hl1_ch1:
+								hl1_str = str(hl1_ch1)
+							elif hv == hl2_ch1:
+								hl2_str = str(hl2_ch1)
 							elif i > limit-1+limit*2:
 								l4 = "570"
 							elif i > limit-1+limit:
@@ -203,29 +193,26 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 						data_table.add_hline()
 
 			# second chamber
-			if chambername2IP[0:3] == "SM1" or chambername2IP[0:3] == "LM1":
+			if chambername2IP[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
 				limit = 10
 			else:
 				limit = 6
 			with doc.create(Subsection(chambername2IP, numbering=False)):
-				doc.append("\n")
-				doc.append(timeslots[1])
-				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table2:
 						data_table2.add_hline()
 						data_table2.add_row(["Sector",
-											"L5",
-											"L6",
-											"L7",
-											"L8",
-											"HL3",
-											"HL4"],
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
 										   mapper=bold,
 										   color="lightgray")
 						data_table2.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-						for i, hv in enumerate(final_hvs[1]):
+						for i, hv in enumerate(final_hvs1[1]):
 							hl1_str = ""
 							hl2_str = ""
 							l1 = ""
@@ -233,10 +220,10 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 							l3 = ""
 							l4 = ""
 							# assign each sector to a line
-							if hv == hl1[1]:
-								hl1_str = str(hl1[1])
-							elif hv == hl2[1]:
-								hl2_str = str(hl2[1])
+							if hv == hl1_ch1:
+								hl1_str = str(hl1_ch1)
+							elif hv == hl2_ch1:
+								hl2_str = str(hl2_ch1)
 							elif i > limit-1+limit*2:
 								l4 = "570"
 							elif i > limit-1+limit:
@@ -253,9 +240,9 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 						data_table2.add_hline()
 	# HO
 	# Swap R an L
-	final_hvs[2] = swap(final_hvs[2])
-	final_hvs[3] = swap(final_hvs[3])
-	if chambername1HO[0:3] == "SM1" or chambername1HO[0:3] == "LM1":
+	final_hvs2[0] = swap(final_hvs2[0])
+	final_hvs2[1] = swap(final_hvs2[1])
+	if chambername1HO[0:3] == "SM1" or chambername2HO[0:3] == "LM1":
 		limit = 10
 	else:
 		limit = 6
@@ -264,9 +251,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 		# first chamber
 		with doc.create(Subsection("Chambers: "+chambername1HO+" + "+chambername2HO, numbering=False)):
 			with doc.create(Subsection(chambername1HO, numbering=False)):
-				doc.append("\n")
-				doc.append(timeslots[2])
-				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table3:
 						data_table3.add_hline()
@@ -281,7 +265,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 										   color="lightgray")
 						data_table3.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-						for i, hv in enumerate(final_hvs[2]):
+						for i, hv in enumerate(final_hvs2[0]):
 							hl1_str = ""
 							hl2_str = ""
 							l1 = ""
@@ -289,10 +273,10 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 							l3 = ""
 							l4 = ""
 							# assign each sector to a line
-							if hv == hl1[2]:
-								hl1_str = str(hl1[2])
-							elif hv == hl2[2]:
-								hl2_str = str(hl2[2])
+							if hv == hl1_ch2:
+								hl1_str = str(hl1_ch2)
+							elif hv == hl2_ch2:
+								hl2_str = str(hl2_ch2)
 							elif i > limit-1+limit*2:
 								l4 = "570"
 							elif i > limit-1+limit:
@@ -313,24 +297,21 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 			else:
 				limit = 6
 			with doc.create(Subsection(chambername2HO, numbering=False)):
-				doc.append("\n")
-				doc.append(timeslots[3])
-				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table4:
 						data_table4.add_hline()
 						data_table4.add_row(["Sector",
-											"L5",
-											"L6",
-											"L7",
-											"L8",
-											"HL3",
-											"HL4"],
+											"L1",
+											"L2",
+											"L3",
+											"L4",
+											"HL1",
+											"HL2"],
 										   mapper=bold,
 										   color="lightgray")
 						data_table4.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
-						for i, hv in enumerate(final_hvs[3]):
+						for i, hv in enumerate(final_hvs2[1]):
 							hl1_str = ""
 							hl2_str = ""
 							l1 = ""
@@ -338,10 +319,10 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 							l3 = ""
 							l4 = ""
 							# assign each sector to a line
-							if hv == hl1[3]:
-								hl1_str = str(hl1[3])
-							elif hv == hl2[3]:
-								hl2_str = str(hl2[3])
+							if hv == hl1_ch2:
+								hl1_str = str(hl1_ch2)
+							elif hv == hl2_ch2:
+								hl2_str = str(hl2_ch2)
 							elif i > limit-1+limit*2:
 								l4 = "570"
 							elif i > limit-1+limit:
@@ -365,4 +346,4 @@ def swap(hvs):
 	return hvs
 #---------------------------------------------------------------------------------------------
 
-generate_unique_dw(final_hvs,hl1, hl2, sectors)
+generate_unique_dw(final_hvs1, final_hvs2 ,hl1_ch1, hl2_ch1, hl1_ch2, hl2_ch2, sectors)
