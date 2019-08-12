@@ -716,8 +716,9 @@ if ps == "yes":
 		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
 	elif user == "Natalia":
 		ps_path = "/home/est/Escritorio/CERN/PS_Data/"
-		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-		gifpath = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/GIF/"
+		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
+		gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
 	elif user == "bb5":
 		path = "bb5 path"
 		ps_path = "bb5 path"
@@ -737,8 +738,10 @@ else:
 		path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
 		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
 	elif user == "Natalia":
-		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-		gifpath = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/GIF/"
+		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
+		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
 	elif user == "bb5":
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
@@ -750,4 +753,4 @@ else:
 
 	sectors_irradiated, hv_irradiated, spark_irradiated, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
 	ID = ID_irradiated
-	generate_unique_gif(sectors_irradiated,hv_irradiated,spark_irradiated)
+	generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated)
