@@ -116,7 +116,8 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 		first_page_table.add_empty_row()
 
 	doc.change_document_style("firstpage")
-	doc.add_color(name="lightgray", model="gray", description="0.80")
+	doc.add_color(name="lightgray", model="gray", description="0.85")
+	doc.add_color(name="lightgray2", model="gray", description="0.6")
 
 	#doc.append(NoEscape(r'\vspace{17.634mm}'))
 	#doc.append(LargeText(bold("Gas leak (mL/h) "))+str(gas_leak))
@@ -136,14 +137,15 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			data_table.add_hline()
 			data_table.add_row(["Sector",
 								"HV",
-								"PS HV",
+								"HV PS",
 								"spark/min",
-								"PS spark/min",
+								"spark/min PS",
 								"Efficiency",
 								"Flag"],
 							   mapper=bold,
-							   color="lightgray")
-			data_table.add_empty_row()
+							   color="lightgray2")
+			data_table.add_hline()
+			data_table.end_table_header()
 			data_table.add_hline()
 			row = ["sector", "hv", "pshv", "spark", "sparkhv", "efficiency", "0 or 1"]
 			acceptedlist = []
@@ -200,7 +202,8 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")])
+					data_table.add_hline()
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -251,10 +254,10 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(pscolor,str(ps_hv[i])),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))),TextColor(pscolor,str(ps_spike[i])), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")])
+					TextColor(acceptedcolor, "V")], color="lightgray")
+					data_table.add_hline()
 				#	data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))), TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))), TextColor(acc_color,"V")])
 
-			data_table.add_empty_row()
 			data_table.add_hline()
 			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), " ", str(len([x for x in spark_notirradiated if x > 6.0]))," ", str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
 
@@ -307,7 +310,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 								"Stereo",
 								"Eta+Stereo"],
 								mapper=bold,
-								color="lightgray")
+								color="lightgray2")
 			data_table2.add_empty_row()
 			data_table2.add_hline()
 			row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
@@ -323,7 +326,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 			data_table3.add_row(["Layer",
 								"Mean Efficiency"],
 								mapper=bold,
-								color="lightgray")
+								color="lightgray2")
 			data_table3.add_empty_row()
 			data_table3.add_hline()
 			row = ["layers", "efficiency"]
@@ -457,7 +460,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 		first_page_table.add_empty_row()
 
 	doc.change_document_style("firstpage")
-	doc.add_color(name="lightgray", model="gray", description="0.80")
+	doc.add_color(name="lightgray", model="gray", description="0.85")
+	doc.add_color(name="lightgray2", model="gray", description="0.6")
 
 	with doc.create(Section('HV not irradiated', numbering=False)):
 	   # Add statement table
@@ -478,8 +482,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 								"Efficiency",
 								"Flag"],
 							   mapper=bold,
-							   color="lightgray")
-			data_table.add_empty_row()
+							   color="lightgray2")
+			data_table.add_hline()
+			data_table.end_table_header()
 			data_table.add_hline()
 			row = ["sector", "hv","spark", "efficiency", "0 or 1"]
 			acceptedlist = []
@@ -537,7 +542,8 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
+					TextColor(acceptedcolor, "V")])
+					data_table.add_hline()
 				else:
 					'''
 					if int(hv_notirradiated[i]) > 567.9 and spark_notirradiated[i]<1.0:
@@ -588,9 +594,9 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 					data_table.add_row([str(sectors_notirradiated[i]), TextColor(hvcolor,str(int(hv_notirradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_notirradiated[i],2))), TextColor(effcolor, str(round(efficiency[i],1))),
-					TextColor(acceptedcolor, "V")])
+					TextColor(acceptedcolor, "V")], color="lightgray")
+					data_table.add_hline()
 
-			data_table.add_empty_row()
 			data_table.add_hline()
 			data_table.add_row("Out of spec", str(len([x for x in hv_notirradiated if x < 548.0])), str(len([x for x in spark_notirradiated if x > 6.0])), str(len([x for x in efficiency if x < 80.0])), str(not_acc_counter))
 
@@ -601,9 +607,6 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 	doc.append(NoEscape('\\clearpage'))
 	with doc.create(Section('Summary not irradiated', numbering=False)):
-		print "pie\n"
-		print acceptedlist.count(1)
-		print acceptedlist.count(0)
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 
 
@@ -648,7 +651,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 								"Stereo",
 								"Eta+Stereo"],
 								mapper=bold,
-								color="lightgray")
+								color="lightgray2")
 			data_table2.add_empty_row()
 			data_table2.add_hline()
 			row = ["Sector (all layers)", "Out of spec (Eta)", "Out of spec (Stereo)", "Out of spec (E+S)"]
@@ -664,7 +667,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			data_table3.add_row(["Layer",
 								"Mean Efficiency"],
 								mapper=bold,
-								color="lightgray")
+								color="lightgray2")
 			data_table3.add_empty_row()
 			data_table3.add_hline()
 			row = ["layers", "efficiency"]
@@ -708,7 +711,8 @@ if ps == "yes":
 		path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
 		ps_path = "Lorenzo's path"
 	elif user == "Natalia":
-		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		path = "/home/est/Escritorio/CERN/oldData/Data_"+str(house)+"/"+folder+"/HV/"
 		ps_path = "/home/est/Escritorio/CERN/PS_Data/"
 	elif user == "bb5":
 		path = "bb5 path"

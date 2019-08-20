@@ -3,6 +3,7 @@ def read(filename):
     hv = []
     spike = []
     position = []
+
     for data in f:
         for i in range(len(data)):
             if data[i:i+1] == '\t':
