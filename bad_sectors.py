@@ -10,11 +10,16 @@ def get_threshold(hvs): # get hospital lines voltages values
             if sector < threshold:
                 values[i].append(sector)
         values[i].sort()
-        div.append(values[i][int(len(values[i])/2)-1])
-        hl1.append(int(values[i][0]))
-        hl2.append(int(values[i][int(len(values[i])/2)]))
+        if len(values[i]) != 0:
+            div.append(values[i][int(len(values[i])/2)-1])
+            hl1.append(int(values[i][0]))
+            hl2.append(int(values[i][int(len(values[i])/2)]))
+        else:
+            div.append(0)
+            hl1.append(0)
+            hl2.append(0)
     return div, hl1, hl2
-
+#---------------------------------------------------------------------
 def get_sectors_hv(hvs):
     div, hl1, hl2 = get_threshold(hvs)
     final_values = []
