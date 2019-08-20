@@ -20,8 +20,8 @@ def createsummaryplots(path=None, folder=None):
         if user == "Lorenzo":
             path = "/Users/lorenzo/Data_"+str(house)+"/"+folder+"/HV/"#Changed folder: files in Data_bb5 were in DataBB5 2/5/2019
         elif user == "Natalia":
-            #path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-            path = "/home/est/Escritorio/CERN/oldData/Data_"+str(house)+"/"+folder+"/HV/"
+            path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+            #path = "/home/est/Escritorio/CERN/oldData/Data_"+str(house)+"/"+folder+"/HV/"
         elif user == "bb5":
             path = "bb5 path"
         else:

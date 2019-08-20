@@ -716,9 +716,10 @@ if ps == "yes":
 		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
 	elif user == "Natalia":
 		ps_path = "/home/est/Escritorio/CERN/PS_Data/"
-		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-		path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
-		gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
+		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		#path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
+		#gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
+		gifpath = "/home/est/Escritorio/CERN/Data_gif/"+folder+"/GIF/"
 	elif user == "bb5":
 		path = "bb5 path"
 		ps_path = "bb5 path"
@@ -738,10 +739,10 @@ else:
 		path = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/HV/"
 		gifpath = "/Users/lorenzo/Data"+str(house)+"/"+folder+"/GIF/"
 	elif user == "Natalia":
-		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-		path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
-		#path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
-		gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
+		path = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/HV/"
+		#path = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/HV/"
+		gifpath = "/home/est/Escritorio/CERN/Data_"+str(house)+"/"+folder+"/GIF/"
+		#gifpath = "/home/est/Escritorio/CERN/oldData/Data_gif/"+folder+"/GIF/"
 	elif user == "bb5":
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"

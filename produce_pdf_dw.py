@@ -5,6 +5,7 @@ import MMPlots_attenuation
 import glob
 from termcolor import colored
 import bad_sectors
+import probability
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -32,6 +33,7 @@ bad_sec = []
 final_hvs = []
 sectors = []
 timeslots = []
+efficiencies = []
 user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 
 for folder in folders:
@@ -48,6 +50,7 @@ for i in range(4):
 	hvs.append(hv_notirradiated)
 	sectors.append(sectors_notirradiated)
 	timeslots.append(timeslot)
+	efficiencies.append(efficiency)
 final_hvs, hl1, hl2 = bad_sectors.get_sectors_hv(hvs)
 #--------------------------------------------------------------------------------
 def generate_unique_dw(final_hvs, hl1, hl2, sectors):

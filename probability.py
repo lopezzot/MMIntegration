@@ -37,32 +37,53 @@ def combination_rec(arr, data, start, end, index, r, final_combination, combinat
 
 	return final_combination
 
-# Returns the probability of detecting the particle
+def get_other_probabilities(combination, all_probabilities):
+	other = []
+	final_value = 1
+	for value in all_probabilities:
+		if len(combination):
+			for i, num in enumerate(combination):
+				if num == value:
+					combination.pop(i)
+					break
+				else:
+					other.append(value)
+					break
+		else:
+			other.append(value)
+	for value in other:
+		final_value = final_value * (1-value)
+	return final_value
+
+# Returns the probability of
+# detecting the particle
 # in x layers out of n layers
 # in a specific section
-def get_section_probability(combinations, x, n):
-	probability = 1
+def get_section_probability(combinations, x, n, all_probabilities):
+	probability = 0
 	for values in combinations:
 		# gets the probability of the combination
-		result = get_combinations_probability(values, x, n)
+		result = get_combinations_probability(values, x, n, all_probabilities)
 		# multiplies all the probabilities
-		probability = result * probability
+		probability = result + probability
 	return probability
 
 # Returns the probability of a combination
-def get_combinations_probability(values, x, n):
+def get_combinations_probability(values, x, n, all_probabilities):
 	total = 1
+	values_copy = []
+	for x in values:
+		values_copy.append(x)
+	other_probability = get_other_probabilities(values_copy, all_probabilities)
 	# multiplies all the probabilities of the different layers
 	for value in values:
 		total = total * value
 	# calculates the probability using the binomial distribution
 	# probability function
-	if total == 1.0:
-		probability = 1.0
-	else:
-		f1 = pow(total, x)
-		f2 = pow( (1-total), (n-x))
-		probability = f1*f2
+	probability =  total * other_probability
+	print "prib"
+	print probability
+
 	return probability
 
 # Read the list with efficiency values
@@ -84,27 +105,26 @@ def get_probability(values_1, values_2, chamber_type):
 			final_sectors.append(section_efficiency)
 	# In case it is SM1 or LM1
 	else:
-		#for i in range(10):
-		for i in range(2):
+		for i in range(10):
+	#	for i in range(2):
 			section_efficiency = []
-		#	for j in range(8):
-			for j in range(4):
-			#	section_efficiency.append(new_values[i+10*j])
-				section_efficiency.append(new_values[i+2*j])
+			for j in range(8):
+		#	for j in range(4):
+				section_efficiency.append(new_values[i+10*j])
+			#	section_efficiency.append(new_values[i+2*j])
 			final_sectors.append(section_efficiency)
-		print final_sectors
+			print final_sectors
 
 	for sector in final_sectors:
 		# getting all the possible combinations for the layers
 		#combinations = get_combination(sector, 8, 4)
 		section_probability = 0
 		# calculating the probability for 4 , 3 , 2 or 1 layer detecting the particle
-		for j in range(3):
-			#combinations = get_combination(sector, 8, 4+j)
-			combinations = get_combination(sector, 4, 2+j)
-			probability = get_section_probability(combinations, 2+j, 4) #4+j, 8
+		for j in range(5):
+			combinations = get_combination(sector, 8, 4+j)
+			#combinations = get_combination(sector, 4, 2+j)
+			probability = get_section_probability(combinations, 4+j, 8, sector) #4+j, 8
 			section_probability = section_probability + probability
-			# print probability
 		final_probabilities.append(section_probability)
 	return final_probabilities
 
@@ -125,11 +145,13 @@ def main():
 	# print comb
 	# print get_section_probability(comb)
 	#eff = [100, 80, 40 ,50, 60, 85, 100, 80, 40 ,50, 60, 85, 100, 80, 40 ,50, 60, 85, 100, 80, 40 ,50, 60, 85]
-	# eff1 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-	# eff2 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
-	eff1 = [100, 90, 85, 95]
-	eff2 = [93, 97, 89, 90]
-	print get_probability(eff1, eff2, "SM1")
+	 eff1 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	 eff2 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	 print get_probability(eff1, eff2, "SM1")
+	#	eff1 = [100, 90, 85, 95]
+	#	eff2 = [93, 97, 89, 90]
+	# p = [.25,0.63,0.25,0.71,0.28,0.71]
+	# comb = [0.71, 0.25, 0.89]
+	# get_other_probabilities(comb, p)
 if __name__ == '__main__':
     main()
