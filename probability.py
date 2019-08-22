@@ -100,15 +100,14 @@ def get_probability(values_1, values_2, chamber_type):
 				section_efficiency.append(new_values[i+6*j])
 			final_sectors.append(section_efficiency)
 	# In case it is SM1 or LM1
-	# elif
-	else:
+	elif chamber_type == "SM1" or chamber_type == "LM1":
 		for i in range(10):
 			section_efficiency = []
 			for j in range(8):
-		#	for j in range(4):
 				section_efficiency.append(new_values[i+10*j])
 			final_sectors.append(section_efficiency)
-
+	else:
+		print "Chamber type not found"
 	for sector in final_sectors:
 		# getting all the possible combinations for the layers
 		section_probability = 0
