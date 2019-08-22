@@ -53,7 +53,6 @@ def swap(hvs):
 		hvs[i*2], hvs[i*2+1] = hvs[i*2+1] , hvs[i*2]
 	return hvs
 #---------------------------------------------------------------------------------------------
-
 for i in range(4):
 	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(paths[i], folders[i])
 	hvs.append(hv_notirradiated)
@@ -183,8 +182,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table:
 						data_table.add_hline()
-						data_table.end_table_header()
-						data_table.add_hline()
 						data_table.add_row(["Sector",
 											"L1",
 											"L2",
@@ -194,6 +191,8 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL2"],
 										   mapper=bold,
 										   color="lightgray2")
+						data_table.add_hline()
+						data_table.end_table_header()
 						data_table.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[0]):
@@ -234,8 +233,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table2:
 						data_table2.add_hline()
-						data_table2.end_table_header()
-						data_table2.add_hline()
 						data_table2.add_row(["Sector",
 											"L5",
 											"L6",
@@ -245,6 +242,8 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL4"],
 										   mapper=bold,
 										   color="lightgray2")
+						data_table2.add_hline()
+						data_table2.end_table_header()
 						data_table2.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[1]):
@@ -292,8 +291,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table3:
 						data_table3.add_hline()
-						data_table3.end_table_header()
-						data_table3.add_hline()
 						data_table3.add_row(["Sector",
 											"L1",
 											"L2",
@@ -303,6 +300,8 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL2"],
 										   mapper=bold,
 										   color="lightgray2")
+						data_table3.add_hline()
+						data_table3.end_table_header()
 						data_table3.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[2]):
@@ -342,9 +341,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table4:
-						data_table4.add_hline()
-						data_table4.end_table_header()
-						data_table4.add_hline()
 						data_table4.add_row(["Sector",
 											"L5",
 											"L6",
@@ -354,6 +350,8 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL4"],
 										   mapper=bold,
 										   color="lightgray2")
+						data_table4.add_hline()
+						data_table4.end_table_header()
 						data_table4.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[3]):
@@ -397,17 +395,15 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				data_table5.add_hline()
 				row = ["L#", "probability", "R#", "probability"]
 				j = 0
-				print sector_probabilities
 				for i in range(len(sector_probabilities)/2):
 					if (i % 2) == 0:
-						data_table5.add_row(["L" + str(j+1), round(sector_probabilities[j],5), "R" + str(j+2), round(sector_probabilities[j+1],5)])
+						data_table5.add_row(["L" + str(i+1), round(sector_probabilities[j],5), "R" + str(i+1), round(sector_probabilities[j+1],5)])
 					else:
-						data_table5.add_row(["L" + str(j+1), round(sector_probabilities[j],5), "R" + str(j+2), round(sector_probabilities[j+1],5)],color="lightgray")
+						data_table5.add_row(["L" + str(i+1), round(sector_probabilities[j],5), "R" + str(i+1), round(sector_probabilities[j+1],5)],color="lightgray")
 					j = j + 2
 				data_table5.add_hline()
 
 	doc.generate_pdf("complex_report_DW", clean_tex=False, compiler='pdflatex')
-
 #---------------------------------------------------------------------------------------------
 
 generate_unique_dw(final_hvs,hl1, hl2, sectors)
