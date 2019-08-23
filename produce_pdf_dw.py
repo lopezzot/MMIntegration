@@ -5,6 +5,7 @@ import MMPlots_attenuation
 import glob
 from termcolor import colored
 import bad_sectors
+import probability
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -32,6 +33,7 @@ bad_sec = []
 final_hvs = []
 sectors = []
 timeslots = []
+efficiencies = []
 user = raw_input("Who is it? (type Lorenzo, Natalia or bb5) ")
 
 for folder in folders:
@@ -43,13 +45,27 @@ for folder in folders:
 		paths.append("bb5 path")
 	else:
 		print "Name not found"
+
+#---------------------------------------------------------------------------------------------
+# swap R and L
+def swap(hvs):
+	for i in range(len(hvs)/2):
+		hvs[i*2], hvs[i*2+1] = hvs[i*2+1] , hvs[i*2]
+	return hvs
+#---------------------------------------------------------------------------------------------
 for i in range(4):
 	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots(paths[i], folders[i])
 	hvs.append(hv_notirradiated)
 	sectors.append(sectors_notirradiated)
 	timeslots.append(timeslot)
+	efficiencies.append(efficiency)
+efficiencies[2] = swap(efficiencies[2])
+efficiencies[3] = swap(efficiencies[3])
+
+sector_probabilities = probability.get_dw_probability(chambername1IP[0:3],chambername2IP[0:3], efficiencies[0], efficiencies[1], efficiencies[2], efficiencies[3])
 final_hvs, hl1, hl2 = bad_sectors.get_sectors_hv(hvs)
-#--------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------
 def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 	geometry_options = {
 		"head": "40pt",
@@ -147,6 +163,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 
 	doc.change_document_style("firstpage")
 	doc.add_color(name="lightgray", model="gray", description="0.80")
+	doc.add_color(name="lightgray2", model="gray", description="0.6")
 
 	# IP
 	with doc.create(Section('IP SIDE', numbering=False)):
@@ -173,7 +190,9 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL1",
 											"HL2"],
 										   mapper=bold,
-										   color="lightgray")
+										   color="lightgray2")
+						data_table.add_hline()
+						data_table.end_table_header()
 						data_table.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[0]):
@@ -222,7 +241,9 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL3",
 											"HL4"],
 										   mapper=bold,
-										   color="lightgray")
+										   color="lightgray2")
+						data_table2.add_hline()
+						data_table2.end_table_header()
 						data_table2.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[1]):
@@ -278,7 +299,9 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL1",
 											"HL2"],
 										   mapper=bold,
-										   color="lightgray")
+										   color="lightgray2")
+						data_table3.add_hline()
+						data_table3.end_table_header()
 						data_table3.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[2]):
@@ -318,7 +341,6 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 				doc.append(LineBreak())
 				with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|X[r]|X[r]|X[r]|",
 										 row_height=1.5)) as data_table4:
-						data_table4.add_hline()
 						data_table4.add_row(["Sector",
 											"L5",
 											"L6",
@@ -327,7 +349,9 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 											"HL3",
 											"HL4"],
 										   mapper=bold,
-										   color="lightgray")
+										   color="lightgray2")
+						data_table4.add_hline()
+						data_table4.end_table_header()
 						data_table4.add_hline()
 						row = ["blank", "l1", "l2", "l3", "l4", "hl1", "hl2"]
 						for i, hv in enumerate(final_hvs[3]):
@@ -356,13 +380,30 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 							else:
 								data_table4.add_row([str(sectors[3][i]), l1, l2, l3, l4, hl1_str, hl2_str],color="lightgray")
 						data_table4.add_hline()
+
+	doc.append(NewPage())
+	with doc.create(Section('Probability of dectecting the particle in at least 4 layers', numbering=False)):
+		with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|",
+								 row_height=1.5)) as data_table5:
+				data_table5.add_hline()
+				data_table5.add_row(["Sector",
+									"Probability",
+									"Sector",
+									"Probability"],
+								   mapper=bold,
+								   color="lightgray2")
+				data_table5.add_hline()
+				row = ["L#", "probability", "R#", "probability"]
+				j = 0
+				for i in range(len(sector_probabilities)/2):
+					if (i % 2) == 0:
+						data_table5.add_row(["L" + str(i+1), round(sector_probabilities[j],5), "R" + str(i+1), round(sector_probabilities[j+1],5)])
+					else:
+						data_table5.add_row(["L" + str(i+1), round(sector_probabilities[j],5), "R" + str(i+1), round(sector_probabilities[j+1],5)],color="lightgray")
+					j = j + 2
+				data_table5.add_hline()
+
 	doc.generate_pdf("complex_report_DW", clean_tex=False, compiler='pdflatex')
-#---------------------------------------------------------------------------------------------
-# swap R and L
-def swap(hvs):
-	for i in range(len(hvs)/2):
-		hvs[i*2], hvs[i*2+1] = hvs[i*2+1] , hvs[i*2]
-	return hvs
 #---------------------------------------------------------------------------------------------
 
 generate_unique_dw(final_hvs,hl1, hl2, sectors)
