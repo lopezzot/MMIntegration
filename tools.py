@@ -108,6 +108,7 @@ def write_rootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirect
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
+		print graphtitle + " "+str(np.mean(vectory))
 		color = 4
 		offset = 0.9
 		minimum = 400
