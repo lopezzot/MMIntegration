@@ -253,6 +253,7 @@ def createplot(giffile, file, filename, folder):
 	source_times = [x.replace(':',' ') for x in source_times]
 	source_times = [x.replace('/',' ') for x in source_times]
 	source_times = [x.replace('_',' ') for x in source_times]
+
 	source_times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in source_times]
 
 	source_starttime = source_times[0]
@@ -292,11 +293,22 @@ def createplot(giffile, file, filename, folder):
 		#for counter in range(0,50):
 		#	print source_dates[counter],source_newvalues[counter],atten_dates[counter],atten_newvalues[counter]
 
+	#part added on 7/10/2019 to sync also the end of data from source.dat and effectiveattenuation.dat	
+	if len(atten_newvalues)>len(source_newvalues):
+		atten_newvalues = atten_newvalues[:len(source_newvalues)]
+	else:
+		source_newvalues = source_newvalues[:len(atten_newvalues)]
+
 	for counter, atten_newvalue in enumerate(atten_newvalues):
 		if counter < len(source_newvalues):
 			if source_newvalues[counter] == 0.0:
 				atten_newvalues[counter] = 0.0  #put attenuation to 0 il source is off, i will later remove zeros
-
+		'''
+		else:                                   #else assing 0 to all remaining current values if source was off for the last minutes
+			if source_newvalues[len(source_newvalues)-1] == 0.0:
+				for x in atten_newvalues[len(source_newvalues)-1::len(atten_newvalues)-1]:
+					x = 0.0
+		'''
 	#completed date array and attenuation array from GIF
 	#now important to match starting time with data from chamber
 	#not done for drift

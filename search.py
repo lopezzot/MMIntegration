@@ -59,7 +59,7 @@ def removespikes_atgif(valuesdeltas, valueshv, attenvalues): #to remove spikes i
 def removetrips(valuesdeltas, valueshv):
 	for counter, x in enumerate(valuesdeltas):
 		if abs(x) > 5: #5V
-			for i in range(counter,counter+60*20):
+			for i in range(counter,counter+60):
 				if i == len(valueshv) -1:
 					break
 				valueshv[i] = valueshv[i-1]
