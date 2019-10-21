@@ -167,7 +167,7 @@ def write_orderedrootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, roo
 		minimum = -1
 		maximum = int(np.max(vectory)+1.5)
 		if maximum > 10:
-			maximum = int(10)
+			maximum = int(maximum)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"
@@ -229,7 +229,7 @@ def write_rootdategraph_fromgif(vectorx, vectory, graphtitle, xtitle, ytitle, ro
 		minimum = -1
 		maximum = int(np.max(vectory)+1.5)
 		if maximum > 10:
-			maximum = int(10)
+			maximum = int(maximum)
 
 	if ytitle == "v":
 		ytitle = ytitle+" (V)"

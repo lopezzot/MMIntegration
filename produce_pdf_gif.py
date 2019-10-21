@@ -240,6 +240,14 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 			data_table_irradiated.add_empty_row()
 			data_table_irradiated.add_row("Chamber efficiency", "","", "", str(round(total_efficiency_irradiated)))
 			data_table_irradiated.add_hline()
+			if "LM2" in chambername:
+				newefficiency = efficiency
+				newefficiency.pop(4)
+				newefficiency.pop(4)
+				newefficiency.pop(8)
+				newefficiency.pop(8)
+				data_table.add_row("Efficiency no LE8", "","", "", str(round(np.mean(newefficiency))))
+				data_table.add_hline()
 
 	doc.append(NewPage())
 	with doc.create(Section('Summary irradiated at GIF', numbering=False)):

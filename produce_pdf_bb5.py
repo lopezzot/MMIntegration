@@ -6,6 +6,7 @@ import glob
 import piecart
 from termcolor import colored
 import production_site
+import numpy as np
 
 from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
 	StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
@@ -604,6 +605,14 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 			data_table.add_hline()
 			data_table.add_row("Chamber efficiency", "","", "", str(round(total_efficiency)))
 			data_table.add_hline()
+			if "LM2" in chambername:
+				newefficiency = efficiency
+				newefficiency.pop(4)
+				newefficiency.pop(4)
+				newefficiency.pop(8)
+				newefficiency.pop(8)
+				data_table.add_row("Efficiency no LE8", "","", "", str(round(np.mean(newefficiency))))
+				data_table.add_hline()
 
 	doc.append(NoEscape('\\clearpage'))
 	with doc.create(Section('Summary not irradiated', numbering=False)):
