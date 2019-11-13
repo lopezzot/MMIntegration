@@ -1,6 +1,7 @@
 from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine, TLatex, TGaxis, TPad
 import numpy as np
 from array import array
+import math
 
 
 def write_roothistogram(vector, histogramtitle, xtitle, ytitle, rootdirectory):
@@ -208,6 +209,68 @@ def write_orderedrootdategraph(vectorx, vectory, graphtitle, xtitle, ytitle, roo
 	#MyTGraph.Draw("APL")
 	if "D" not in graphtitle:
 		gPad.SaveAs("BB5-"+graphtitle[0:9]+".pdf")
+	gPad.Close()
+
+def write_orderedrootdategraph_datadw(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
+	"""Function to perform ROOT graph"""
+
+	arrayx = array('d')
+	arrayy = array('d')
+
+	for x in vectorx:
+		arrayx.append(x.Convert())
+
+	for y in vectory:
+		arrayy.append(y)
+
+	if ytitle == "i":
+		ytitle = ytitle+" (uA)"
+		color = 2
+		offset = 1.
+		minimum = -1
+		maximum = int(np.max(vectory)+1.5)
+		if maximum > 10:
+			maximum = int(maximum)
+
+	if ytitle == "v":
+		ytitle = ytitle+" (V)"
+		color = 4
+		offset = 0.9
+		minimum = 400
+		maximum = 600
+		
+	#How many graph points
+	n = len(vectorx)
+
+	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph.SetName(graphtitle)
+	
+	#Draw + DrawOptions
+	c = TCanvas()
+	Style = gStyle
+	Style.SetPadLeftMargin(2.0)
+	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
+	XAxis.SetTimeDisplay(1)
+	XAxis.SetTimeFormat("#splitline{%d/%m}{%H:%M:%S}")
+	XAxis.SetLabelOffset(0.025)
+	MyTGraph.SetMarkerColor(color)
+	MyTGraph.SetMarkerStyle(1)
+	MyTGraph.SetMarkerSize(1)
+	MyTGraph.SetLineColor(color)
+	MyTGraph.SetTitle(graphtitle+" V")
+	#XAxis.SetTitle(xtitle)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetTitleOffset(offset)
+	YAxis.SetTitleOffset(offset)
+	YAxis.SetTitle(ytitle)
+	MyTGraph.GetHistogram().SetMinimum(minimum)
+	MyTGraph.GetHistogram().SetMaximum(maximum)
+	MyTGraph.Draw("APL")
+	#rootdirectory.WriteTObject(MyTGraph) #do not write into root file
+	#MyTGraph.Write(graphtitle)
+	#MyTGraph.Draw("APL")
+	if "D" not in graphtitle:
+		gPad.SaveAs("BB5-"+graphtitle[0:8]+".pdf")
 	gPad.Close()
 
 def write_rootdategraph_fromgif(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):

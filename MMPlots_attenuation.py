@@ -13,6 +13,7 @@ from fpdf import FPDF
 from pylatex import Document, Figure
 from array import array
 import efficiency
+import math
 
 #----------------------------------------------------------------------------
 def createsummaryplot_attenuation(folder, path, gifpath):
@@ -76,7 +77,7 @@ def createsummaryplot_attenuation(folder, path, gifpath):
 			spikesduration = spikeduration
 		if sectorscurrent != None:
 			sectorscurrents.append(sectorscurrent)
-		if meancurrent != None:
+		if meancurrent != None and math.isnan(meancurrent)==False:
 			meancurrents.append(meancurrent)
 		if sectorsvoltage != None:
 			sectorsvoltages.append(sectorsvoltage)
@@ -86,9 +87,10 @@ def createsummaryplot_attenuation(folder, path, gifpath):
 			graphs_atten.append(graph_atten)
 		if graph_linearity != None:
 			graphs_linearity.append(graph_linearity)
-
+	
 	#create summary plots
 	tools.write_roothistogram(newspikeseconds, "Spike time distribution", "t (s)", "Entries", dir_summary)
+	#remove this line below for LM1 M8 gif
 	tools.write_rootgraph(range(len(meancurrents)),meancurrents,"i "+str(round(float(deltatime)/float(3600),2))+" hours","sector","i", sectorscurrents, dir_summary)
 	tools.write_rootgraph(range(len(meanvoltages)),meanvoltages,"HV "+str(round(float(deltatime)/float(3600),2))+" hours","sector","v",sectorsvoltages, dir_summary)
 	tools.write_spikeroothistogram(spikenames, "spikes", "spikes/min", dir_summary, deltatime)
