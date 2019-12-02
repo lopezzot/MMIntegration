@@ -1,4 +1,4 @@
-from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine, TLatex, TGaxis, TPad
+from ROOT import gROOT, TH1, TH1F, gStyle, gPad, TGraph, TCanvas, TDatime, TMultiGraph, TLine, TLatex, TGaxis, TPad, TF1
 import numpy as np
 from array import array
 import math
@@ -526,6 +526,37 @@ def write_rootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, sectorscurrent
 	#gPad.SaveAs("current-"+graphtitle+".pdf")
 	gPad.Close()
 
+def write_imposedattenuationgraphs(ordered_graphslinearity):
+	if len(ordered_graphslinearity) == 40:
+		sectors = [1,2,3,4,5]
+	else:
+		sectors = [6,7,8]
+
+	colors = [1,2,3,4,5,6,7,8,9]
+
+	for c, s in enumerate(sectors):
+		plots = [x for x in ordered_graphslinearity if str(s) in x.filename[8]]
+		mgraph = TMultiGraph()
+		for counter, p in enumerate(plots):
+			x = array('d', p.setattenvalues)
+			y = array('d', p.normalizedsetmeancurrents)
+			n = len(x)
+			graph = TGraph(n, x, y)
+			graph.SetMarkerColor(colors[counter])
+			graph.SetLineColor(colors[counter])
+			graph.SetMarkerStyle(20)
+			graph.SetMarkerSize(1)
+			mgraph.Add(graph)
+
+		mgraph.SetTitle("PCBs type "+str(s))
+		mgraph.GetXaxis().SetRangeUser(0.0,1.2)
+		mgraph.GetXaxis().SetTitle("1/attenuation")
+		mgraph.GetYaxis().SetTitle("i/area (uA/cm^{2})")
+		mgraph.GetYaxis().SetTitleOffset(1.5)
+		mgraph.Draw("APL")
+		gPad.SaveAs("Overimposed_"+str(s)+".pdf")
+		gPad.Close()
+
 def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, rootdirectory):
 	"""Function to perform ROOT graph"""
 
@@ -568,6 +599,10 @@ def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, roo
 	YAxis = MyTGraph.GetYaxis()
 	YAxis.SetTitleOffset(offset)
 	YAxis.SetTitle(ytitle)
+	MyTGraph.Fit("pol1")
+	intercept = MyTGraph.GetFunction("pol1").GetParameter(0)
+	slope = MyTGraph.GetFunction("pol1").GetParameter(1)
+	intercpetandslope = [intercept, slope]
 	rootdirectory.WriteTObject(MyTGraph)
 	c = TCanvas()
 	#c.SetLogx()
@@ -579,3 +614,4 @@ def write_attenuationrootgraph(vectorx, vectory, graphtitle, xtitle, ytitle, roo
 	#MyTGraph.Draw("AP")
 	gPad.SaveAs(graphtitle[0:9]+".pdf")
 	gPad.Close()
+	return intercpetandslope

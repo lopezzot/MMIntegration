@@ -29,5 +29,6 @@ if todo == "DWData":
 	MMPlotsDW.createsummaryplots()
 
 os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/GIF*")
+os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/Overimposed*")
 os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/iMon*")
 os.system("rm -rf /Users/lorenzo/cernbox/work/Git-to-Mac/MMAnalysis/MMIntegration/BB5*")

@@ -117,6 +117,7 @@ def createsummaryplot_attenuation(folder, path, gifpath):
 	ordered_orderedspikerate = []
 	ordered_graphsatten = []
 	ordered_graphslinearity = []
+	orderedinterceptandslope = []
 
 	for layer in defaultlayers:
 		index = sectorsvoltages.index(layer)
@@ -142,11 +143,15 @@ def createsummaryplot_attenuation(folder, path, gifpath):
 		tools.write_rootdategraph_plusatten(graph.new_rootdates, graph.newvalues, graph.atten_newvalues, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "time (s)", filename[0], dir_summary) #plot graph current + source
 
 	for counter, graph in enumerate(ordered_graphslinearity):
-		print graph.name	                                              #+" "+str(int(orderedsmeanvoltages[counter]))#
-		tools.write_attenuationrootgraph(graph.setattenvalues, graph.normalizedsetmeancurrents, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "1/attenuation", "i", dir_summary)
+		print graph.name                                            #+" "+str(int(orderedsmeanvoltages[counter]))#
+		#here creates linearity plots
+		interceptandslope = tools.write_attenuationrootgraph(graph.setattenvalues, graph.normalizedsetmeancurrents, graph.filename+" "+str(int(orderedsmeanvoltages[counter])), "1/attenuation", "i", dir_summary)
+		orderedinterceptandslope.append(interceptandslope)
+
+	tools.write_imposedattenuationgraphs(ordered_graphslinearity)
 
 	eff, layers_eff, total_eff = efficiency.efficiency_values(orderedsmeanvoltages, chambertype)
-	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, ID, timeslot, deltatime, eff, layers_eff, total_eff
+	return orderedsectorsvoltages, orderedsmeanvoltages, ordered_orderedspikerate, orderedinterceptandslope, ID, timeslot, deltatime, eff, layers_eff, total_eff
 #----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------

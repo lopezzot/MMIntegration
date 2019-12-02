@@ -131,13 +131,15 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 		doc.append(LineBreak())
 		doc.append("Spike_treshold_0.20_uA")
 		doc.append(LineBreak())
-		with doc.create(LongTabu("|X[l] |X[r]| X[r] |X[r]| X[r]|",
+		with doc.create(LongTabu("|X[l] |X[r]| X[r] |X[r] |X[r] |X[r] |X[r]|",
 								 row_height=1.5)) as data_table_irradiated:
 			data_table_irradiated.add_hline()
 			data_table_irradiated.add_row(["Sector",
 								"HV",
 								"spark/min",
 								"Efficiency",
+								"Intercept (nA)",
+								"Slope (nA/atten.)",
 								"Flag"],
 							   mapper=bold,
 							   color="lightgray2")
@@ -188,7 +190,7 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")])
+					round(orderedinterceptandslope[i][0]*1000,4), round(orderedinterceptandslope[i][1]*1000,4), TextColor(acceptedcolor, "V")])
 					data_table_irradiated.add_hline()
 				else:
 
@@ -231,15 +233,20 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 
 					data_table_irradiated.add_row([str(sectors_irradiated[i]), TextColor(hvcolor,str(int(hv_irradiated[i]))),
 					TextColor(sparkcolor, str(round(spark_irradiated[i],2))), TextColor(effcolor, str(round(efficiency_irradiated[i],1))),
-					TextColor(acceptedcolor, "V")], color="lightgray")
+					round(orderedinterceptandslope[i][0]*1000,4), round(orderedinterceptandslope[i][1]*1000,4), TextColor(acceptedcolor, "V")], color="lightgray")
 					data_table_irradiated.add_hline()
 
 			data_table_irradiated.add_hline()
 			data_table_irradiated.add_empty_row()
-			data_table_irradiated.add_row("Out of spec", str(len([x for x in hv_irradiated if x < 548.0])), str(len([x for x in spark_irradiated if x > 6.0])), str(len([x for x in efficiency_irradiated if x < 80.0])), str(acceptedlist.count(0)))
+			data_table_irradiated.add_row("Out of spec", str(len([x for x in hv_irradiated if x < 548.0])), str(len([x for x in spark_irradiated if x > 6.0])), str(len([x for x in efficiency_irradiated if x < 80.0])),
+			 str(round(np.array([x[0] for x in orderedinterceptandslope]).mean()*1000,4)), str(round(np.array([x[1] for x in orderedinterceptandslope]).mean()*1000,4)), str(acceptedlist.count(0)))
 			data_table_irradiated.add_hline()
 			data_table_irradiated.add_empty_row()
-			data_table_irradiated.add_row("Chamber efficiency", "","", "", str(round(total_efficiency_irradiated)))
+			data_table_irradiated.add_row("Std", "","","",
+			 str(round(np.array([x[0] for x in orderedinterceptandslope]).std()*1000,4)), str(round(np.array([x[1] for x in orderedinterceptandslope]).std()*1000,4)),"")
+			data_table_irradiated.add_hline()
+			data_table_irradiated.add_empty_row()
+			data_table_irradiated.add_row("Chamber efficiency", "","", "", "", "", str(round(total_efficiency_irradiated)))
 			data_table_irradiated.add_hline()
 			if "LM2" in chambername:
 				newefficiency = efficiency_irradiated
@@ -247,7 +254,7 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 				newefficiency.pop(4)
 				newefficiency.pop(8)
 				newefficiency.pop(8)
-				data_table_irradiated.add_row("Efficiency no LE8", "","", "", str(round(np.mean(newefficiency))))
+				data_table_irradiated.add_row("Efficiency no LE8", "","", "", "", "", str(round(np.mean(newefficiency))))
 				data_table_irradiated.add_hline()
 
 	doc.append(NewPage())
@@ -327,7 +334,7 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 	doc.append(NewPage())
 
 	with doc.create(Section('Current under irradiation', numbering=False)):
-
+	
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
 			png_list = glob.glob('GIF-i*.pdf')
@@ -348,6 +355,35 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 	doc.append(NewPage())
 
 	with doc.create(Section('Current vs. flux (GIF)', numbering=False)):
+
+	#overiposed graphs linearity
+	# Add cheque images
+		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
+			png_list = glob.glob('Overimposed_*.pdf')
+			png_list.sort(key=os.path.getmtime)
+			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
+			row_image = []
+			i = 0
+			if len(png_list) == 5:
+				for image in png_list:
+					row_image.append(image)
+					i = i +1
+					if i==5:
+						cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
+						cheque_table.add_row([row_image[4], "", "", ""])
+						row_image = []
+						i=0
+			else:
+				for image in png_list:
+					row_image.append(image)
+					i = i +1
+					if i==3:
+						cheque_table.add_row([row_image[0], row_image[1], row_image[2], ""])
+						row_image = []
+						i=0
+
+		png_list = []
+		doc.append(NewPage())
 
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
@@ -738,7 +774,7 @@ if ps == "yes":
 		ps_path = "gif path"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
 	else:
-	    print "Name not found"
+		print "Name not found"
 	sectors_irradiated, hv_irradiated, spark_irradiated, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
 	ps_hv, ps_spike = production_site.read(ps_path+ps_filename+'.dat')
 	ID = ID_irradiated
@@ -759,8 +795,8 @@ else:
 		path = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/HV/"
 		gifpath = "$HOME/Documents/ATLHVMMBB5/Export_Data/"+folder+"/GIF/"
 	else:
-	    print "Name not found"
+		print "Name not found"
 
-	sectors_irradiated, hv_irradiated, spark_irradiated, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
+	sectors_irradiated, hv_irradiated, spark_irradiated, orderedinterceptandslope, ID_irradiated, timeslot_irradiated, deltatime_irradiated, efficiency_irradiated, layers_efficiency_irradiated, total_efficiency_irradiated = MMPlots_attenuation.createsummaryplot_attenuation(folder, path, gifpath)
 	ID = ID_irradiated
 	generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated)
