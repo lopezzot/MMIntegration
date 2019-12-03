@@ -552,7 +552,7 @@ def write_imposedattenuationgraphs(ordered_graphslinearity):
 		mgraph.GetXaxis().SetRangeUser(0.0,1.2)
 		mgraph.GetXaxis().SetTitle("1/attenuation")
 		mgraph.GetYaxis().SetTitle("i/area (uA/cm^{2})")
-		mgraph.GetYaxis().SetTitleOffset(1.5)
+		mgraph.GetYaxis().SetTitleOffset(1.2)
 		mgraph.Draw("APL")
 		gPad.SaveAs("Overimposed_"+str(s)+".pdf")
 		gPad.Close()

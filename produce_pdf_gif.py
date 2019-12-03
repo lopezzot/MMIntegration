@@ -359,6 +359,8 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 	#overiposed graphs linearity
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
+			colorimage = glob.glob("color.pdf")
+			color_list = [StandAloneGraphic(x, image_options="width=120px") for x in colorimage]
 			png_list = glob.glob('Overimposed_*.pdf')
 			png_list.sort(key=os.path.getmtime)
 			png_list = [StandAloneGraphic(x, image_options="width=120px") for x in png_list]
@@ -370,7 +372,7 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 					i = i +1
 					if i==5:
 						cheque_table.add_row([row_image[0], row_image[1], row_image[2], row_image[3]])
-						cheque_table.add_row([row_image[4], "", "", ""])
+						cheque_table.add_row([row_image[4], color_list[0], "", ""])
 						row_image = []
 						i=0
 			else:
@@ -378,7 +380,7 @@ def generate_unique_gif(sectors_irradiated, hv_irradiated, spark_irradiated):
 					row_image.append(image)
 					i = i +1
 					if i==3:
-						cheque_table.add_row([row_image[0], row_image[1], row_image[2], ""])
+						cheque_table.add_row([row_image[0], row_image[1], row_image[2], color_list[0]])
 						row_image = []
 						i=0
 

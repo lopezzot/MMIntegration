@@ -270,7 +270,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 	#doc.append(NewPage())
 	doc.append(NoEscape('\\clearpage'))
 
-	with doc.create(Section('Summary not irradiated', numbering=False)):
+	with doc.create(Section('Summary', numbering=False)):
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 		 # Add cheque images
 		with doc.create(LongTabu("X[c]")) as summary1_table:
@@ -338,8 +338,12 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 				else:
 					data_table3.add_row([str(channelsT3[i]), str(round(layers_efficiency[i],1))])
 
-
-	with doc.create(Section('Current with no irradiation', numbering=False)):
+	if irradatgif == "y":
+		title = "Current with irradiation"
+	else:
+		title = "Current with no irradiation"
+	
+	with doc.create(Section(title, numbering=False)):
 
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
@@ -362,7 +366,7 @@ def generate_unique_ps(sectors_notirradiated, hv_notirradiated, spark_notirradia
 	doc.generate_pdf("complex_report", clean_tex=False, compiler='pdflatex')
 
 
-def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated):
+def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated, irradatgif):
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -464,7 +468,11 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 	doc.add_color(name="lightgray", model="gray", description="0.85")
 	doc.add_color(name="lightgray2", model="gray", description="0.6")
 
-	with doc.create(Section('HV not irradiated', numbering=False)):
+	if irradatgif == "y":
+		title = "HV irradiated"
+	else:
+		title = "HV not irradiated"
+	with doc.create(Section(title, numbering=False)):
 	   # Add statement table
 		doc.append("\n")
 		doc.append(timeslot)
@@ -615,7 +623,7 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 				data_table.add_hline()
 
 	doc.append(NoEscape('\\clearpage'))
-	with doc.create(Section('Summary not irradiated', numbering=False)):
+	with doc.create(Section('Summary', numbering=False)):
 		piecart.create_pie([acceptedlist.count(1), acceptedlist.count(0)], "piechart.pdf")
 
 
@@ -689,7 +697,11 @@ def generate_unique(sectors_notirradiated, hv_notirradiated, spark_notirradiated
 
 	doc.append(NewPage())
 
-	with doc.create(Section('Current with no irradiation', numbering=False)):
+	if irradatgif == "y":
+		title = "Current with irradiation"
+	else:
+		title = "Current with no irradiation"
+	with doc.create(Section(title, numbering=False)):
 
 	# Add cheque images
 		with doc.create(LongTabu("X[c] X[c] X[c] X[c]")) as cheque_table:
@@ -733,4 +745,5 @@ if ps == "yes":
 	generate_unique_ps(sectors_notirradiated,hv_notirradiated,spark_notirradiated, ps_hv, ps_spike)
 else:
 	sectors_notirradiated, hv_notirradiated, spark_notirradiated, ID, timeslot, deltatime, efficiency, layers_efficiency, total_efficiency = MMPlots.createsummaryplots()
-	generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated)
+	irradatgif = raw_input("single point irradiated at gif? (y/n)")
+	generate_unique(sectors_notirradiated,hv_notirradiated,spark_notirradiated, irradatgif)
