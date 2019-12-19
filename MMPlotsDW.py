@@ -65,7 +65,7 @@ def createsummaryplots(path=None, folder=None):
         print "Analyzing: "+dat_file[len(path):len(dat_file)]+" \n"
         filename = dat_file[len(path):len(dat_file)-4]
         layer = filename[5:7]
-        if "D" not in layer:
+        if "D" not in layer and "HO" not in layer:
             rootdirectory = directories[layer]
         graphcurrent, spikeslayer, duration, sectorsvoltage, meanvoltage, sectorscurrent, meancurrent, spikeseconds = createplot(dat_file, dat_file[len(path):len(dat_file)-4])
 
@@ -149,7 +149,7 @@ def createsummaryplots(path=None, folder=None):
 def createplot(file, filename):
 
     layer = filename[5:7]
-    if "D" not in layer:
+    if "D" not in layer and "HO" not in layer:
         rootdirectory = directories[layer] #to check
 
 
@@ -216,6 +216,9 @@ def createplot(file, filename):
     	if "D" in filename:
     		sectorscurrent = None
     		nospike_meancurrent = None
+        if "HO" in filename:
+            sectorscurrent = None
+            nospike_meancurrent = None
 
     if "v" in filename: #it's a voltage file
     	sectorsvoltage = filename[5:9]
@@ -228,9 +231,12 @@ def createplot(file, filename):
     	if "D" in filename:
     		sectorsvoltage = None
     		notrips_meanvoltage = None
+        if "HO" in filename:
+            sectorscurrent = None
+            nospike_meancurrent = None
 
     #tools.write_roothistogram(newvalues, filename, filename[0], "Entries", rootdirectory) #if want additional histograms
-    if "D" not in filename:
+    if "D" not in filename and "HO" not in filename:
         tools.write_rootdategraph(rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
         currentgraph = classes.currentgraph(filename[5:9], rootdates, newvalues, filename, "time (s)", filename[0], rootdirectory)
 
@@ -246,7 +252,7 @@ def createplot(file, filename):
 
     duration = len(newtimes) #total seconds from start to stop
 
-    if "i" not in filename or "D" in filename:
+    if "i" not in filename or "D" in filename or "HO" in filename:
     	spikenames = None
     	duration = None
     	spikeseconds = None
