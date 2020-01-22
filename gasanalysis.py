@@ -22,6 +22,8 @@ layersnosource2 = ["L1L8", "L2L8", "L3L8"]
 
 rootfile = TFile("out.root", "RECREATE")
 
+rootfilezoom = TFile("outzoom.root", "RECREATE")
+
 rootfilespikes = TFile("outspikes.root", "RECREATE")
 
 rootfilenosource = TFile("outnosource.root", "RECREATE")
@@ -81,6 +83,9 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetLineColorAlpha(2, 0.5)
 	MyTGraph.SetLineWidth(1)
 	MyTGraph.SetTitle(filename)
+	rootfilezoom.cd()
+	MyTGraph.SetName(graphtitle)
+	MyTGraph.Write()
 
 	XAxis2 = MyTGraph2.GetXaxis() #TGraphfasthescin
 	XAxis2.SetTimeDisplay(1)
@@ -1368,7 +1373,7 @@ def processARCO2937spikes(file, file2, filename):
 	hvvaluescheck = [x-570 for x in hvvaluescheck]
 	write_summaryspikes(hvvaluescheck, spikesvalues, "ARCO2937 - "+str(filename), filename)
 
-
+'''
 for L in goodlayers:
 	print "Gain summary: "+str(L)
 	filename = L
@@ -1454,7 +1459,7 @@ for L in goodlayers:
 		hvgain.append(x)
 		gain.append(ivalues2[counter]/ivalues3[counter])
 	write_summarygain(hvgain, gain, "ARCO2037_"+str(filename)+"_2", filename+"_2")
-	
+'''	
 '''
 for L in layersnosource2:
 	print "Current no source "+str(L)
@@ -1536,7 +1541,7 @@ for L in goodlayers:
 	#processARCO2937(file1, file2, filename+"_att1000")
 '''
 
-'''
+
 for L in layers:
 	print "Create plots for: "+str(L)
 
@@ -1551,8 +1556,8 @@ for L in layers:
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/vMon_"+str(L)+".dat"
 
 	#ISOBUTANE no source
-	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
-	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 2.2
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
@@ -1560,8 +1565,8 @@ for L in layers:
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 100.0
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 1000.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/vMon_"+str(L)+".dat"
@@ -1584,4 +1589,3 @@ for L in layers:
 
 	filename = L
 	createplot(file1, file2, filename)
-'''
