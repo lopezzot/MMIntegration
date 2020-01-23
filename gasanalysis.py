@@ -66,6 +66,31 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	pad2.SetFillStyle(4000)
 	pad2.SetFrameFillStyle(0)
 
+	rootfilezoom.cd()
+	Style = gStyle
+	Style.SetPadLeftMargin(2.0)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetRangeUser(-1, 40.)
+	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
+	XAxis.SetTimeDisplay(1)
+	XAxis.SetTimeFormat("%H:%M")
+	XAxis.SetLabelOffset(0.025)
+	MyTGraph.GetXaxis().SetNdivisions(910)
+	MyTGraph.SetMarkerStyle(1)
+	MyTGraph.SetMarkerSize(1)
+	MyTGraph.GetYaxis().SetTitle("Current (uA)")
+	MyTGraph.GetYaxis().SetTitleOffset(1.)
+	MyTGraph.GetYaxis().SetTitleColor(2)
+	MyTGraph.SetLineColorAlpha(2, 0.5)
+	MyTGraph.SetLineWidth(1)
+	MyTGraph.SetName(graphtitle)
+	MyTGraph.SetTitle(filename)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetRangeUser(-0.5, 0.9)
+	MyTGraph.Draw("AL")
+	c.SaveAs("gaszoom/"+str(filename)+".pdf")
+	MyTGraph.Write()
+
 	Style = gStyle
 	Style.SetPadLeftMargin(2.0)
 	YAxis = MyTGraph.GetYaxis()
@@ -83,10 +108,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetLineColorAlpha(2, 0.5)
 	MyTGraph.SetLineWidth(1)
 	MyTGraph.SetTitle(filename)
-	rootfilezoom.cd()
-	MyTGraph.SetName(graphtitle)
-	MyTGraph.Write()
-
+	
 	XAxis2 = MyTGraph2.GetXaxis() #TGraphfasthescin
 	XAxis2.SetTimeDisplay(1)
 	XAxis2.SetTimeFormat("%H:%M")
