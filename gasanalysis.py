@@ -133,6 +133,59 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	c.SaveAs("gastest/"+str(filename)+".pdf")
 	gPad.Close()
 
+def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
+	"""Function to perform ROOT graph"""
+
+	rootfilelinearity = TFile("outlinearity.root", "RECREATE")
+
+	arrayx = array('d')
+	arrayy = array('d')
+	arrayerrory = array('d')
+
+	for e in errorvectory:
+		arrayerrory.append(e)
+
+	for x in vectorx:
+		arrayx.append(x)
+
+	for y in vectory:
+		arrayy.append(y)
+		
+	#How many graph points
+	n = len(vectorx)
+
+	zeros = array('d')
+	for i in range(n):
+		zeros.append(0.0)
+
+	MyTGraph = TGraphErrors(n, arrayx, arrayy, zeros, zeros)
+	
+	c = TCanvas()
+	Style = gStyle
+	Style.SetPadLeftMargin(2.0)
+	YAxis = MyTGraph.GetYaxis()
+	YAxis.SetRangeUser(-0.5, 30.)
+	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
+	XAxis.SetLimits(-0.1,1.2)
+	#XAxis.SetLabelOffset(0.025)
+	XAxis.SetTitle("1/attenuation")
+	#MyTGraph.GetXaxis().SetNdivisions(910)
+	MyTGraph.SetMarkerStyle(8)
+	MyTGraph.SetMarkerSize(1)
+	MyTGraph.GetYaxis().SetTitle("Current (uA)")
+	MyTGraph.GetYaxis().SetTitleOffset(1.)
+	#MyTGraph.GetYaxis().SetTitleColor(2)
+	MyTGraph.SetLineColor(1)
+	MyTGraph.SetLineWidth(1)
+	MyTGraph.SetMarkerColor(1)
+	MyTGraph.SetName(graphtitle)
+	MyTGraph.SetTitle(graphtitle)
+	f = TF1("f","pol1", 0.0, 1.0)
+	MyTGraph.Fit(f, "R")
+	MyTGraph.Draw("AP")
+	c.SaveAs("gaslinearity/"+str(graphtitle)+".pdf")
+	MyTGraph.Write()
+	
 def write_summaryspikes(vectorx, vectory, graphtitle, filename):
 	"""Function to perform ROOT graph"""
 	arrayx = array('d')
@@ -549,6 +602,117 @@ def createplot(file, file2, filename):
 	
 	#common part
 	write_rootdategraph(rootdates, newvalues, rootdates2, newvalues2, filename)
+
+def processsaturation(file, file2, filename):
+	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
+	if len(times) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+
+	times = [x.replace(':',' ') for x in times]
+	times = [x.replace('/',' ') for x in times]
+	times = [x.replace('_',' ') for x in times]
+	#print times
+	times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times]
+
+	starttime = times[0]
+	dates = [starttime]
+
+	times = [int((x-starttime).total_seconds()) for x in times]
+
+	values = [float(x.split(' 	 ')[1]) for x in open(file,"r").readlines()]
+
+	newtimes = range(times[len(times)-1])
+	newvalues = [None]*len(newtimes)
+
+	for counter, value in enumerate(newvalues):
+		if counter in times:
+			newvalues[counter] = values[times.index(counter)]
+		else:
+			newvalues[counter] = newvalues[counter-1]
+
+	for counter in range(len(newtimes)-1):
+		dates.append(dates[counter]+td(seconds=1))
+
+	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
+
+	#part file2
+	times2 = [x[0:19] for x in open(file2,"r").readlines()]
+	if len(times2) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times2:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+	
+	#part file2
+	times2 = [x.replace(':',' ') for x in times2]
+	times2 = [x.replace('/',' ') for x in times2]
+	times2 = [x.replace('_',' ') for x in times2]
+	
+	times2 = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times2]
+	starttime2 = times2[0]
+	dates2 = [starttime2]
+	times2 = [int((x-starttime2).total_seconds()) for x in times2]
+	values2 = [float(x[21:28]) for x in open(file2,"r").readlines()]
+	#print values2
+	#print values2
+	newtimes2 = range(times2[len(times2)-1])
+	newvalues2 = [None]*len(newtimes2) 
+
+	for counter, value in enumerate(newvalues2):
+		if counter in times2:
+			newvalues2[counter] = values2[times2.index(counter)]
+		else:
+			newvalues2[counter] = newvalues2[counter-1]
+
+	for counter in range(len(newtimes2)-1):
+		dates2.append(dates2[counter]+td(seconds=1))
+
+	#print dates[0:10]
+	#print newvalues[0:10]
+	#print dates2[0:10]
+	#print newvalues2[0:10]
+	
+	rootdates2 = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates2]
+	
+	if rootdates[0] not in rootdates2:
+		for counter, i in enumerate(rootdates):
+			if i in rootdates2:
+				startrootdate = counter
+				break
+		rootdates = rootdates[startrootdate:]
+		newvalues = newvalues[startrootdate:]
+
+	if len(rootdates) > len(rootdates2):
+		rootdates = rootdates[:len(rootdates2)]
+		newvalues = newvalues[:len(newvalues2)]
+	else:
+		rootdates2 = rootdates2[:len(rootdates)]
+		newvalues2 = newvalues2[:len(newvalues)]
+	
+	filtervalues = [0.0, 10.0, 6.9, 4.6, 2.2, 1.0]
+	ivalues = []
+	ivalueserror = []
+	
+	for x in filtervalues:	
+		f = np.mean([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
+		e = np.std([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
+		n = float(len([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x]))
+		error = e/(n**0.5)
+		ivalues.append(f)
+		print error
+		ivalueserror.append(error)
+		
+	print filtervalues, ivalues
+	filtervalues = [1./x for x in filtervalues[1:]]
+	filtervalues = [0.0]+filtervalues
+	#common part
+	write_rootgraphlinearity(filtervalues, ivalues, ivalueserror, filename)
+
 
 def processARCO28020(file, file2, filename):
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
@@ -1521,7 +1685,7 @@ for L in layersnosource2:
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
 '''
-
+'''
 for L in goodlayers:
 	print "HV summary: "+str(L)
 	filename = L
@@ -1589,7 +1753,7 @@ for L in goodlayers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 	#processARCO2937(file1, file2, filename+"_att1000")
-
+'''
 '''
 for L in layers:
 	print "Create plots for: "+str(L)
@@ -1645,3 +1809,14 @@ for L in layers:
 	filename = L
 	createplot(file1, file2, filename)
 '''
+
+
+for L in layers:
+	print "Create plots for: "+str(L)
+
+	#ARCO2 80-20 no source
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_24_10_22_02_TO_2020_01_24_12_10_00/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_24_10_22_02_TO_2020_01_24_12_10_00/GIF/EffectiveAttenuation.dat"
+	
+	filename = L
+	processsaturation(file1, file2, filename)
