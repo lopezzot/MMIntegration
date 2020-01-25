@@ -264,15 +264,23 @@ def write_summaryhv(vectorx, vectory, graphtitle, filename):
 	XAxis.SetTitle("Amplification Voltage (V)")
 	XAxis.SetTitleOffset(1.2)
 	MyTGraph.SetMarkerStyle(20)
-	MyTGraph.SetMarkerSize(0.7)
+	MyTGraph.SetMarkerSize(1.0)
 
-	if "ARCO28020" in graphtitle and "10" in graphtitle:
+	if "ARCO28020" in graphtitle and "10" in graphtitle and "100" not in graphtitle:
 		MyTGraph.SetMarkerColor(9)
 		MyTGraph.SetLineColor(9)
 
-	if "ARCO28020" in graphtitle and "10" not in graphtitle:
+	if "ARCO28020" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(4)
 		MyTGraph.SetLineColor(4)
+
+	if "ARCO28020" in graphtitle and "46" in graphtitle:
+		MyTGraph.SetMarkerColor(38)
+		MyTGraph.SetLineColor(38)
+
+	if "ARCO28020" in graphtitle and "100" in graphtitle:
+		MyTGraph.SetMarkerColor(39)
+		MyTGraph.SetLineColor(39)
 
 	if "ARCO2937" in graphtitle and "10" in graphtitle:
 		MyTGraph.SetMarkerColor(8)
@@ -294,19 +302,19 @@ def write_summaryhv(vectorx, vectory, graphtitle, filename):
 		MyTGraph.SetMarkerColor(2)
 		MyTGraph.SetLineColor(2)		
 		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 420., 520.)
-		MyTGraph.Fit(f, "R")
+		#MyTGraph.Fit(f, "R")
 
 	if "ISOBUTANE" in graphtitle and "10" in graphtitle:
 		MyTGraph.SetMarkerColor(46)
 		MyTGraph.SetLineColor(46)
 		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 440., 520.)
-		MyTGraph.Fit(f, "R")
+		#MyTGraph.Fit(f, "R")
 
 	if "ISOBUTANE" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(50)
 		MyTGraph.SetLineColor(50)
 		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 500., 560.)
-		MyTGraph.Fit(f, "R")
+		#MyTGraph.Fit(f, "R")
 
 	if "ISOBUTANE" in graphtitle and "1000" in graphtitle:
 		MyTGraph.SetMarkerColor(49)
@@ -613,14 +621,24 @@ def processARCO28020(file, file2, filename):
 		rootdates2 = rootdates2[:len(rootdates)]
 		newvalues2 = newvalues2[:len(newvalues)]
 	
-	if "_att10" not in filename: 			
+	if "_2.2" in filename: 			
 		newvalues2 = newvalues2[4*60:len(newvalues2)-7*60]
 		newvalues = newvalues[4*60:len(newvalues)-7*60] 	
 
 	newvalues2 = [int(math.ceil(x / 10.0)) * 10 for x in newvalues2]
 	hvvalues = [550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700]
-	if "_att10" in filename:
+	if "_att10" in filename and "_att100" not in filename:
 		hvvalues = [550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 690, 700]
+	if "_att100" in filename:
+		hvvalues = [610, 610, 620, 630, 640, 660, 670, 680, 690]
+	if "_att100" in filename and "L3L6" in filename:
+		hvvalues = [600, 620, 630, 640, 660, 670, 680, 690]
+	if "_att100" in filename and "L4L6" in filename:
+		hvvalues = [660, 670, 680, 690]
+	if "_att46" in filename:
+		hvvalues = [600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700]
+	if "_att46" in filename and ("L4L7" in filename or "L4R7" in filename):
+		hvvalues = [600, 610, 620, 630, 640, 650, 660, 670, 680, 690]	
 	ivalues = []
 	hvvaluescheck = []
 	for x in hvvalues:	
@@ -1503,22 +1521,32 @@ for L in layersnosource2:
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
 '''
-'''
+
 for L in goodlayers:
 	print "HV summary: "+str(L)
 	filename = L
 
 	#ARCO2 80-20 source at 2.2
-	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/iMon_"+str(L)+".dat"
-	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename)
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/vMon_"+str(L)+".dat"
+	processARCO28020(file1, file2, filename+"_2.2")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 10.0
-	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/iMon_"+str(L)+".dat"
-	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename+"_att10")
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/vMon_"+str(L)+".dat"
+	processARCO28020(file1, file2, filename+"_att10")
 	#processARCO28020spikes(file1, file2, filename)
+
+	#ARCO2 80-20 source at 46.0
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/vMon_"+str(L)+".dat"
+	processARCO28020(file1, file2, filename+"_att46")
+	
+	#ARCO2 80-20 source at 100.0
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/vMon_"+str(L)+".dat"
+	processARCO28020(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
@@ -1544,7 +1572,7 @@ for L in goodlayers:
 	#ARCO2 93-7 SOURCE AT 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/vMon_"+str(L)+".dat"
-	#processARCO2937(file1, file2, filename)
+	processARCO2937(file1, file2, filename)
 	#processARCO2937spikes(file1, file2, filename)
 
 	#ARCO2 93-7 SOURCE AT 10.0
@@ -1561,9 +1589,8 @@ for L in goodlayers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 	#processARCO2937(file1, file2, filename+"_att1000")
+
 '''
-
-
 for L in layers:
 	print "Create plots for: "+str(L)
 
@@ -1576,10 +1603,16 @@ for L in layers:
 	#ARCO2 80-20 source at 10.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/vMon_"+str(L)+".dat"
+	#ARCO2 80-20 source at 46.0
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/vMon_"+str(L)+".dat"
+	#ARCO2 80-20 source at 100.0
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/vMon_"+str(L)+".dat"
 
 	#ISOBUTANE no source
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 2.2
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
@@ -1611,3 +1644,4 @@ for L in layers:
 
 	filename = L
 	createplot(file1, file2, filename)
+'''
