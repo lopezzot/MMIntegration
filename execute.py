@@ -17,7 +17,7 @@ if todo == "pdf":
 		os.system("python produce_pdf_dwdata.py")
 
 if todo == "DoubleWedgepdf":
-	os.system("python produce_pdf_dwdata.py")
+	os.system("python produce_pdf_dw.py")
 
 if todo == "MMPlots":
 	MMPlots.createsummaryplots()
