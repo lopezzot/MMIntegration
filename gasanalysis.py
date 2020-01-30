@@ -1708,7 +1708,7 @@ for L in layersnosource2:
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
 '''
-'''
+
 for L in goodlayers:
 	print "HV summary: "+str(L)
 	filename = L
@@ -1738,18 +1738,18 @@ for L in goodlayers:
 	#ISOBUTANE source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename)
+	processisobutane(file1, file2, filename)
 	#processisobutanespikes(file1, file2, filename)
 
 	#ISOBUTANE source at 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename+"_att10")
+	processisobutane(file1, file2, filename+"_att10")
 	
 	#ISOBUTANE source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename+"_att100")
+	processisobutane(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 1000.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/iMon_"+str(L)+".dat"
@@ -1781,7 +1781,7 @@ for L in goodlayers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 	#processARCO2937(file1, file2, filename+"_att1000")
-'''
+
 '''
 for L in layers:
 	print "Create plots for: "+str(L)
@@ -1841,7 +1841,7 @@ for L in layers:
 	createplot(file1, file2, filename)
 '''
 
-
+'''
 for L in layers:
 	print "Create plots for: "+str(L)
 	filename = L
@@ -1860,4 +1860,4 @@ for L in layers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/GIF/EffectiveAttenuation.dat"	
 	processsaturation(file1, file2, filename+"937-550", "937")
-
+'''
