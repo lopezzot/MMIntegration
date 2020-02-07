@@ -112,9 +112,9 @@ def get_probability(values_1, values_2, chamber_type):
 		# getting all the possible combinations for the layers
 		section_probability = 0
 		# calculating the probability for 4 , 3 , 2 or 1 layer detecting the particle
-		for j in range(5):
-			combinations = get_combination(sector, 8, 4+j)
-			probability = get_section_probability(combinations, 4+j, 8, sector) #4+j, 8
+		for j in range(3):
+			combinations = get_combination(sector, 8, 6+j)
+			probability = get_section_probability(combinations, 6+j, 8, sector) #4+j, 8
 			section_probability = section_probability + probability
 		final_probabilities.append(section_probability)
 	return final_probabilities

@@ -382,7 +382,7 @@ def generate_unique_dw(final_hvs, hl1, hl2, sectors):
 						data_table4.add_hline()
 
 	doc.append(NewPage())
-	with doc.create(Section('Probability of dectecting the particle in at least 4 layers', numbering=False)):
+	with doc.create(Section('Probability of dectecting the particle in at least 6 layers', numbering=False)):
 		with doc.create(LongTabu("|X[l]|X[r]|X[r]|X[r]|",
 								 row_height=1.5)) as data_table5:
 				data_table5.add_hline()

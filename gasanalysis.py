@@ -14,7 +14,7 @@ import efficiency
 import math
 
 layers = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L4L6", "L4R6", "L1L7", "L1R7", "L2L7", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L3R8", "L4L8", "L4R8"]
-goodlayers = ["L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"]
+goodlayers = ["L1L6", "L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"]
 goodlayers2 = ["L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L3L7", "L3R7", "L4L7", "L4R7"]
 layersnosource = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L2L8", "L3L8", "L3R8", "L4L8"]
 layersnosource = ["L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L4R8"]
@@ -88,7 +88,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(filename)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(-0.5, 0.9)
+	YAxis.SetRangeUser(-0.2, 0.2)
 	MyTGraph.Draw("AL")
 	c.SaveAs("gaszoom/"+str(filename)+".pdf")
 	MyTGraph.Write()
@@ -145,7 +145,10 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	arrayerrory = array('d')
 
 	for e in errorvectory:
-		arrayerrory.append(3.0*e)
+		if 3*e < 0.2:
+			arrayerrory.append(3*e)
+		else:
+			arrayerrory.append(0.2)
 
 	for x in vectorx:
 		arrayx.append(x)
@@ -166,7 +169,7 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	Style = gStyle
 	Style.SetPadLeftMargin(2.0)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(-0.5, 20.)
+	YAxis.SetRangeUser(-0.5, 29.)
 	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
 	XAxis.SetLimits(-0.1,1.2)
 	#XAxis.SetLabelOffset(0.025)
@@ -182,17 +185,25 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	MyTGraph.SetMarkerColor(1)
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(graphtitle)
-	f = TF1("f","pol1", 0.0, 0.15)
-	#MyTGraph.Fit(f, "R")
-	f2 = TF1("f2", '[0]+[1]*x-pow(x,[2])', 0.005,1.0)
-	#MyTGraph.Fit(f2, "R")
+	f = TF1("f","pol1", 1./100., 0.15)
+	MyTGraph.Fit(f, "R")
+	f2 = TF1("f2", '[1]*TMath::Log([2]*x+1.)+[3]', 1./100.,1.0)
+	#f2.SetParLimits(3,0.0,10.)
+	#f2.SetParLimits(2,0.5,3.)
+	#f2.SetParLimits(1,0.5,20.)
+	MyTGraph.Fit(f2, "R")
 	MyTGraph.Draw("AP")
 	a = f.GetParameter(1)
 	b = f.GetParameter(0)
-	f2 = TF1("f2", '[0]*x+[1]', 0.0, 1.0)
-	f2.SetParameter(0,a)
-	f2.SetParameter(1,b)
-	f2.Draw("same")
+	f3 = TF1("f2", '[0]*x+[1]', 1./100., 1.0)
+	f3.SetParameter(0,a)
+	f3.SetParameter(1,b)
+	f3.SetLineStyle(3)
+	f3.SetLineWidth(1)
+	f3.SetLineColor(1)
+	f3.Draw("same")
+	f3.SetName(graphtitle)
+	f3.Write()
 	c.SaveAs("gaslinearity/"+str(graphtitle)+".pdf")
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(graphtitle)
@@ -284,21 +295,27 @@ def write_summaryspikes(vectorx, vectory, graphtitle, filenae):
 	MyTGraph.SetTitle(filename)
 	MyTGraph.Write()
 
-def write_summaryhv(vectorx, vectory, graphtitle, filename):
+def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	"""Function to perform ROOT graph"""
 	arrayx = array('d')
 	arrayy = array('d')
+	arrayerror = array('d')
+	arrayzeros = array('d')
 
 	for x in vectorx:
 		arrayx.append(x)
 
 	for y in vectory:
 		arrayy.append(y)
-		
+	
+	for e in errorvalues:
+		arrayerror.append(e)
+		arrayzeros.append(0.)
+
 	#How many graph points
 	n = len(vectorx)
 
-	MyTGraph = TGraph(n, arrayx, arrayy)
+	MyTGraph = TGraphErrors(n, arrayx, arrayy, arrayzeros, arrayerror)
 	
 	'''
 	#Draw + DrawOptions
@@ -329,7 +346,7 @@ def write_summaryhv(vectorx, vectory, graphtitle, filename):
 	XAxis.SetTitle("Amplification Voltage (V)")
 	XAxis.SetTitleOffset(1.2)
 	MyTGraph.SetMarkerStyle(20)
-	MyTGraph.SetMarkerSize(1.0)
+	MyTGraph.SetMarkerSize(0.1)
 
 	if "ARCO28020" in graphtitle and "10" in graphtitle and "100" not in graphtitle:
 		MyTGraph.SetMarkerColor(9)
@@ -367,27 +384,31 @@ def write_summaryhv(vectorx, vectory, graphtitle, filename):
 		MyTGraph.SetMarkerColor(32)
 		MyTGraph.SetLineColor(32)
 
-	if "ISOBUTANE" in graphtitle and "10" not in graphtitle:
+	if "ISOBUTANE" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(2)
-		MyTGraph.SetLineColor(2)		
-		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 420., 520.)
-		#MyTGraph.Fit(f, "R")
+		MyTGraph.SetLineColor(2)	
+		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 420., 570.)
+		if "L1L6" in filename or "L2R7" in filename:					
+			f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 420., 570.)
+		#f.SetParLimits(3,0.0,10.)
+		MyTGraph.Fit(f, "R")
 
 	if "ISOBUTANE" in graphtitle and "10" in graphtitle:
 		MyTGraph.SetMarkerColor(46)
 		MyTGraph.SetLineColor(46)
-		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 440., 520.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4])", 440., 520.)
 		#MyTGraph.Fit(f, "R")
 
 	if "ISOBUTANE" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(50)
 		MyTGraph.SetLineColor(50)
-		f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 500., 560.)
+		#f = TF1("f", "[Baseline]+exp([Constant]+[Slope]*x)", 500., 560.)
 		#MyTGraph.Fit(f, "R")
 
-	if "ISOBUTANE" in graphtitle and "1000" in graphtitle:
+	if "ISOBUTANE" in graphtitle and "46" in graphtitle:
 		MyTGraph.SetMarkerColor(49)
 		MyTGraph.SetLineColor(49)
+
 
 	rootfile.cd()
 	MyTGraph.SetName(graphtitle)
@@ -715,21 +736,29 @@ def processsaturation(file, file2, filename, gastype):
 	ivalueserror = []
 
 	if "937" in gastype:
-		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 6.9, 4.6, 2.2, 1.0]
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+
+	if "iso" in gastype:
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+
+	if "L3L7iso-520" in filename or "L3L8iso-520" in filename:
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2]
 	
+
 	for x in filtervalues:	
 		f = np.mean([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
 		e = np.std([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
 		n = float(len([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x]))
-		error = e/(n**0.5)
+		error = e
 		ivalues.append(f)
-		print error
 		ivalueserror.append(error)
 		
-	print filtervalues, ivalues
+	
 	filtervalues = [1./x for x in filtervalues[1:]]
 	#filtervalues = [0.0]+filtervalues
 	ivalues = ivalues[1:]
+	ivalueserror = ivalueserror[1:]
+	#print ivalueserror
 	#common part
 	write_rootgraphlinearity(filtervalues, ivalues, ivalueserror, filename)
 
@@ -1110,16 +1139,29 @@ def processisobutane(file, file2, filename):
 	if "_att1000" in filename:
 		hvvalues = [530, 540, 550, 560]
 
+	if "_att46" in filename:
+		hvvalues = [440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550]
+		if "L1R6" in filename:
+			hvvalues = [440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540]
+	if "_att10.0" in filename:
+		hvvalues = [430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560]
+		if "L1L6" in filename:
+			hvvalues = [450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560]
+
+
 	ivalues = []
 	hvvaluescheck = []
+	errorvalues = []
 	for x in hvvalues:	
 		f = np.mean([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
+		e = 3*np.std([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
 		if math.isnan(f) == False:
 			ivalues.append(f)
+			errorvalues.append(e)
 			hvvaluescheck.append(x)
 
 	print hvvaluescheck, ivalues
-	write_summaryhv(hvvaluescheck, ivalues, "ISOBUTANE - "+str(filename), filename)
+	write_summaryhv(hvvaluescheck, ivalues, errorvalues, "ISOBUTANE - "+str(filename), filename)
 	return hvvaluescheck, ivalues
 
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
@@ -1716,40 +1758,50 @@ for L in goodlayers:
 	#ARCO2 80-20 source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_2.2")
+	#processARCO28020(file1, file2, filename+"_2.2")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_18_09_08_00_TO_2019_12_18_10_13_44/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att10")
+	#processARCO28020(file1, file2, filename+"_att10")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att46")
+	#processARCO28020(file1, file2, filename+"_att46")
 	
 	#ARCO2 80-20 source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att100")
+	#processARCO28020(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename)
+	#processisobutane(file1, file2, filename+"_att2.2")
 	#processisobutanespikes(file1, file2, filename)
+	
+	#ISOBUTANE source at 10.0 - old
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/vMon_"+str(L)+".dat"
+	#processisobutane(file1, file2, filename+"_att10")
+	
+	#ISOBUTANE source at 10.0 - 2
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/vMon_"+str(L)+".dat"
+	#processisobutane(file1, file2, filename+"_att10.0")
 
-	#ISOBUTANE source at 10.0
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att10")
+	#ISOBUTANE source at 46.0
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/vMon_"+str(L)+".dat"
+	#processisobutane(file1, file2, filename+"_att46")
 	
 	#ISOBUTANE source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att100")
+	#processisobutane(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 1000.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/iMon_"+str(L)+".dat"
@@ -1759,30 +1811,30 @@ for L in goodlayers:
 	#ARCO2 93-7 SOURCE AT 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename)
+	#processARCO2937(file1, file2, filename)
 	#processARCO2937spikes(file1, file2, filename)
 
 	#ARCO2 93-7 SOURCE AT 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att10")
+	#processARCO2937(file1, file2, filename+"_att10")
 
 	#ARCO2 93-7 SOURCE AT 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att46")
+	#processARCO2937(file1, file2, filename+"_att46")
 
 	#ARCO2 93-7 SOURCE AT 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_20_19_29_TO_2020_01_14_21_15_35/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_20_19_29_TO_2020_01_14_21_15_35/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att100")
+	#processARCO2937(file1, file2, filename+"_att100")
 
 	#ARCO2 93-7 SOURCE AT 1000.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 	#processARCO2937(file1, file2, filename+"_att1000")
 
-'''
+
 for L in layers:
 	print "Create plots for: "+str(L)
 
@@ -1805,18 +1857,43 @@ for L in layers:
 	#ISOBUTANE no source
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE no source - 2
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 2.2
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE source at 4.6
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_14_42_09_TO_2020_01_31_15_41_29/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_14_42_09_TO_2020_01_31_15_41_29/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 10.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE source at 10.0 - 2
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE source at 10.0 - 3
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_53_45_TO_2020_01_31_14_38_34/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_53_45_TO_2020_01_31_14_38_34/HV/vMon_"+str(L)+".dat"	
+	#ISOBUTANE source at 46.0
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 100.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
 	#ISOBUTANE source at 1000.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/vMon_"+str(L)+".dat"
+	#SPECIAL RUNS
+	#ISOBUTANE long run at 500 V att 1.0
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_01_17_06_33_TO_2020_02_02_13_58_33/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_01_17_06_33_TO_2020_02_02_13_58_33/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE 1 hour source off at 540 V
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/vMon_"+str(L)+".dat"
+	#ISOBUTANE long term scan from 420V to 520V at filter 4.6
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/vMon_"+str(L)+".dat"
 
 	#ARCO2 93-7 NO SOURCE
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/iMon_"+str(L)+".dat"
@@ -1838,8 +1915,7 @@ for L in layers:
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 
 	filename = L
-	createplot(file1, file2, filename)
-'''
+	#createplot(file1, file2, filename)
 
 '''
 for L in layers:
@@ -1855,9 +1931,24 @@ for L in layers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/GIF/EffectiveAttenuation.dat"	
 	processsaturation(file1, file2, filename+"937-570", "937")
+	#createplot(file1, file2, filename)
 
 	#ARCO2 93-7 at 550V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/GIF/EffectiveAttenuation.dat"	
 	processsaturation(file1, file2, filename+"937-550", "937")
+	#createplot(file1, file2, filename)
+
+	#ISOBUTANE at 500V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/GIF/EffectiveAttenuation.dat"	
+	processsaturation(file1, file2, filename+"iso-500", "iso")
+	#createplot(file1, file2, filename)
+
+	#ISOBUTANE at 520V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/GIF/EffectiveAttenuation.dat"	
+	processsaturation(file1, file2, filename+"iso-520", "iso")
+	#createplot(file1, file2, filename)
 '''
+
