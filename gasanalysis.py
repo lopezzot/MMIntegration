@@ -110,7 +110,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetLineColorAlpha(2, 0.5)
 	MyTGraph.SetLineWidth(1)
 	MyTGraph.SetTitle(filename)
-	
+
 	XAxis2 = MyTGraph2.GetXaxis() #TGraphfasthescin
 	XAxis2.SetTimeDisplay(1)
 	XAxis2.SetTimeFormat("%H:%M")
@@ -191,6 +191,10 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	if "iso" in graphtitle:
 		MyTGraph.SetMarkerColor(2)
 		MyTGraph.SetLineColor(2)	
+
+	if "8020" in graphtitle:
+		MyTGraph.SetMarkerColor(4)
+		MyTGraph.SetLineColor(4)	
 
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(graphtitle)
@@ -815,9 +819,11 @@ def processsaturation(file, file2, filename, gastype):
 	if "iso" in gastype:
 		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
 
+	if "8020" in gastype:
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+
 	if "L3L7iso-520" in filename or "L3L8iso-520" in filename:
 		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2]
-	
 
 	for x in filtervalues:	
 		f = np.mean([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
@@ -1956,6 +1962,10 @@ for L in layers:
 	#ARCO2 80-20 source at 100.0
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/vMon_"+str(L)+".dat"
+	#------->SPECIAL RUNS
+	#ARCO2 80-20 1 h source off HV=WP+20V = 665 V
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/vMon_"+str(L)+".dat"
 
 	#ISOBUTANE no source
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
@@ -2026,41 +2036,49 @@ for L in layers:
 	#ARCO2 93-7 source off scan at 590 V
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source on att 1.0 scan at 550 V 24 hours
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/vMon_"+str(L)+".dat"
+
 
 	filename = L
 	#createplot(file1, file2, filename)
 
-'''
 for L in layers:
 	print "Create plots for: "+str(L)
 	filename = L
 
-	#ARCO2 80-20 
+	#ARCO2 80-20 - old, deprecated
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_24_10_22_02_TO_2020_01_24_12_10_00/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_24_10_22_02_TO_2020_01_24_12_10_00/GIF/EffectiveAttenuation.dat"
 	#processsaturation(file1, file2, filename, "8020")
 	
+	#ARCO2 80-20 at 645 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_12_50_11_TO_2020_02_24_14_40_07/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_12_50_11_TO_2020_02_24_14_40_07/GIF/EffectiveAttenuation.dat"
+	processsaturation(file1, file2, filename+"8020-645", "8020")
+	#createplot(file1, file2, filename)
+
 	#ARCO2 93-7 at 570V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/GIF/EffectiveAttenuation.dat"	
-	processsaturation(file1, file2, filename+"937-570", "937")
+	#processsaturation(file1, file2, filename+"937-570", "937")
 	#createplot(file1, file2, filename)
 
 	#ARCO2 93-7 at 550V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/GIF/EffectiveAttenuation.dat"	
-	processsaturation(file1, file2, filename+"937-550", "937")
+	#processsaturation(file1, file2, filename+"937-550", "937")
 	#createplot(file1, file2, filename)
 
 	#ISOBUTANE at 500V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/GIF/EffectiveAttenuation.dat"	
-	processsaturation(file1, file2, filename+"iso-500", "iso")
+	#processsaturation(file1, file2, filename+"iso-500", "iso")
 	#createplot(file1, file2, filename)
 
 	#ISOBUTANE at 520V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/GIF/EffectiveAttenuation.dat"	
-	processsaturation(file1, file2, filename+"iso-520", "iso")
+	#processsaturation(file1, file2, filename+"iso-520", "iso")
 	#createplot(file1, file2, filename)
-'''
