@@ -88,7 +88,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(filename)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(-0.2, 0.2)
+	YAxis.SetRangeUser(-0.2, 0.2) #-0.2, 0.2
 	MyTGraph.Draw("AL")
 	c.SaveAs("gaszoom/"+str(filename)+".pdf")
 	MyTGraph.Write()
@@ -1966,6 +1966,12 @@ for L in layers:
 	#ARCO2 80-20 1 h source off HV=WP+20V = 665 V
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/vMon_"+str(L)+".dat"
+	#ARCO2 80-20 1 h source off HV=WP 645 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/vMon_"+str(L)+".dat"
+	#ARCO2 80-20 24 hours (23 h) scan at att 1.0 HV=WP-20 = 625 V
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_15_50_31_TO_2020_02_25_15_29_45/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_15_50_31_TO_2020_02_25_15_29_45/HV/vMon_"+str(L)+".dat"
 
 	#ISOBUTANE no source
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
@@ -2036,14 +2042,14 @@ for L in layers:
 	#ARCO2 93-7 source off scan at 590 V
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/vMon_"+str(L)+".dat"
-	#ARCO2 93-7 source on att 1.0 scan at 550 V 24 hours
+	#ARCO2 93-7 source on att 1.0 scan at 550 V 24 hours -> TO BE CHECKED CURRENTS ARE TOO LOW POSSIBLE CONTAMINATION WITH ARCO28020
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/vMon_"+str(L)+".dat"
 
 
 	filename = L
-	#createplot(file1, file2, filename)
-
+	createplot(file1, file2, filename)
+'''
 for L in layers:
 	print "Create plots for: "+str(L)
 	filename = L
@@ -2082,3 +2088,4 @@ for L in layers:
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/GIF/EffectiveAttenuation.dat"	
 	#processsaturation(file1, file2, filename+"iso-520", "iso")
 	#createplot(file1, file2, filename)
+'''
