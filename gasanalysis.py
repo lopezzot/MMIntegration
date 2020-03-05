@@ -20,6 +20,9 @@ layersnosource = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L2R7", "L3L7"
 layersnosource = ["L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L4R8"]
 layersnosource2 = ["L1L8", "L2L8", "L3L8"]
 
+#sectors used in last weeks of february
+# [L1L6, L1R6, L1L7, L1L8, L2L6, L2R6, L2R7, L3L6, L3R6, L3L7, L3R7, L3R8, L4L6, L4R6, L4L7, L4R7]
+
 rootfile = TFile("out.root", "RECREATE")
 
 rootfilezoom = TFile("outzoom.root", "RECREATE")
@@ -88,7 +91,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(filename)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(-0.2, 0.2) #-0.2, 0.2
+	YAxis.SetRangeUser(5.0, 18.0) #-0.2, 0.2
 	MyTGraph.Draw("AL")
 	c.SaveAs("gaszoom/"+str(filename)+".pdf")
 	MyTGraph.Write()
@@ -1870,13 +1873,13 @@ for L in goodlayers:
 	#ARCO2 80-20 source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att2.2")
+	#processARCO28020(file1, file2, filename+"_att2.2")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_12_30_20_TO_2020_02_29_13_23_06/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_12_30_20_TO_2020_02_29_13_23_06/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att4.6")
+	#processARCO28020(file1, file2, filename+"_att4.6")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 10.0 - old
@@ -1888,30 +1891,30 @@ for L in goodlayers:
 	#ARCO2 80-20 source at 10.0 - 2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_13_25_41_TO_2020_02_29_14_18_17/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_13_25_41_TO_2020_02_29_14_18_17/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att10.0")
+	#processARCO28020(file1, file2, filename+"_att10.0")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att46")
+	#processARCO28020(file1, file2, filename+"_att46")
 	
 	#ARCO2 80-20 source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/vMon_"+str(L)+".dat"
-	processARCO28020(file1, file2, filename+"_att100")
+	#processARCO28020(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att2.2")
+	#processisobutane(file1, file2, filename+"_att2.2")
 	#processisobutanespikes(file1, file2, filename)
 
 	#ISOBUTANE source at 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/vMon_"+str(L)+".dat"
-	if L != "L3L7":
-		processisobutane(file1, file2, filename+"_att4.6")
+	#if L != "L3L7":
+		#processisobutane(file1, file2, filename+"_att4.6")
 
 	#ISOBUTANE source at 10.0 - old
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
@@ -1921,17 +1924,17 @@ for L in goodlayers:
 	#ISOBUTANE source at 10.0 - 2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att10.0")
+	#processisobutane(file1, file2, filename+"_att10.0")
 
 	#ISOBUTANE source at 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att46")
+	#processisobutane(file1, file2, filename+"_att46")
 	
 	#ISOBUTANE source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/vMon_"+str(L)+".dat"
-	processisobutane(file1, file2, filename+"_att100")
+	#processisobutane(file1, file2, filename+"_att100")
 
 	#ISOBUTANE source at 1000.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_16_21_19_TO_2020_01_16_17_40_30/HV/iMon_"+str(L)+".dat"
@@ -1941,28 +1944,28 @@ for L in goodlayers:
 	#ARCO2 93-7 SOURCE AT 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att2.2")
+	#processARCO2937(file1, file2, filename+"_att2.2")
 	#processARCO2937spikes(file1, file2, filename)
 
 	#ARCO2 93-7 SOURCE AT 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att4.6")
+	#processARCO2937(file1, file2, filename+"_att4.6")
 
 	#ARCO2 93-7 SOURCE AT 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att10.0")
+	#processARCO2937(file1, file2, filename+"_att10.0")
 
 	#ARCO2 93-7 SOURCE AT 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att46")
+	#processARCO2937(file1, file2, filename+"_att46")
 
 	#ARCO2 93-7 SOURCE AT 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_20_19_29_TO_2020_01_14_21_15_35/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_20_19_29_TO_2020_01_14_21_15_35/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att100")
+	#processARCO2937(file1, file2, filename+"_att100")
 
 	#ARCO2 93-7 SOURCE AT 1000.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
@@ -2077,11 +2080,22 @@ for L in layers:
 	#ARCO2 93-7 source on att 1.0 scan at 550 V 24 hours -> TO BE CHECKED CURRENTS ARE TOO LOW POSSIBLE CONTAMINATION WITH ARCO28020
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46//HV/vMon_"+str(L)+".dat"
-
+	#ARCO2 93-7 source on att 1.0 hv = 570 V -> TO CHECK ARCO2 937 WAS FLUSHING INSIDE THE CHAMBER
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_00_53_55_TO_2020_03_04_10_00_30/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_00_53_55_TO_2020_03_04_10_00_30/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source off scan at 570 V 1 h
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_10_39_48_TO_2020_03_04_11_36_57/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_10_39_48_TO_2020_03_04_11_36_57/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source off scan at 590 V 1 h
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours of good data then trip due to main frame power cut
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/vMon_"+str(L)+".dat"
 
 	filename = L
-	#createplot(file1, file2, filename)
-'''
+	createplot(file1, file2, filename)
+
 for L in layers:
 	print "Create plots for: "+str(L)
 	filename = L
@@ -2126,4 +2140,3 @@ for L in layers:
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/GIF/EffectiveAttenuation.dat"	
 	#processsaturation(file1, file2, filename+"iso-520", "iso")
 	#createplot(file1, file2, filename)
-'''
