@@ -91,7 +91,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(filename)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(5.0, 18.0) #-0.2, 0.2
+	YAxis.SetRangeUser(-0.2, 0.2) #-0.2, 0.2
 	MyTGraph.Draw("AL")
 	c.SaveAs("gaszoom/"+str(filename)+".pdf")
 	MyTGraph.Write()
@@ -2092,6 +2092,9 @@ for L in layers:
 	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours of good data then trip due to main frame power cut
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours not checked, data still to be produced in case needed
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_11_54_24_TO_2020_03_05_14_34_52/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_11_54_24_TO_2020_03_05_14_34_52/HV/vMon_"+str(L)+".dat"
 
 	filename = L
 	createplot(file1, file2, filename)
