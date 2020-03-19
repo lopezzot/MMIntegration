@@ -14,7 +14,8 @@ import efficiency
 import math
 
 layers = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L4L6", "L4R6", "L1L7", "L1R7", "L2L7", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L3R8", "L4L8", "L4R8"]
-goodlayers = ["L1L6", "L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"]
+24hlayers = ["L1L8"]
+goodlayers = ["L1L6", "L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"] #L1L8 for a PCB type 8 example
 goodlayers2 = ["L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L3L7", "L3R7", "L4L7", "L4R7"]
 layersnosource = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L2L8", "L3L8", "L3R8", "L4L8"]
 layersnosource = ["L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L4R8"]
@@ -34,6 +35,8 @@ rootfilenosource = TFile("outnosource.root", "RECREATE")
 rootfilelinearity = TFile("outlinearity.root", "RECREATE")
 
 rootfilegain = TFile("outgain.root", "RECREATE")
+
+rootfile1h = TFile("out1h.root", "RECREATE")
 
 def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	"""Function to perform ROOT graph"""
@@ -138,7 +141,7 @@ def write_rootdategraph(vectorx, vectory, vectorx2, vectory2, graphtitle):
 	c.SaveAs("gastest/"+str(filename)+".pdf")
 	gPad.Close()
 
-def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
+def write_rootgraphlinearity(vectorx, vectory, errorvectory, errorvectorx, graphtitle):
 	"""Function to perform ROOT graph"""
 
 	rootfilelinearity.cd()
@@ -146,12 +149,17 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	arrayx = array('d')
 	arrayy = array('d')
 	arrayerrory = array('d')
-
+	'''
 	for e in errorvectory:
-		if e < 0.3:
+		if e < 0.5:
 			arrayerrory.append(e)
+			if e < 0.2:
+				arrayerrory.append(0.2)
 		else:
-			arrayerrory.append(0.3)
+			arrayerrory.append(0.5)
+	'''
+	for e in errorvectory:
+		arrayerrory.append(0.2)
 
 	for x in vectorx:
 		arrayx.append(x)
@@ -163,8 +171,8 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	n = len(vectorx)
 
 	zeros = array('d')
-	for i in range(n):
-		zeros.append(0.0)
+	for i in errorvectorx:
+		zeros.append(i/(12.**0.5))
 
 	MyTGraph = TGraphErrors(n, arrayx, arrayy, zeros, arrayerrory)
 	
@@ -172,14 +180,14 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 	Style = gStyle
 	Style.SetPadLeftMargin(2.0)
 	YAxis = MyTGraph.GetYaxis()
-	YAxis.SetRangeUser(-0.5, 29.)
+	YAxis.SetRangeUser(-1.5, 15.) #-0.2, 29.
 	XAxis = MyTGraph.GetXaxis() #TGraphfasthescin
-	XAxis.SetLimits(-0.1,1.2)
+	XAxis.SetLimits(-1.5,30.0) #0.,50.
 	#XAxis.SetLabelOffset(0.025)
-	XAxis.SetTitle("1/attenuation")
+	XAxis.SetTitle("Rate (kHz/cm^{2})")
 	#MyTGraph.GetXaxis().SetNdivisions(910)
 	MyTGraph.SetMarkerStyle(20)
-	MyTGraph.SetMarkerSize(0.8)
+	MyTGraph.SetMarkerSize(0.6)
 	MyTGraph.GetYaxis().SetTitle("Current (uA)")
 	MyTGraph.GetYaxis().SetTitleOffset(1.)
 	#MyTGraph.GetYaxis().SetTitleColor(2)
@@ -201,18 +209,25 @@ def write_rootgraphlinearity(vectorx, vectory, errorvectory, graphtitle):
 
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(graphtitle)
-	f = TF1("f","pol1", 1./100., 0.15)
+	f = TF1("f","pol1", 0.0, 25.0)
+	f = TF1("f", '[1]*TMath::Log([2]*x+1.)+[3]', 0.0,25.0)
+	f.SetParLimits(3,0.0,10.)
+	f.SetParLimits(2,0.5,3.)
+	f.SetParLimits(1,0.5,20.)
 	MyTGraph.Fit(f, "R")
-	f2 = TF1("f2", '[1]*TMath::Log([2]*x+1.)+[3]', 1./100.,1.0)
+	MyTGraph.GetFunction("f").SetLineWidth(1)
+	f2 = TF1("f2","pol1", 0.0, 4.0)
+	#f2 = TF1("f2", '[1]*TMath::Log([2]*x+1.)+[3]', 0.84,42.1)
 	#f2.SetParLimits(3,0.0,10.)
 	#f2.SetParLimits(2,0.5,3.)
 	#f2.SetParLimits(1,0.5,20.)
 	MyTGraph.Fit(f2, "R")
-	MyTGraph.GetFunction("f2").SetLineColor(1)
+	MyTGraph.Fit(f, "R")
+	#MyTGraph.GetFunction("f2").SetLineColor(1)
 	MyTGraph.Draw("AP")
-	a = f.GetParameter(1)
-	b = f.GetParameter(0)
-	f3 = TF1("f2", '[0]*x+[1]', 1./100., 1.0)
+	a = f2.GetParameter(1)
+	b = f2.GetParameter(0)
+	f3 = TF1("f3", '[0]*x+[1]', 0.0, 25.0)
 	f3.SetParameter(0,a)
 	f3.SetParameter(1,b)
 	f3.SetLineStyle(3)
@@ -361,18 +376,19 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	YAxis.SetRangeUser(-10.0, 50.)
 	YAxis.SetTitle("Current (uA)")
 	XAxis = MyTGraph.GetXaxis()
-	XAxis.SetLimits(400., 700.)
+	XAxis.SetLimits(420., 690.)
 	XAxis.SetTitle("Amplification Voltage (V)")
 	XAxis.SetTitleOffset(1.2)
 	MyTGraph.SetMarkerStyle(20)
-	MyTGraph.SetMarkerSize(1.0)
+	MyTGraph.SetMarkerSize(1.5)
 
 	if "ARCO28020" in graphtitle and "10.0" in graphtitle:
-		MyTGraph.SetMarkerColor(9)
-		MyTGraph.SetLineColor(9)
+		MyTGraph.SetMarkerColor(4) #9 color
+		MyTGraph.SetLineColor(4)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.) #old 10.0 reached 700V
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(9)
+		MyTGraph.GetFunction("f").SetLineColor(4)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO28020" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(4)
@@ -380,20 +396,23 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
 		MyTGraph.Fit(f, "R")
 		MyTGraph.GetFunction("f").SetLineColor(4)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO28020" in graphtitle and "4.6" in graphtitle:
-		MyTGraph.SetMarkerColor(7)
-		MyTGraph.SetLineColor(7)
+		MyTGraph.SetMarkerColor(4) #7 color
+		MyTGraph.SetLineColor(4)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(7)
+		MyTGraph.GetFunction("f").SetLineColor(4)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO28020" in graphtitle and "46" in graphtitle:
-		MyTGraph.SetMarkerColor(38)
-		MyTGraph.SetLineColor(38)
+		MyTGraph.SetMarkerColor(4) #38 color
+		MyTGraph.SetLineColor(4)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 600., 670.)
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(38)
+		MyTGraph.GetFunction("f").SetLineColor(4)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO28020" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(39)
@@ -405,28 +424,31 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		#MyTGraph.GetFunction("f").SetLineColor(39)
 
 	if "ARCO2937" in graphtitle and "10.0" in graphtitle:
-		MyTGraph.SetMarkerColor(8)
-		MyTGraph.SetLineColor(8)
+		MyTGraph.SetMarkerColor(3) #color 8
+		MyTGraph.SetLineColor(3)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
-		if "L1L6" in graphtitle or "L3R6" in graphtitle or "L3L6" in graphtitle:
-			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 490., 590.)
-		if "L1L6" not in graphtitle and "L3R6" not in graphtitle and "L3L6" not in graphtitle:
+		#if "L1L6" in graphtitle or "L3R6" in graphtitle or "L3L6" in graphtitle:
+			#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 490., 590.)
+		if "L3R6" not in graphtitle and "L3L6" not in graphtitle and "L1L6" not in graphtitle:
 			MyTGraph.Fit(f, "R")
-			MyTGraph.GetFunction("f").SetLineColor(8)
-
+			MyTGraph.GetFunction("f").SetLineColor(3)
+     		#MyTGraph.GetFunction("f").SetLineWidth(1)
+	
 	if "ARCO2937" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(3)
 		MyTGraph.SetLineColor(3)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
 		MyTGraph.Fit(f, "R")
 		MyTGraph.GetFunction("f").SetLineColor(3)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO2937" in graphtitle and "4.6" in graphtitle:
-		MyTGraph.SetMarkerColor(29)
-		MyTGraph.SetLineColor(29)
+		MyTGraph.SetMarkerColor(3) #color 29
+		MyTGraph.SetLineColor(3)
 		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(29)
+		MyTGraph.GetFunction("f").SetLineColor(3)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ARCO2937" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(30)
@@ -441,11 +463,12 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		MyTGraph.SetLineColor(32)
 
 	if "ARCO2937" in graphtitle and "46" in graphtitle:
-		MyTGraph.SetMarkerColor(32)
-		MyTGraph.SetLineColor(32)
+		MyTGraph.SetMarkerColor(3) #color 32
+		MyTGraph.SetLineColor(3)
 		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 520., 590.)
 		MyTGraph.Fit(f,"R")
-		MyTGraph.GetFunction("f").SetLineColor(32)
+		MyTGraph.GetFunction("f").SetLineColor(3)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ISOBUTANE" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(2)
@@ -456,18 +479,20 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		#f.SetParLimits(3,0.0,10.)
 		MyTGraph.Fit(f, "R")
 		MyTGraph.GetFunction("f").SetLineColor(2)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ISOBUTANE" in graphtitle and "4.6" in graphtitle:
-		MyTGraph.SetMarkerColor(45)
-		MyTGraph.SetLineColor(45)	
+		MyTGraph.SetMarkerColor(2) #color 45
+		MyTGraph.SetLineColor(2)	
 		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
 		#f.SetParLimits(3,0.0,10.)
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(45)
+		MyTGraph.GetFunction("f").SetLineColor(2)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ISOBUTANE" in graphtitle and "10.0" in graphtitle:
-		MyTGraph.SetMarkerColor(46)
-		MyTGraph.SetLineColor(46)
+		MyTGraph.SetMarkerColor(2) #color 46
+		MyTGraph.SetLineColor(2)
 		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
 		if "L1L6" in graphtitle:
 			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
@@ -475,23 +500,26 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
 		if "L2L6" not in graphtitle:
 			MyTGraph.Fit(f, "R")
-			MyTGraph.GetFunction("f").SetLineColor(46)
-			
+			MyTGraph.GetFunction("f").SetLineColor(2)
+  			MyTGraph.GetFunction("f").SetLineWidth(1)			
+	
 	if "ISOBUTANE" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(50)
 		MyTGraph.SetLineColor(50)
 		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 500., 540.)
 		MyTGraph.Fit(f, "R")
 		MyTGraph.GetFunction("f").SetLineColor(50)		
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	if "ISOBUTANE" in graphtitle and "46" in graphtitle:
-		MyTGraph.SetMarkerColor(49)
-		MyTGraph.SetLineColor(49)
+		MyTGraph.SetMarkerColor(2) #color 49
+		MyTGraph.SetLineColor(2)
 		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
 		if "L1R6" in graphtitle:
 			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
 		MyTGraph.Fit(f, "R")
-		MyTGraph.GetFunction("f").SetLineColor(49)
+		MyTGraph.GetFunction("f").SetLineColor(2)
+		MyTGraph.GetFunction("f").SetLineWidth(1)
 
 	rootfile.cd()
 	MyTGraph.SetName(graphtitle)
@@ -723,6 +751,239 @@ def createplot(file, file2, filename):
 	#common part
 	write_rootdategraph(rootdates, newvalues, rootdates2, newvalues2, filename)
 
+def process1h(file, file2, filename, gastype):
+	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
+	if len(times) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+
+	times = [x.replace(':',' ') for x in times]
+	times = [x.replace('/',' ') for x in times]
+	times = [x.replace('_',' ') for x in times]
+	#print times
+	times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times]
+
+	starttime = times[0]
+	dates = [starttime]
+
+	times = [int((x-starttime).total_seconds()) for x in times]
+
+	values = [float(x.split(' 	 ')[1]) for x in open(file,"r").readlines()]
+
+	newtimes = range(times[len(times)-1])
+	newvalues = [None]*len(newtimes)
+
+	for counter, value in enumerate(newvalues):
+		if counter in times:
+			newvalues[counter] = values[times.index(counter)]
+		else:
+			newvalues[counter] = newvalues[counter-1]
+
+	for counter in range(len(newtimes)-1):
+		dates.append(dates[counter]+td(seconds=1))
+
+	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
+
+	#part file2
+	times2 = [x[0:19] for x in open(file2,"r").readlines()]
+	if len(times2) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times2:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+	
+	#part file2
+	times2 = [x.replace(':',' ') for x in times2]
+	times2 = [x.replace('/',' ') for x in times2]
+	times2 = [x.replace('_',' ') for x in times2]
+	
+	times2 = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times2]
+	starttime2 = times2[0]
+	dates2 = [starttime2]
+	times2 = [int((x-starttime2).total_seconds()) for x in times2]
+	values2 = [float(x[21:28]) for x in open(file2,"r").readlines()]
+	#print values2
+	#print values2
+	newtimes2 = range(times2[len(times2)-1])
+	newvalues2 = [None]*len(newtimes2) 
+
+	for counter, value in enumerate(newvalues2):
+		if counter in times2:
+			newvalues2[counter] = values2[times2.index(counter)]
+		else:
+			newvalues2[counter] = newvalues2[counter-1]
+
+	for counter in range(len(newtimes2)-1):
+		dates2.append(dates2[counter]+td(seconds=1))
+
+	#print dates2[0:10]
+	#print newvalues2[0:10]
+	rootdates2 = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates2]
+	newvalues2 = [x/100. for x in newvalues2]
+	
+	if rootdates[0] not in rootdates2:
+		for counter, i in enumerate(rootdates):
+			if i in rootdates2:
+				startrootdate = counter
+				break
+		rootdates = rootdates[startrootdate:]
+		newvalues = newvalues[startrootdate:]
+
+	if len(rootdates) > len(rootdates2):
+		rootdates = rootdates[:len(rootdates2)]
+		newvalues = newvalues[:len(newvalues2)]
+	else:
+		rootdates2 = rootdates2[:len(rootdates)]
+		newvalues2 = newvalues2[:len(newvalues)]
+	
+	MyHisto = TH1F("1hhisto-"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(100), -0.1, 0.8)
+	MyHistoDiff = TH1F("1hhisto-diff"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(100), -0.1, 0.8)
+	
+	if "520-iso" in gastype:
+		newvalues2 = [int(math.ceil(x * 100.0)) for x in newvalues2]
+		#print newvalues2
+		t = 15*[c for counter, c in enumerate(newvalues) if newvalues2[counter] == int(520)]
+		t_diff = np.diff(t)
+		for entry in t:
+			#print "520ISO"+str(entry)
+			if abs(entry-np.mean(t))<0.004:
+				MyHisto.Fill(entry)
+		for entry in t_diff:
+			MyHistoDiff.Fill(entry)
+
+	if "937" in gastype:
+		newvalues_diff = np.diff(newvalues[120:])
+		for entry in newvalues[120:]:
+			MyHisto.Fill(entry)
+		for entry in newvalues_diff:
+			MyHistoDiff.Fill(entry)
+
+	if "937" not in gastype and "520-iso" not in gastype:
+		newvalues_diff = np.diff(newvalues)
+		for entry in newvalues:
+			MyHisto.Fill(entry)
+		for entry in newvalues_diff:
+			MyHistoDiff.Fill(entry)
+
+	rootfile1h.cd()
+	MyHisto.Write()
+	MyHistoDiff.Write()
+
+def process24h(file, file2, filename, gastype):
+	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
+	if len(times) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+
+	times = [x.replace(':',' ') for x in times]
+	times = [x.replace('/',' ') for x in times]
+	times = [x.replace('_',' ') for x in times]
+	#print times
+	times = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times]
+
+	starttime = times[0]
+	dates = [starttime]
+
+	times = [int((x-starttime).total_seconds()) for x in times]
+
+	values = [float(x.split(' 	 ')[1]) for x in open(file,"r").readlines()]
+
+	newtimes = range(times[len(times)-1])
+	newvalues = [None]*len(newtimes)
+
+	for counter, value in enumerate(newvalues):
+		if counter in times:
+			newvalues[counter] = values[times.index(counter)]
+		else:
+			newvalues[counter] = newvalues[counter-1]
+
+	for counter in range(len(newtimes)-1):
+		dates.append(dates[counter]+td(seconds=1))
+
+	rootdates = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates]
+
+	#part file2
+	times2 = [x[0:19] for x in open(file2,"r").readlines()]
+	if len(times2) == 1:
+		print "Exception -----> Only one data in "+str(filename)+".dat \n"
+		return None
+	if not times2:
+		print "Exception -----> File empty: "+str(filename)+".dat \n"
+		return None
+	
+	#part file2
+	times2 = [x.replace(':',' ') for x in times2]
+	times2 = [x.replace('/',' ') for x in times2]
+	times2 = [x.replace('_',' ') for x in times2]
+	
+	times2 = [dt.strptime(x, '%m %d %Y %H %M %S') for x in times2]
+	starttime2 = times2[0]
+	dates2 = [starttime2]
+	times2 = [int((x-starttime2).total_seconds()) for x in times2]
+	values2 = [float(x[21:28]) for x in open(file2,"r").readlines()]
+	#print values2
+	#print values2
+	newtimes2 = range(times2[len(times2)-1])
+	newvalues2 = [None]*len(newtimes2) 
+
+	for counter, value in enumerate(newvalues2):
+		if counter in times2:
+			newvalues2[counter] = values2[times2.index(counter)]
+		else:
+			newvalues2[counter] = newvalues2[counter-1]
+
+	for counter in range(len(newtimes2)-1):
+		dates2.append(dates2[counter]+td(seconds=1))
+
+	#print dates2[0:10]
+	#print newvalues2[0:10]
+	rootdates2 = [TDatime(x.year, x.month, x.day, x.hour, x.minute, x.second) for x in dates2]
+	newvalues2 = [x/100. for x in newvalues2]
+	
+	if rootdates[0] not in rootdates2:
+		for counter, i in enumerate(rootdates):
+			if i in rootdates2:
+				startrootdate = counter
+				break
+		rootdates = rootdates[startrootdate:]
+		newvalues = newvalues[startrootdate:]
+
+	if len(rootdates) > len(rootdates2):
+		rootdates = rootdates[:len(rootdates2)]
+		newvalues = newvalues[:len(newvalues2)]
+	else:
+		rootdates2 = rootdates2[:len(rootdates)]
+		newvalues2 = newvalues2[:len(newvalues)]
+	
+	MyHisto = TH1F("24hhisto-"+str(gastype)+"-"+str(filename), "24hhisto-"+str(gastype)+"-"+str(filename), int(180), 11., 20.)
+	#MyHistoDiff = TH1F("1hhisto-diff"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(100), -0.1, 0.8)
+	
+	#if "937" in gastype:
+		#newvalues = 8*newvalues[120:len(newvalues)-240]
+
+	if "937" in gastype:
+		newvalues = newvalues[60*150:len(newvalues)-120]
+		newvalues = [x+4.0 for x in newvalues]
+
+	if "8020" in gastype:
+		newvalues = newvalues[len(newvalues)/2+(60*60*2):len(newvalues)-120]
+		
+	for entry in newvalues[60*150:len(newvalues)-120]:
+		integral = MyHisto.Integral()
+		MyHisto.Fill(entry)
+	MyHisto.Scale(1./integral)
+
+	rootfile1h.cd()
+	MyHisto.Write()
+	#MyHistoDiff.Write()
+
 def processsaturation(file, file2, filename, gastype):
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
@@ -819,20 +1080,20 @@ def processsaturation(file, file2, filename, gastype):
 	ivalueserror = []
 
 	if "937" in gastype:
-		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2] #not inclyding filter 1.0
 
 	if "iso" in gastype:
-		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2] #not inclyding filter 1.0
 
 	if "8020" in gastype:
-		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2, 1.0]
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2] #not inclyding filter 1.0
 
 	if "L3L7iso-520" in filename or "L3L8iso-520" in filename:
-		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2]
+		filtervalues = [0.0, 100.0, 46.0, 22.0, 10.0, 4.6, 2.2] #not inclyding filter 1.0
 
 	for x in filtervalues:	
 		f = np.mean([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
-		e = 3.0*np.std([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
+		e = np.std([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x])
 		n = float(len([c for counter, c in enumerate(newvalues) if newvalues2[counter] == x]))
 		error = e
 		ivalues.append(f)
@@ -840,12 +1101,19 @@ def processsaturation(file, file2, filename, gastype):
 		
 	
 	filtervalues = [1./x for x in filtervalues[1:]]
+	if "L1L6" in filename:
+		filtervalues = [0.85, 1.7, 3.3, 6.7, 12.7, 23.6] #L1L6
+		filtererrors = [0.2, 0.43, 0.8, 1.7, 3.2, 6.0] #L1L6
+	if "L3R7" in filename:
+		filtervalues = [0.70, 1.5, 3.0, 5.9, 11.4, 21.7] #L3R7
+		filtererrors = [0.2, 0.4, 0.7, 1.5, 2.9, 5.5] #L3R7
+
 	#filtervalues = [0.0]+filtervalues
 	ivalues = ivalues[1:]
 	ivalueserror = ivalueserror[1:]
 	#print ivalueserror
 	#common part
-	write_rootgraphlinearity(filtervalues, ivalues, ivalueserror, filename)
+	write_rootgraphlinearity(filtervalues, ivalues, ivalueserror, filtererrors, filename)
 
 
 def processARCO28020(file, file2, filename):
@@ -1865,7 +2133,7 @@ for L in layersnosource2:
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
 '''
-
+'''
 for L in goodlayers:
 	print "HV summary: "+str(L)
 	filename = L
@@ -1873,13 +2141,13 @@ for L in goodlayers:
 	#ARCO2 80-20 source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_10_15_08_22_TO_2019_12_10_18_18_04/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename+"_att2.2")
+	processARCO28020(file1, file2, filename+"_att2.2")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_12_30_20_TO_2020_02_29_13_23_06/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_12_30_20_TO_2020_02_29_13_23_06/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename+"_att4.6")
+	processARCO28020(file1, file2, filename+"_att4.6")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 10.0 - old
@@ -1891,13 +2159,13 @@ for L in goodlayers:
 	#ARCO2 80-20 source at 10.0 - 2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_13_25_41_TO_2020_02_29_14_18_17/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_13_25_41_TO_2020_02_29_14_18_17/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename+"_att10.0")
+	processARCO28020(file1, file2, filename+"_att10.0")
 	#processARCO28020spikes(file1, file2, filename)
 
 	#ARCO2 80-20 source at 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_16_22_34_TO_2020_01_23_17_41_42/HV/vMon_"+str(L)+".dat"
-	#processARCO28020(file1, file2, filename+"_att46")
+	processARCO28020(file1, file2, filename+"_att46")
 	
 	#ARCO2 80-20 source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_23_14_33_22_TO_2020_01_23_16_03_01/HV/iMon_"+str(L)+".dat"
@@ -1907,14 +2175,14 @@ for L in goodlayers:
 	#ISOBUTANE source at 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_11_37_30_TO_2019_12_12_13_04_08/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename+"_att2.2")
+	processisobutane(file1, file2, filename+"_att2.2")
 	#processisobutanespikes(file1, file2, filename)
 
 	#ISOBUTANE source at 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_07_09_57_19_TO_2020_02_07_11_08_17/HV/vMon_"+str(L)+".dat"
-	#if L != "L3L7":
-		#processisobutane(file1, file2, filename+"_att4.6")
+	if L != "L3L7":
+		processisobutane(file1, file2, filename+"_att4.6")
 
 	#ISOBUTANE source at 10.0 - old
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_13_09_56_53_TO_2019_12_13_11_09_06/HV/iMon_"+str(L)+".dat"
@@ -1924,12 +2192,12 @@ for L in goodlayers:
 	#ISOBUTANE source at 10.0 - 2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_12_17_51_TO_2020_01_30_13_29_25/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename+"_att10.0")
+	processisobutane(file1, file2, filename+"_att10.0")
 
 	#ISOBUTANE source at 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_30_11_01_01_TO_2020_01_30_12_06_58/HV/vMon_"+str(L)+".dat"
-	#processisobutane(file1, file2, filename+"_att46")
+	processisobutane(file1, file2, filename+"_att46")
 	
 	#ISOBUTANE source at 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_16_17_50_38_TO_2020_01_16_19_14_20/HV/iMon_"+str(L)+".dat"
@@ -1944,23 +2212,23 @@ for L in goodlayers:
 	#ARCO2 93-7 SOURCE AT 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/vMon_"+str(L)+".dat"
-	#processARCO2937(file1, file2, filename+"_att2.2")
+	processARCO2937(file1, file2, filename+"_att2.2")
 	#processARCO2937spikes(file1, file2, filename)
 
 	#ARCO2 93-7 SOURCE AT 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/vMon_"+str(L)+".dat"
-	#processARCO2937(file1, file2, filename+"_att4.6")
+	processARCO2937(file1, file2, filename+"_att4.6")
 
 	#ARCO2 93-7 SOURCE AT 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/vMon_"+str(L)+".dat"
-	#processARCO2937(file1, file2, filename+"_att10.0")
+	processARCO2937(file1, file2, filename+"_att10.0")
 
 	#ARCO2 93-7 SOURCE AT 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/vMon_"+str(L)+".dat"
-	#processARCO2937(file1, file2, filename+"_att46")
+	processARCO2937(file1, file2, filename+"_att46")
 
 	#ARCO2 93-7 SOURCE AT 100.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_20_19_29_TO_2020_01_14_21_15_35/HV/iMon_"+str(L)+".dat"
@@ -1971,8 +2239,7 @@ for L in goodlayers:
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_14_21_18_13_TO_2020_01_14_22_14_11/HV/vMon_"+str(L)+".dat"
 	#processARCO2937(file1, file2, filename+"_att1000")
-
-
+'''
 for L in layers:
 	print "Create plots for: "+str(L)
 
@@ -2090,15 +2357,15 @@ for L in layers:
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/vMon_"+str(L)+".dat"
 	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours of good data then trip due to main frame power cut
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/vMon_"+str(L)+".dat"
-	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours not checked, data still to be produced in case needed
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/vMon_"+str(L)+".dat"
+	#ARCO2 93-7 source on filter 1 scan at 550 V -> only 2.5 hours, not checked, data still to be produced in case needed
 	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_11_54_24_TO_2020_03_05_14_34_52/HV/iMon_"+str(L)+".dat"
 	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_11_54_24_TO_2020_03_05_14_34_52/HV/vMon_"+str(L)+".dat"
 
 	filename = L
-	createplot(file1, file2, filename)
-
+	#createplot(file1, file2, filename)
+'''
 for L in layers:
 	print "Create plots for: "+str(L)
 	filename = L
@@ -2111,35 +2378,99 @@ for L in layers:
 	#ARCO2 80-20 at 645 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_12_50_11_TO_2020_02_24_14_40_07/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_12_50_11_TO_2020_02_24_14_40_07/GIF/EffectiveAttenuation.dat"
-	#processsaturation(file1, file2, filename+"8020-645", "8020")
-	#createplot(file1, file2, filename)
+	processsaturation(file1, file2, filename+"8020-645", "8020")
+	createplot(file1, file2, filename)
 
 	#ARCO2 80-20 at 625 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_10_41_04_TO_2020_02_29_12_27_40/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_29_10_41_04_TO_2020_02_29_12_27_40/GIF/EffectiveAttenuation.dat"
-	#processsaturation(file1, file2, filename+"8020-625", "8020")
+	processsaturation(file1, file2, filename+"8020-625", "8020")
 	#createplot(file1, file2, filename)
 
 	#ARCO2 93-7 at 570V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_10_41_02_TO_2020_01_28_12_38_20/GIF/EffectiveAttenuation.dat"	
-	#processsaturation(file1, file2, filename+"937-570", "937")
+	processsaturation(file1, file2, filename+"937-570", "937")
 	#createplot(file1, file2, filename)
 
 	#ARCO2 93-7 at 550V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_28_17_24_13_TO_2020_01_28_19_23_20/GIF/EffectiveAttenuation.dat"	
-	#processsaturation(file1, file2, filename+"937-550", "937")
+	processsaturation(file1, file2, filename+"937-550", "937")
 	#createplot(file1, file2, filename)
 
 	#ISOBUTANE at 500V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_04_14_56_40_TO_2020_02_04_16_48_41/GIF/EffectiveAttenuation.dat"	
-	#processsaturation(file1, file2, filename+"iso-500", "iso")
+	processsaturation(file1, file2, filename+"iso-500", "iso")
 	#createplot(file1, file2, filename)
 
 	#ISOBUTANE at 520V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_06_11_09_50_TO_2020_02_06_13_18_41/GIF/EffectiveAttenuation.dat"	
-	#processsaturation(file1, file2, filename+"iso-520", "iso")
+	processsaturation(file1, file2, filename+"iso-520", "iso")
 	#createplot(file1, file2, filename)
+'''
+
+for L in layers:
+	#1h source off data analysis
+	filename = L
+
+	#ARCO2 80-20 1 h source off HV=WP+20V = 665 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "665-8020")
+	#createplot(file1, file2, filename)
+	#ARCO2 80-20 1 h source off HV=WP 645 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "645-8020")
+	#createplot(file1, file2, filename)
+	
+	#ISOBUTANE 1 h source off at 520
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "520-iso")
+	#createplot(file1, file2, filename)
+	#ISOBUTANE 1 hour source off at 540 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "540-iso")
+	#createplot(file1, file2, filename)
+	
+	#ARCO2 93-7 source off scan at 570 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "570-937")
+	#createplot(file1, file2, filename)
+	#ARCO2 93-7 source off scan at 590 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/vMon_"+str(L)+".dat"
+	#process1h(file1, file2, filename, "590-937")
+	#createplot(file1, file2, filename)
+'''	
+for L in 24hlayers:
+	#long scan source on
+	filename = L
+	print L
+
+	#ARCO2 80-20 24 hours (23 h) scan at att 1.0 HV=WP-20 = 625 V
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_15_50_31_TO_2020_02_25_15_29_45/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_15_50_31_TO_2020_02_25_15_29_45/HV/vMon_"+str(L)+".dat"
+	process24h(file1, file2, filename, "625-8020")
+
+	#ISOBUTANE long run at 500 V att 1.0
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_01_17_06_33_TO_2020_02_02_13_58_33/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_01_17_06_33_TO_2020_02_02_13_58_33/HV/vMon_"+str(L)+".dat"
+	process24h(file1, file2, filename, "500-iso")
+
+	#ARCO2 93-7 2.5 hourse at 550V att 1.0
+	#file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/iMon_"+str(L)+".dat"
+	#file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_05_09_13_58_TO_2020_03_05_11_54_00/HV/vMon_"+str(L)+".dat"
+	#process24h(file1, file2, filename, "550-937")
+
+	#ARCO2 93-7 2.5 hourse at 550V att 1.0
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_21_13_12_47_TO_2020_02_22_13_51_46/HV/vMon_"+str(L)+".dat"
+	process24h(file1, file2, filename, "550-937")
+'''
