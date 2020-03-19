@@ -15,6 +15,7 @@ import math
 
 layers = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L4L6", "L4R6", "L1L7", "L1R7", "L2L7", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L3R8", "L4L8", "L4R8"]
 twentyfourhlayers = ["L1L8"]
+onehourlayers = ["L3L6"]
 goodlayers = ["L1L6", "L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"] #L1L8 for a PCB type 8 example
 goodlayers2 = ["L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L3L7", "L3R7", "L4L7", "L4R7"]
 layersnosource = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L2L8", "L3L8", "L3R8", "L4L8"]
@@ -840,8 +841,8 @@ def process1h(file, file2, filename, gastype):
 		rootdates2 = rootdates2[:len(rootdates)]
 		newvalues2 = newvalues2[:len(newvalues)]
 	
-	MyHisto = TH1F("1hhisto-"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(100), -0.1, 0.8)
-	MyHistoDiff = TH1F("1hhisto-diff"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(100), -0.1, 0.8)
+	MyHisto = TH1F("1hhisto-"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(90), -0.1, 0.8)
+	MyHistoDiff = TH1F("1hhisto-diff"+str(gastype)+"-"+str(filename), "1hhisto-"+str(gastype)+"-"+str(filename), int(40), -0.2, 0.2)
 	
 	if "520-iso" in gastype:
 		newvalues2 = [int(math.ceil(x * 100.0)) for x in newvalues2]
@@ -870,6 +871,11 @@ def process1h(file, file2, filename, gastype):
 			MyHistoDiff.Fill(entry)
 
 	rootfile1h.cd()
+	integral = MyHisto.Integral()
+	MyHisto.Scale(1./integral)
+	integral_diff = MyHistoDiff.Integral()
+	MyHistoDiff.Scale(1./integral_diff)
+	MyHisto.GetYaxis().SetRangeUser(0.0004,0.8)
 	MyHisto.Write()
 	MyHistoDiff.Write()
 
@@ -2412,7 +2418,7 @@ for L in layers:
 	#createplot(file1, file2, filename)
 '''
 
-for L in layers:
+for L in onehourlayers:
 	#1h source off data analysis
 	filename = L
 
@@ -2439,13 +2445,13 @@ for L in layers:
 	#createplot(file1, file2, filename)
 	
 	#ARCO2 93-7 source off scan at 570 V
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/vMon_"+str(L)+".dat"
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_10_39_48_TO_2020_03_04_11_36_57/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_10_39_48_TO_2020_03_04_11_36_57/HV/vMon_"+str(L)+".dat"
 	process1h(file1, file2, filename, "570-937")
 	#createplot(file1, file2, filename)
 	#ARCO2 93-7 source off scan at 590 V
-	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/iMon_"+str(L)+".dat"
-	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/vMon_"+str(L)+".dat"
+	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/iMon_"+str(L)+".dat"
+	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/vMon_"+str(L)+".dat"
 	process1h(file1, file2, filename, "590-937")
 	#createplot(file1, file2, filename)
 
