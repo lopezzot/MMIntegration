@@ -1543,7 +1543,9 @@ def processisobutane(file, file2, filename):
 	print hvvaluescheck, ivalues
 	write_summaryhv(hvvaluescheck, ivalues, errorvalues, "ISOBUTANE - "+str(filename), filename)
 	return hvvaluescheck, ivalues
-	''' for summary no source
+	
+def processisobutanenosource(file, file2, filename):
+	#for summary no source
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
 		print "Exception -----> Only one data in "+str(filename)+".dat \n"
@@ -1634,7 +1636,8 @@ def processisobutane(file, file2, filename):
 	print hvvaluescheck, ivalues
 	hvvaluescheck = [x-520 for x in hvvaluescheck]
 	write_summarynosource(hvvaluescheck, ivalues, "ISOBUTANE - "+str(filename), filename)
-	'''
+	
+
 def processisobutanespikes(file, file2, filename):
 	times = [x.split(' 	 ')[0] for x in open(file,"r").readlines()]
 	if len(times) == 1:
@@ -2118,7 +2121,7 @@ for L in goodlayers:
 		gain.append(ivalues2[counter]/ivalues3[counter])
 	write_summarygain(hvgain, gain, "ARCO2037_"+str(filename)+"_2", filename+"_2")
 '''
-'''
+
 for L in layersnosource2:
 	print "Current no source "+str(L)
 	filename = L
@@ -2131,6 +2134,7 @@ for L in layersnosource2:
 	#ISOBUTANE no source
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_12_09_43_04_TO_2019_12_12_11_04_25/HV/vMon_"+str(L)+".dat"
+	#processisobutane(file1, file2, filename)
 	processisobutanenosource(file1, file2, filename)
 	
 	#ARCO2 93-7 NO SOURCE
@@ -2138,7 +2142,7 @@ for L in layersnosource2:
 		file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/iMon_"+str(L)+".dat"
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
-'''
+
 '''
 for L in goodlayers:
 	print "HV summary: "+str(L)
@@ -2417,7 +2421,7 @@ for L in layers:
 	processsaturation(file1, file2, filename+"iso-520", "iso")
 	#createplot(file1, file2, filename)
 '''
-
+'''
 for L in onehourlayers:
 	#1h source off data analysis
 	filename = L
@@ -2454,7 +2458,7 @@ for L in onehourlayers:
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_03_04_11_38_17_TO_2020_03_04_12_30_04/HV/vMon_"+str(L)+".dat"
 	process1h(file1, file2, filename, "590-937")
 	#createplot(file1, file2, filename)
-
+'''
 '''	
 for L in twentyfourhlayers:
 	#long scan source on
