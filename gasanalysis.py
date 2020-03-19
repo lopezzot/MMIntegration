@@ -14,7 +14,7 @@ import efficiency
 import math
 
 layers = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L4L6", "L4R6", "L1L7", "L1R7", "L2L7", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L1R8", "L2L8", "L2R8", "L3L8", "L3R8", "L4L8", "L4R8"]
-24hlayers = ["L1L8"]
+twentyfourhlayers = ["L1L8"]
 goodlayers = ["L1L6", "L1R6", "L2L6", "L2R6", "L2R7", "L3L6", "L3R6", "L3L7", "L3R7", "L4L6", "L4L7", "L4R7"] #L1L8 for a PCB type 8 example
 goodlayers2 = ["L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L3L7", "L3R7", "L4L7", "L4R7"]
 layersnosource = ["L1L6", "L1R6", "L2L6", "L2R6", "L3L6", "L3R6", "L2R7", "L3L7", "L3R7", "L4L7", "L4R7", "L1L8", "L2L8", "L3L8", "L3R8", "L4L8"]
@@ -432,7 +432,7 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		if "L3R6" not in graphtitle and "L3L6" not in graphtitle and "L1L6" not in graphtitle:
 			MyTGraph.Fit(f, "R")
 			MyTGraph.GetFunction("f").SetLineColor(3)
-     		#MyTGraph.GetFunction("f").SetLineWidth(1)
+			#MyTGraph.GetFunction("f").SetLineWidth(1)
 	
 	if "ARCO2937" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(3)
@@ -501,7 +501,7 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 		if "L2L6" not in graphtitle:
 			MyTGraph.Fit(f, "R")
 			MyTGraph.GetFunction("f").SetLineColor(2)
-  			MyTGraph.GetFunction("f").SetLineWidth(1)			
+			MyTGraph.GetFunction("f").SetLineWidth(1)			
 	
 	if "ISOBUTANE" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(50)
@@ -2419,37 +2419,38 @@ for L in layers:
 	#ARCO2 80-20 1 h source off HV=WP+20V = 665 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_24_14_43_27_TO_2020_02_24_15_44_15/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "665-8020")
+	process1h(file1, file2, filename, "665-8020")
 	#createplot(file1, file2, filename)
 	#ARCO2 80-20 1 h source off HV=WP 645 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_26_11_37_08_TO_2020_02_26_12_37_51/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "645-8020")
+	process1h(file1, file2, filename, "645-8020")
 	#createplot(file1, file2, filename)
 	
 	#ISOBUTANE 1 h source off at 520
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_31_13_15_03_TO_2020_01_31_13_53_26/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "520-iso")
+	process1h(file1, file2, filename, "520-iso")
 	#createplot(file1, file2, filename)
 	#ISOBUTANE 1 hour source off at 540 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_05_11_32_56_TO_2020_02_05_12_34_56/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "540-iso")
+	process1h(file1, file2, filename, "540-iso")
 	#createplot(file1, file2, filename)
 	
 	#ARCO2 93-7 source off scan at 570 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_12_12_37_01_TO_2020_02_12_15_10_47/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "570-937")
+	process1h(file1, file2, filename, "570-937")
 	#createplot(file1, file2, filename)
 	#ARCO2 93-7 source off scan at 590 V
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_14_09_29_33_TO_2020_02_14_10_32_00/HV/vMon_"+str(L)+".dat"
-	#process1h(file1, file2, filename, "590-937")
+	process1h(file1, file2, filename, "590-937")
 	#createplot(file1, file2, filename)
+
 '''	
-for L in 24hlayers:
+for L in twentyfourhlayers:
 	#long scan source on
 	filename = L
 	print L
