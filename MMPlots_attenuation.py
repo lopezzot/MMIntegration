@@ -165,8 +165,11 @@ def createplot(giffile, file, filename, folder):
 	sectorforarea = filename[8:9]
 	chambertype = folder[0:3] #SM1 or SM2 LM1 or LM2
 
+	#to be checked
 	areasSM1 = {"1":(30.0+52.)*(45.2/4.), "2":(52.+70.2)*(43.5/4.), "3":(43.5+75.6)*(43.5/4.), "4":(75.6+104.)*(43.5/4.), "5":(104.+114.9)*(43.5/4.)}
-	areasSM2 = {"6":(166.4+150.5)*(135./6.), "7":(150.5+130.3)*(135./6.), "8":(130.3+117.1)*(135./6.)}
+	areasSM2 = {"8":(166.4+150.5)*(135./6.), "7":(150.5+130.3)*(135./6.), "6":(130.3+117.1)*(135./6.)}
+	#areasLM2 = {"6":8063.0, "7":8751.5, "8":8767.0} #still to be checked
+	#areasLM1 = {} #still missing	
 
 	if chambertype == "SM1":
 		areas=areasSM1

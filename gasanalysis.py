@@ -332,6 +332,7 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	"""Function to perform ROOT graph"""
 	arrayx = array('d')
 	arrayy = array('d')
+	arrayy1 = array('d')
 	arrayerror = array('d')
 	arrayzeros = array('d')
 
@@ -386,39 +387,70 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	if "ARCO28020" in graphtitle and "10.0" in graphtitle:
 		MyTGraph.SetMarkerColor(4) #9 color
 		MyTGraph.SetLineColor(4)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.) #old 10.0 reached 700V
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.) #old 10.0 reached 700V
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 560., 670.) 
+		MyTGraph.Fit(f, "R","",570.,620.)
 		MyTGraph.GetFunction("f").SetLineColor(4)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
-
+		MyTGraph.GetFunction("f").SetRange(560.,670.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(4) #9 color
+		MyTGraph2.SetLineColor(4)
+		
+	
 	if "ARCO28020" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(4)
 		MyTGraph.SetLineColor(4)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 560., 670.) 
+		MyTGraph.Fit(f, "R","",570.,620.)
 		MyTGraph.GetFunction("f").SetLineColor(4)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(560.,670.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(4) #9 color
+		MyTGraph2.SetLineColor(4)
 
 	if "ARCO28020" in graphtitle and "4.6" in graphtitle:
 		MyTGraph.SetMarkerColor(4) #7 color
 		MyTGraph.SetLineColor(4)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 560., 670.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 560., 670.)
+		MyTGraph.Fit(f, "R","",570.,620.)
 		MyTGraph.GetFunction("f").SetLineColor(4)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
-
+		MyTGraph.GetFunction("f").SetRange(560.,670.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(4) #9 color
+		MyTGraph2.SetLineColor(4)
+	
 	if "ARCO28020" in graphtitle and "46" in graphtitle:
 		MyTGraph.SetMarkerColor(4) #38 color
 		MyTGraph.SetLineColor(4)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 600., 670.)
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 600., 670.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 600., 670.)
+		MyTGraph.Fit(f, "R","",600.,630.)
 		MyTGraph.GetFunction("f").SetLineColor(4)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
-
+		MyTGraph.GetFunction("f").SetRange(600.,670.)
+	
 	if "ARCO28020" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(39)
 		MyTGraph.SetLineColor(39)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 600., 670.)
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 600., 670.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 660., 670.)
 		if "L4L6" in filename:
 			f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 660., 670.)
 		#MyTGraph.Fit(f, "R")
@@ -427,34 +459,64 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	if "ARCO2937" in graphtitle and "10.0" in graphtitle:
 		MyTGraph.SetMarkerColor(3) #color 8
 		MyTGraph.SetLineColor(3)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 490., 590.)
 		#if "L1L6" in graphtitle or "L3R6" in graphtitle or "L3L6" in graphtitle:
 			#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 490., 590.)
-		if "L3R6" not in graphtitle and "L3L6" not in graphtitle and "L1L6" not in graphtitle:
-			MyTGraph.Fit(f, "R")
+		if "L3R6" not in graphtitle and "L3L6" not in graphtitle:
+			MyTGraph.Fit(f, "R","",500.,540.)
+			if "L1L6" in graphtitle:
+				MyTGraph.Fit(f,"R","",510.,540.)
 			MyTGraph.GetFunction("f").SetLineColor(3)
-			#MyTGraph.GetFunction("f").SetLineWidth(1)
+			MyTGraph.GetFunction("f").SetRange(490.,590.)
+			MyTGraph.GetFunction("f").SetLineWidth(1)
+			for counter, x in enumerate(arrayx):
+				func = MyTGraph.GetFunction("f")
+				y1 = func.Eval(x)
+				arrayy1.append(arrayy[counter]/y1)
+			MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+			MyTGraph2.SetMarkerColor(3) #9 color
+			MyTGraph2.SetLineColor(3)
 	
 	if "ARCO2937" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(3)
 		MyTGraph.SetLineColor(3)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 490., 590.)
+		MyTGraph.Fit(f, "R","",500.,540.)
 		MyTGraph.GetFunction("f").SetLineColor(3)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(490.,590.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(3) #9 color
+		MyTGraph2.SetLineColor(3)
 
 	if "ARCO2937" in graphtitle and "4.6" in graphtitle:
 		MyTGraph.SetMarkerColor(3) #color 29
 		MyTGraph.SetLineColor(3)
-		f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
-		MyTGraph.Fit(f, "R")
+		#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 490., 590.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 490., 590.)
+		MyTGraph.Fit(f, "R","",500.,540.)
 		MyTGraph.GetFunction("f").SetLineColor(3)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(490.,590.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(3) #9 color
+		MyTGraph2.SetLineColor(3)
 
 	if "ARCO2937" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(30)
 		MyTGraph.SetLineColor(30)
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 520., 580.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 520., 580.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 520., 580.)
 		if "L3L7" not in graphtitle:
 			MyTGraph.Fit(f,"R")
 			MyTGraph.GetFunction("f").SetLineColor(30)
@@ -466,48 +528,81 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	if "ARCO2937" in graphtitle and "46" in graphtitle:
 		MyTGraph.SetMarkerColor(3) #color 32
 		MyTGraph.SetLineColor(3)
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 520., 590.)
-		MyTGraph.Fit(f,"R")
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 520., 590.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 520., 590.)
+		MyTGraph.Fit(f,"R","",520.,540.)
 		MyTGraph.GetFunction("f").SetLineColor(3)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(520.,590.)
 
 	if "ISOBUTANE" in graphtitle and "2.2" in graphtitle:
 		MyTGraph.SetMarkerColor(2)
 		MyTGraph.SetLineColor(2)	
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 440., 540.)
 		if "L1L6" in filename or "L2R7" in filename:					
-			f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+			#f = TF1("f", "TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+			f = TF1("f", "TMath::Exp([0]*x+[1])", 440., 540.)
 		#f.SetParLimits(3,0.0,10.)
-		MyTGraph.Fit(f, "R")
+		MyTGraph.Fit(f, "R","",450.,490.)
 		MyTGraph.GetFunction("f").SetLineColor(2)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(440.,540.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(2) #9 color
+		MyTGraph2.SetLineColor(2)
 
 	if "ISOBUTANE" in graphtitle and "4.6" in graphtitle:
 		MyTGraph.SetMarkerColor(2) #color 45
 		MyTGraph.SetLineColor(2)	
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 440., 540.)
 		#f.SetParLimits(3,0.0,10.)
-		MyTGraph.Fit(f, "R")
+		MyTGraph.Fit(f, "R","",450.,490.)
 		MyTGraph.GetFunction("f").SetLineColor(2)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(440.,540.)
+		for counter, x in enumerate(arrayx):
+			func = MyTGraph.GetFunction("f")
+			y1 = func.Eval(x)
+			arrayy1.append(arrayy[counter]/y1)
+		MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+		MyTGraph2.SetMarkerColor(2) #9 color
+		MyTGraph2.SetLineColor(2)
 
 	if "ISOBUTANE" in graphtitle and "10.0" in graphtitle:
 		MyTGraph.SetMarkerColor(2) #color 46
 		MyTGraph.SetLineColor(2)
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 440., 540.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 440., 540.)
 		if "L1L6" in graphtitle:
-			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
+			#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
+			f = TF1("f", "TMath::Exp([0]*x+[1])", 450., 540.)
 		if "L1R6" in graphtitle:
-			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
+			#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 450., 540.)
+			f = TF1("f", "TMath::Exp([0]*x+[1])", 450., 540.)
 		if "L2L6" not in graphtitle:
-			MyTGraph.Fit(f, "R")
+			MyTGraph.Fit(f, "R","",450,490.)
 			MyTGraph.GetFunction("f").SetLineColor(2)
 			MyTGraph.GetFunction("f").SetLineWidth(1)			
-	
+			MyTGraph.GetFunction("f").SetRange(440.,540.)
+			for counter, x in enumerate(arrayx):
+				func = MyTGraph.GetFunction("f")
+				y1 = func.Eval(x)
+				arrayy1.append(arrayy[counter]/y1)
+			MyTGraph2 = TGraph(len(arrayx)-2,arrayx[2:],arrayy1[2:])
+			MyTGraph2.SetMarkerColor(2) #9 color
+			MyTGraph2.SetLineColor(2)
+
 	if "ISOBUTANE" in graphtitle and "100" in graphtitle:
 		MyTGraph.SetMarkerColor(50)
 		MyTGraph.SetLineColor(50)
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 500., 540.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 500., 540.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 500., 540.)
 		MyTGraph.Fit(f, "R")
 		MyTGraph.GetFunction("f").SetLineColor(50)		
 		MyTGraph.GetFunction("f").SetLineWidth(1)
@@ -515,17 +610,33 @@ def write_summaryhv(vectorx, vectory, errorvalues, graphtitle, filename):
 	if "ISOBUTANE" in graphtitle and "46" in graphtitle:
 		MyTGraph.SetMarkerColor(2) #color 49
 		MyTGraph.SetLineColor(2)
-		f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
+		#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
+		f = TF1("f", "TMath::Exp([0]*x+[1])", 470., 540.)
 		if "L1R6" in graphtitle:
-			f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
-		MyTGraph.Fit(f, "R")
+			#f = TF1("f", "[1]*TMath::Exp([2]*x+[3])+[4]", 470., 540.)
+			f = TF1("f", "TMath::Exp([0]*x+[1])", 470., 540.)
+		MyTGraph.Fit(f, "R","",470.,500.)
 		MyTGraph.GetFunction("f").SetLineColor(2)
 		MyTGraph.GetFunction("f").SetLineWidth(1)
+		MyTGraph.GetFunction("f").SetRange(470.,540.)
 
 	rootfile.cd()
 	MyTGraph.SetName(graphtitle)
 	MyTGraph.SetTitle(filename)
 	MyTGraph.Write()
+	if "MyTGraph2" in locals():
+		YAxis = MyTGraph2.GetYaxis()
+		YAxis.SetRangeUser(0.5, 1.2)
+		YAxis.SetTitle("Ratio")
+		XAxis = MyTGraph2.GetXaxis()
+		XAxis.SetLimits(420., 690.)
+		XAxis.SetTitle("Amplification Voltage (V)")
+		XAxis.SetTitleOffset(1.2)
+		MyTGraph2.SetMarkerStyle(20)
+		MyTGraph2.SetMarkerSize(1.5)
+		MyTGraph2.SetName(graphtitle+"_ratio")
+		MyTGraph2.SetTitle(filename+"_ratio")
+		MyTGraph2.Write()
 
 def write_summarygain(vectorx, vectory, graphtitle, filename):
 	"""Function to perform ROOT graph"""
@@ -2121,7 +2232,7 @@ for L in goodlayers:
 		gain.append(ivalues2[counter]/ivalues3[counter])
 	write_summarygain(hvgain, gain, "ARCO2037_"+str(filename)+"_2", filename+"_2")
 '''
-
+'''
 for L in layersnosource2:
 	print "Current no source "+str(L)
 	filename = L
@@ -2142,8 +2253,8 @@ for L in layersnosource2:
 		file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/iMon_"+str(L)+".dat"
 		file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_13_03_51_TO_2019_12_16_14_00_09/HV/vMon_"+str(L)+".dat"
 		processARCO2937nosource(file1, file2, filename)
-
 '''
+goodlayers = ["L3R7"]
 for L in goodlayers:
 	print "HV summary: "+str(L)
 	filename = L
@@ -2222,18 +2333,71 @@ for L in goodlayers:
 	#ARCO2 93-7 SOURCE AT 2.2
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_14_02_40_TO_2019_12_16_17_13_09/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att2.2")
 	#processARCO2937spikes(file1, file2, filename)
+	hvvalues, ivalues_2p2 = processARCO2937(file1, file2, filename+"_att2.2")
+	if filename == "L3R7":
+		rate = 21.7
+		error = 6.0
+		ivalues_2p2 = [x/rate for x in ivalues_2p2]
 
 	#ARCO2 93-7 SOURCE AT 4.6
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_02_18_10_33_46_TO_2020_02_18_11_44_48/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att4.6")
+	hvvalues, ivalues_4p6 = processARCO2937(file1, file2, filename+"_att4.6")
+	if filename == "L3R7":
+		rate = 11.4
+		error = 3.2
+		ivalues_4p6 = [x/rate for x in ivalues_4p6]
 
 	#ARCO2 93-7 SOURCE AT 10.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/iMon_"+str(L)+".dat"
 	file2 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2019_12_16_17_14_32_TO_2019_12_16_18_10_58/HV/vMon_"+str(L)+".dat"
-	processARCO2937(file1, file2, filename+"_att10.0")
+	hvvalues, ivalues_10p0 = processARCO2937(file1, file2, filename+"_att10.0")
+	if filename == "L3R7":
+		rate = 5.9
+		error = 1.7
+		ivalues_10p0 = [x/rate for x in ivalues_10p0]
+
+	if filename == "L3R7":
+		array520 = array('d')
+		array570 = array('d')
+		array590 = array('d')
+		for counter, x in enumerate(hvvalues):
+			if x == 520:
+				print "aoooooooooooooooo"
+				array520.append(ivalues_10p0[counter])
+				array520.append(ivalues_4p6[counter])
+				array520.append(ivalues_2p2[counter])
+			if x == 570:
+				print "aoooooooooooooooo"
+				array570.append(ivalues_10p0[counter])
+				array570.append(ivalues_4p6[counter])
+				array570.append(ivalues_2p2[counter])
+			if x == 590:
+				print "aoooooooooooooooo"
+				array590.append(ivalues_10p0[counter])
+				array590.append(ivalues_4p6[counter])
+				array590.append(ivalues_2p2[counter])
+		print "ciaooooooo", array520, array570, array590
+		NewTGraph520 = TGraph(3, array('d',[5.9,11.4,21.7]),array520)
+		NewTGraph520.SetTitle("ARCO2937_L3R7_520")
+		NewTGraph520.SetName("ARCO2937_L3R7_520")
+		NewTGraph520.SetMarkerStyle(20)
+		NewTGraph520.SetMarkerSize(1.5)
+		NewTGraph570 = TGraph(3, array('d',[5.9,11.4,21.7]),array570)
+		NewTGraph570.SetTitle("ARCO2937_L3R7_570")
+		NewTGraph570.SetName("ARCO2937_L3R7_570")
+		NewTGraph570.SetMarkerStyle(20)
+		NewTGraph570.SetMarkerSize(1.5)
+		NewTGraph590 = TGraph(3, array('d',[5.9,11.4,21.7]),array590)
+		NewTGraph590.SetTitle("ARCO2937_L3R7_590")
+		NewTGraph590.SetName("ARCO2937_L3R7_590")
+		NewTGraph590.SetMarkerStyle(20)
+		NewTGraph590.SetMarkerSize(1.5)
+		rootfile.cd()
+		NewTGraph520.Write()
+		NewTGraph570.Write()
+		NewTGraph590.Write()
 
 	#ARCO2 93-7 SOURCE AT 46.0
 	file1 = "/Users/lorenzo/DataGif/LM2_20MNMMML200007_FROM_2020_01_27_19_09_15_TO_2020_01_27_20_05_08/HV/iMon_"+str(L)+".dat"
@@ -2375,6 +2539,7 @@ for L in layers:
 
 	filename = L
 	#createplot(file1, file2, filename)
+'''
 '''
 for L in layers:
 	print "Create plots for: "+str(L)
